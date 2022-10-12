@@ -1,3 +1,7 @@
+# Executable
+webserv
+webserv.dSYM
+
 # Prerequisites
 *.d
 
