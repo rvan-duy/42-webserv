@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "catch2/catch.hpp"
 
 SCENARIO("Example test") {
   GIVEN("An integer") {

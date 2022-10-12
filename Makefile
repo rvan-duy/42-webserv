@@ -23,10 +23,10 @@ SOURCES			:=
 
 ifdef TESTS
 CFLAGS			+= 
-HEADERS			+= 	tests/catch.hpp
-SOURCES			+= 	tests/example_test.cpp \
-					tests/another_example_test.cpp \
-					tests/catch-runner.cpp
+HEADERS			+= 	tests/catch2/catch.hpp
+SOURCES			+= 	tests/catch2/catch-runner.cpp \
+					tests/example_test.cpp \
+					tests/another_example_test.cpp
 else
 SOURCES			+= 	src/main.cpp
 endif
