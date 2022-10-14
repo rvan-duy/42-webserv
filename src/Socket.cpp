@@ -1,7 +1,7 @@
 #include "Socket.hpp"
 
 /*
- * Constructor
+ * Constructor for Socket class
  * @param domain communication domain
  * @param type communication semantics
  * @param protocol protocol to be used with the socket
@@ -26,7 +26,7 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   memset(&_servaddr, 0, sizeof(_servaddr));
   _servaddr.sin_family      = domain;
   _servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  _servaddr.sin_port        = htons(port);
+  _servaddr.sin_port        = htons(_port);
 
   /**************************************************/
   /* Bind the address and port number to the socket */
@@ -38,21 +38,27 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
 }
 
 /*
- * listen
+ * Prepare the socket for incoming connections
  * @param backlog number of connections allowed on the incoming queue
  */
-void Socket::listen(const int backlog) {
-  /**************************************************/
-  /* Listen for incoming connections.               */
-  /**************************************************/
-
-  if (::listen(_fd, backlog) == -1) {
+void Socket::prepare_connections(const int backlog) {
+  if (listen(_fd, backlog) == -1) {
     throw std::runtime_error("Socket listen failed: " + std::string(strerror(errno)));
   }
 }
 
 /*
- * Destructor
+ * Accept an incoming connection from the socket queue
+ */
+void Socket::accept_connection() {
+  int connection_fd = accept(_fd, (struct sockaddr *)NULL, NULL);
+  if (connection_fd == -1) {
+    throw std::runtime_error("Socket accept failed: " + std::string(strerror(errno)));
+  }
+}
+
+/*
+ * Destructor for Socket class
  */
 Socket::~Socket() {
   /**************************************************/

@@ -33,12 +33,13 @@ class Socket {
   ~Socket();
 
   // Methods
-  void listen(const int backlog);
+  // TODO: come up with better names for these methods
+  void prepare_connections(const int backlog);
+  void accept_connection();
 
  private:
   int                _fd;        // file descriptor for socket
   const int          _port;      // port number of socket
-  const int          _backlog;   // number of connections allowed on the incoming queue
   struct sockaddr_in _servaddr;  // socket address structure
                                  /*__uint8_t       sin_len;
                                    sa_family_t     sin_family;
