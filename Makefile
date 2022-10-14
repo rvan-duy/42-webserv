@@ -13,11 +13,11 @@ endif
 
 ################################################################################
 
-HEADERS 		:= 	include/tmp.hpp
+HEADERS 		:= 	include/tmp.hpp include/Socket.hpp
 
 INCLUDE_FLAGS 	:= $(addprefix -I, $(sort $(dir $(HEADERS))))
 
-SOURCES			:= 	
+SOURCES			:= 	src/Socket.cpp
 
 ################################################################################
 
