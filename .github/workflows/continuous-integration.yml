@@ -1,0 +1,26 @@
+name: macOS/Ubuntu CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  macos_build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build webserver
+      run:  make && make fclean
+
+  ubuntu_build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build webserver
+      run:  make && make fclean
