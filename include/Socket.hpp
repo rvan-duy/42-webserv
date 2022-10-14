@@ -3,6 +3,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include <cstdlib>
@@ -24,13 +25,20 @@
 /* 5. Close socket                                                                                  */
 /****************************************************************************************************/
 
+// IMPORTANT: all these things can throw exceptions, so we need to handle them in the main function
+
 class Socket {
  public:
   Socket(const int domain, const int type, const int protocol, const int port);
   ~Socket();
 
+  // Methods
+  void listen(const int backlog);
+
  private:
   int                _fd;        // file descriptor for socket
+  const int          _port;      // port number of socket
+  const int          _backlog;   // number of connections allowed on the incoming queue
   struct sockaddr_in _servaddr;  // socket address structure
                                  /*__uint8_t       sin_len;
                                    sa_family_t     sin_family;

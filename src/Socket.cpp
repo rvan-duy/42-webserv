@@ -1,6 +1,13 @@
 #include "Socket.hpp"
 
-Socket::Socket(const int domain, const int type, const int protocol, const int port) {
+/*
+ * Constructor
+ * @param domain communication domain
+ * @param type communication semantics
+ * @param protocol protocol to be used with the socket
+ * @param port port number of socket
+ */
+Socket::Socket(const int domain, const int type, const int protocol, const int port) : _port(port) {
   /**************************************************/
   /* Create an socket to receive incoming           */
   /* connections on                                 */
@@ -22,19 +29,37 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   _servaddr.sin_port        = htons(port);
 
   /**************************************************/
-  /* Bind our socket address to the                 */
-  /* listening socket, and call listen()            */
+  /* Bind the address and port number to the socket */
   /**************************************************/
 
-  if (bind(_fd, (struct sockaddr *)&_servaddr, sizeof(_servaddr)) < 0) {
+  if (bind(_fd, (struct sockaddr *)&_servaddr, sizeof(_servaddr)) == -1) {
     throw std::runtime_error("Socket bind failed: " + std::string(strerror(errno)));
   }
+}
 
-  if (listen(_fd, 10) < 0) {
+/*
+ * listen
+ * @param backlog number of connections allowed on the incoming queue
+ */
+void Socket::listen(const int backlog) {
+  /**************************************************/
+  /* Listen for incoming connections.               */
+  /**************************************************/
+
+  if (::listen(_fd, backlog) == -1) {
     throw std::runtime_error("Socket listen failed: " + std::string(strerror(errno)));
   }
 }
 
+/*
+ * Destructor
+ */
 Socket::~Socket() {
-  close(_fd);
+  /**************************************************/
+  /* Close the socket                               */
+  /**************************************************/
+
+  if (close(_fd) == -1) {
+    throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
+  }
 }
