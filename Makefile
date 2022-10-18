@@ -13,7 +13,10 @@ endif
 
 ################################################################################
 
-HEADERS 		:= 	include/tmp.hpp include/Socket.hpp
+HEADERS 		:= 	include/Socket.hpp \
+					include/HttpMessage.hpp \
+					include/HttpRequest.hpp \
+					include/HttpResponse.hpp
 
 INCLUDE_FLAGS 	:= $(addprefix -I, $(sort $(dir $(HEADERS))))
 

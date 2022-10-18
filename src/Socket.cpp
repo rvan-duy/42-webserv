@@ -45,7 +45,7 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
  * Prepare the socket for incoming connections
  * @param backlog number of connections allowed on the incoming queue
  */
-void Socket::prepare(const int backlog) {
+void Socket::prepare(const int backlog) const {
   if (listen(_fd, backlog) == -1) {
     throw std::runtime_error("Socket listen failed: " + std::string(strerror(errno)));
   }
@@ -101,34 +101,12 @@ void Socket::wait_for_connections() {
     /* Send response to the client                    */
     /**************************************************/
 
-    // By default send back 404 Not Found which is located at /root/404/404.html
-    std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
-
-    // Find Content-Length which is the size of the file (/root/404/404.html)
-    std::ifstream file("root/404/404.html", std::ios::binary);
-    if (file.is_open()) {
-      file.seekg(0, std::ios::end);
-      header += "Content-Length: " + std::to_string(file.tellg()) + "\r\n\r\n";
-      file.close();
-    } else {
-      throw std::runtime_error("File not found");
-    }
-
-    // Fill the body of the response with the content of the file
-    std::ifstream file2("root/404/404.html", std::ios::binary);
-    if (file2.is_open()) {
-      std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
-      file2.close();
-      header += body;
-    } else {
-      throw std::runtime_error("File not found");
-    }
-
-    // Send the response
-    if (write(new_fd, header.c_str(), header.length()) == -1) {
+    HttpRequest request;
+    request.parse(buffer);
+    std::string response = get_response_to_str(request);  // Get the response to the request
+    if (write(new_fd, response.c_str(), response.length()) == -1) {
       throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
     }
- 
 
     /**************************************************/
     /* Close the connection                           */
@@ -151,4 +129,38 @@ Socket::~Socket() {
   if (close(_fd) == -1) {
     throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
   }
+}
+
+/*
+ * Get response to the request
+ * @param request request to get response to
+ * @return response to the request
+ */
+std::string Socket::get_response_to_str(const HttpRequest &request) const {
+  (void)request;
+
+  // By default send back 404 Not Found which is located at /root/404/404.html
+  std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
+
+  // Find Content-Length which is the size of the file (/root/404/404.html)
+  std::ifstream file("root/404/404.html", std::ios::binary);
+  if (file.is_open()) {
+    file.seekg(0, std::ios::end);
+    header += "Content-Length: " + std::to_string(file.tellg()) + "\r\n\r\n";
+    file.close();
+  } else {
+    throw std::runtime_error("File not found");
+  }
+
+  // Fill the body of the response with the content of the file
+  std::ifstream file2("root/404/404.html", std::ios::binary);
+  if (file2.is_open()) {
+    std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
+    file2.close();
+    header += body;
+  } else {
+    throw std::runtime_error("File not found");
+  }
+
+  return header;
 }

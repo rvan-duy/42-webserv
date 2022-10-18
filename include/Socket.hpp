@@ -28,14 +28,16 @@
 
 // IMPORTANT: all these things can throw exceptions, so we need to handle them in the main function
 
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
+
 class Socket {
  public:
   Socket(const int domain, const int type, const int protocol, const int port);
   ~Socket();
 
   // Methods
-  // TODO: come up with better names for these methods
-  void prepare(const int backlog);
+  void prepare(const int backlog) const;
   void wait_for_connections();
 
  private:
@@ -47,6 +49,8 @@ class Socket {
                                    in_port_t       sin_port;
                                    struct  in_addr sin_addr;
                                    char            sin_zero[8]; */
+
+  std::string get_response_to_str(const HttpRequest &request) const;
 };
 
 #endif  // SOCKET_HPP
