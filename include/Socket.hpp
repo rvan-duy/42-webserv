@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 
 /****************************************************************************************************/
@@ -20,7 +21,7 @@
 /* 1. Create a socket                                                                               */
 /* 2. Bind the socket to an address and port number (also known as identifying the socket,          */
 /*      giving it a name..)                                                                         */
-/* 3. Wait for an incoming connection                                                              */
+/* 3. Wait for an incoming connection                                                               */
 /* 4. Send and receive messages                                                                     */
 /* 5. Close socket                                                                                  */
 /****************************************************************************************************/
@@ -34,8 +35,8 @@ class Socket {
 
   // Methods
   // TODO: come up with better names for these methods
-  void prepare_connections(const int backlog);
-  void accept_connection();
+  void prepare(const int backlog);
+  void wait_for_connections();
 
  private:
   int                _fd;        // file descriptor for socket

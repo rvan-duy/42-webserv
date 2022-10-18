@@ -4,10 +4,13 @@
 
 int main() {
   {
-    Socket *listen_socket = new Socket(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
-    listen_socket->prepare_connections(10);
-    listen_socket->accept_connection();
-    delete listen_socket;
+    try {
+      Socket socket(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
+      socket.prepare(10);
+      socket.wait_for_connections();
+    } catch (std::exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
   }
 
   return 0;
