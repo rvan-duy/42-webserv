@@ -18,6 +18,10 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
   }
 
+  // TEMPORARY SOLUTION TO ENABLE REUSING OF PORTS
+  int opt = 1;
+  setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
   /**************************************************/
   /* Set all bytes in socket address structure to   */
   /* zero, and fill in the relevant data members    */
@@ -97,14 +101,34 @@ void Socket::wait_for_connections() {
     /* Send response to the client                    */
     /**************************************************/
 
-    const std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\n";
+    // By default send back 404 Not Found which is located at /root/404/404.html
+    std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
 
-    const std::string body     = "Hello World!";
-    const std::string response = header + body;
+    // Find Content-Length which is the size of the file (/root/404/404.html)
+    std::ifstream file("root/404/404.html", std::ios::binary);
+    if (file.is_open()) {
+      file.seekg(0, std::ios::end);
+      header += "Content-Length: " + std::to_string(file.tellg()) + "\r\n\r\n";
+      file.close();
+    } else {
+      throw std::runtime_error("File not found");
+    }
 
-    if (write(new_fd, response.c_str(), response.length()) == -1) {
+    // Fill the body of the response with the content of the file
+    std::ifstream file2("root/404/404.html", std::ios::binary);
+    if (file2.is_open()) {
+      std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
+      file2.close();
+      header += body;
+    } else {
+      throw std::runtime_error("File not found");
+    }
+
+    // Send the response
+    if (write(new_fd, header.c_str(), header.length()) == -1) {
       throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
     }
+ 
 
     /**************************************************/
     /* Close the connection                           */
