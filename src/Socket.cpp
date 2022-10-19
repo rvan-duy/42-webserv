@@ -146,7 +146,9 @@ std::string Socket::get_response_to_str(const HttpRequest &request) const {
   std::ifstream file("root/404/404.html", std::ios::binary);
   if (file.is_open()) {
     file.seekg(0, std::ios::end);
-    header += "Content-Length: " + std::to_string(file.tellg()) + "\r\n\r\n";
+    std::stringstream ss;
+    ss << file.tellg();
+    header += "Content-Length: " + ss.str() + "\r\n\r\n";
     file.close();
   } else {
     throw std::runtime_error("File not found");
