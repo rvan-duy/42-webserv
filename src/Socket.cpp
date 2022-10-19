@@ -126,8 +126,11 @@ Socket::~Socket() {
   /* Close the socket                               */
   /**************************************************/
 
+  // Destructor should not throw exceptions, prob need better solution for this
   if (close(_fd) == -1) {
-    throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
+    std::cerr << "Socket close failed: " << std::string(strerror(errno)) << std::endl;
+    std::cerr << "Exiting..." << std::endl;
+    exit(EXIT_FAILURE);
   }
 }
 
