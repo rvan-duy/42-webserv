@@ -1,6 +1,6 @@
 NAME			:= tester
 CC				:= c++
-CFLAGS			:= -Wall -Wextra -Werror -g -std=c++98 -pedantic
+CFLAGS			:= -Wall -Wextra -g3 -std=c++98 -pedantic -fsanitize=address
 ################################################################################
 OBJ_DIR			:= ../obj
 SRCS			+= $(wildcard *.cpp)
@@ -11,7 +11,7 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	@$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
 	@./$(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)

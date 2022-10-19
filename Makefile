@@ -27,7 +27,7 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
-export SRCS			:=	Logger.cpp
+export SRCS			:=	test.cpp
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp
 MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
@@ -37,14 +37,14 @@ OBJS				:=	$(TEST_OBJS) $(MAIN_OBJ)
 all: $(NAME)
 
 $(NAME):	$(OBJ_DIR) $(OBJS)
-	printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
+	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
-	$(CC) $(CFLAGS) -c $< -I$(INCL_DIR) -o $@
+	@$(CC) $(CFLAGS) -c $< -I$(INCL_DIR) -o $@
+	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
+	@printf "$(notdir $(basename $@)) created\n"
 
-# printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-# printf "$(notdir $(basename $@)) created\n"
 run: $(NAME)
 	./$(NAME)
 
@@ -65,7 +65,7 @@ re: fclean all
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-tester: $(OBJ_DIR) $(OBJS)
+runtest: $(OBJ_DIR) $(OBJS)
 	@$(MAKE) -C $(TEST_DIR)
 
 echo:
