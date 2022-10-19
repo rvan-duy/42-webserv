@@ -9,17 +9,23 @@ class HttpMessage {
   HttpMessage();
   virtual ~HttpMessage();
 
+  enum HttpVersion { HTTP_1_1, HTTP_2_0, HTTP_3_0 };
+
   // Methods
   virtual void parse(const std::string &message) = 0;
 
-  enum HttpVersion { HTTP_1_1, HTTP_2_0, HTTP_3_0 };
+  // Getters
+  HttpVersion                        get_version() const;
+  std::map<std::string, std::string> get_headers() const;
+  std::string                        get_header(const std::string &key) const;
+  std::string                        get_body() const;
 
  protected:
   HttpVersion                        _version;  // HTTP version of message
   std::map<std::string, std::string> _headers;  // headers of message
   std::string                        _body;     // body of message
 
-  HttpVersion parse_version(const std::string &version);
+  HttpVersion                        parse_version(const std::string &version);
 };
 
 #endif  // HTTP_MESSAGE_HPP
