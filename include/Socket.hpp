@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
 /****************************************************************************************************/
 /* The Socket Class                                                                                 */
