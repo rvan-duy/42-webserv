@@ -1,73 +1,74 @@
-NAME			:= webserv
-CC				:= c++
-CFLAGS			:= -Wall -Wextra -Werror -g -std=c++98 -pedantic
+NAME				:=	webserv
+CC					:=	c++
+CFLAGS				:=	-Wall -Wextra -std=c++98 -pedantic
 
 ################################################################################
-
-ifdef ADDRESS
-CFLAGS			+= -fsanitize=address -g3
-endif
-ifdef NO_FLAGS
-CFLAGS			:= 
-endif
-
-################################################################################
-
-HEADERS 		:= 	include/tmp.hpp
-
-INCLUDE_FLAGS 	:= $(addprefix -I, $(sort $(dir $(HEADERS))))
-
-SOURCES			:= 	
-
-################################################################################
-
-ifdef TESTS
-CFLAGS			+= 
-HEADERS			+= 	tests/catch2/catch.hpp
-SOURCES			+= 	tests/catch2/catch-runner.cpp \
-					tests/example_test.cpp \
-					tests/another_example_test.cpp
+# EXTRA FLAGS
+ifdef PROD
+# Used for evals
+CFLAGS				+=	-Werror
 else
-SOURCES			+= 	src/main.cpp
+# Used for development
+CFLAGS				+=	-g3 -fsanitize=address
 endif
-
 ################################################################################
-
-BOLD 			:= \e[1m
-RESET 			:= \e[0m
-LIGHT_GREEN 	:= \e[92m
-LIGHT_CYAN 		:= \e[96m
-
-OBJECTS_DIR		:= obj
-OBJECTS			:= $(SOURCES:src/%.c=$(OBJECTS_DIR)/%.o)
-
+# COLORS
+BOLD 				:=	\e[1m
+RESET 				:=	\e[0m
+LIGHT_GREEN 		:=	\e[92m
+LIGHT_CYAN 			:=	\e[96m
+################################################################################
+# DIRECTORIES
+INCL_DIR			:=	include
+SRC_DIR				:=	src
+OBJ_DIR				:=	obj
+TEST_DIR			:=	test
+VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
+################################################################################
+# SOURCES / OBJECTS
+MAIN				:=	main.cpp
+export SRCS			:=	Logger.cpp
+TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
+MAIN				:=	main.cpp
+MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
+OBJS				:=	$(TEST_OBJS) $(MAIN_OBJ)
 ################################################################################
 
 all: $(NAME)
 
-obj/%.o: src/%.c $(HEADERS)
-	@mkdir -p $(@D)
-	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	@$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
+$(NAME):	$(OBJ_DIR) $(OBJS)
+	printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
+	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
 
-$(NAME): $(OBJECTS)
-	@$(CC) $(CFLAGS) $(OBJECTS) $(INCLUDE_FLAGS) -o $(NAME)
-	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	@printf "$(NAME) created\n"
+$(OBJ_DIR)/%.o: $(notdir %.cpp)
+	$(CC) $(CFLAGS) -c $< -I$(INCL_DIR) -o $@
 
-test: $(NAME)
+# printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
+# printf "$(notdir $(basename $@)) created\n"
+run: $(NAME)
 	./$(NAME)
 
-clean:
-	@printf "$(LIGHT_CYAN)$(BOLD)clean$(RESET)  [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	/bin/rm -rf obj
+debug: $(NAME)
 
-fclean: clean
-	@printf "$(LIGHT_CYAN)$(BOLD)fclean$(RESET) [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	/bin/rm -rf $(NAME) $(NAME).dSYM
+lldb: $(NAME)
+	lldb $(NAME)
+
+clean:
+	@rm -rf $(OBJ_DIR)
+	@$(MAKE) -C $(TEST_DIR) clean
+
+fclean:	clean
+	@rm -f $(NAME)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
 
-################################################################################
+tester: $(OBJ_DIR) $(OBJS)
+	@$(MAKE) -C $(TEST_DIR)
+
+echo:
+	@echo $(OBJS)
+
+.PHONY: all clean fclean re lldb

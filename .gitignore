@@ -10,6 +10,7 @@ webserv.dSYM
 *.lo
 *.o
 *.obj
+obj/
 
 # Precompiled Headers
 *.gch
@@ -38,3 +39,9 @@ webserver
 
 # logs
 logs/*.log
+
+# Test output
+test/tester
+
+# IDE settings
+.vscode
