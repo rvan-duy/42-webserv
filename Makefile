@@ -27,7 +27,7 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
-export SRCS			:=	
+export SRCS			:=	ConfigParser.cpp
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp
 MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
@@ -46,9 +46,7 @@ $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@printf "$(notdir $(basename $@)) created\n"
 
 run: $(NAME)
-	./$(NAME)
-
-debug: $(NAME)
+	./$(NAME) config/config0.conf
 
 lldb: $(NAME)
 	lldb $(NAME)
