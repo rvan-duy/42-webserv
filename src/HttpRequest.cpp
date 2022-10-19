@@ -103,6 +103,20 @@ void HttpRequest::parse(const std::string &message) {
 }
 
 /*
+ * Getter for the request method
+ */
+HttpRequest::HttpMethod HttpRequest::get_method() const {
+  return _method;
+}
+
+/*
+ * Getter for the request URI
+ */
+std::string HttpRequest::get_uri() const {
+  return _uri;
+}
+
+/*
  * Parse the method string into the method enum
  * @param method the method string
  * @return the method enum

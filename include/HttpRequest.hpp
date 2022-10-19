@@ -9,10 +9,14 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   ~HttpRequest();
 
+  enum HttpMethod { GET, POST, DELETE };
+
   // Methods
   void parse(const std::string &message);
 
-  enum HttpMethod { GET, POST, DELETE };
+  // Getters
+  HttpMethod  get_method() const;
+  std::string get_uri() const;
 
  private:
   HttpMethod  _method;  // HTTP method of request
