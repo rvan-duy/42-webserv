@@ -20,7 +20,7 @@ $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@printf "$(notdir $(basename $@)) created\n"
 
 clean:
-	@rm $(NAME)
+	@rm -f $(NAME)
 
 echo:
 	@echo $(OBJS)
