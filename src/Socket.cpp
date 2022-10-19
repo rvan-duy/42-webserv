@@ -1,5 +1,7 @@
 #include "Socket.hpp"
 
+#include "Logger.hpp"
+
 /*
  * Constructor for Socket class
  * @param domain communication domain
@@ -93,19 +95,21 @@ void Socket::wait_for_connections() {
     /* Print the received message                     */
     /**************************************************/
 
-    std::cout << "Received message from " << inet_ntoa(_servaddr.sin_addr) << ":" << ntohs(_servaddr.sin_port)
-              << std::endl;
-    std::cout << buffer << std::endl;
+    Logger &logger = Logger::getInstance();
+    logger.log("Received response\n---------------------------\n" + std::string(buffer) +
+               "\n---------------------------\n");
 
     /**************************************************/
     /* Send response to the client                    */
     /**************************************************/
 
-    HttpRequest request;
-    request.parse(buffer);
-    std::string response = get_response_to_str(request);  // Get the response to the request
-    if (write(new_fd, response.c_str(), response.length()) == -1) {
-      throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
+    {
+      HttpRequest request;
+      request.parse(buffer);
+      std::string response = get_response_to_str(request);  // Get the response to the request
+      if (write(new_fd, response.c_str(), response.length()) == -1) {
+        throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
+      }
     }
 
     /**************************************************/
@@ -140,8 +144,6 @@ Socket::~Socket() {
  * @return response to the request
  */
 std::string Socket::get_response_to_str(const HttpRequest &request) const {
-  (void)request;
-
   // By default send back 404 Not Found which is located at /root/404/404.html
   std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
 

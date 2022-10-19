@@ -6,6 +6,7 @@
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
+  HttpRequest(const HttpRequest &obj);
   ~HttpRequest();
 
   // Methods
@@ -14,8 +15,10 @@ class HttpRequest : public HttpMessage {
   enum HttpMethod { GET, POST, DELETE };
 
  private:
-  HttpMethod  _method;          // HTTP method of request
-  std::string _uri;             // URI of request
+  HttpMethod  _method;  // HTTP method of request
+  std::string _uri;     // URI of request
+
+  HttpMethod  parse_method(const std::string &method);
 };
 
 #endif  // HTTP_REQUEST_HPP
