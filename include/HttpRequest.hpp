@@ -11,9 +11,11 @@ class HttpRequest : public HttpMessage {
   // Methods
   void parse(const std::string &message);
 
+  enum HttpMethod { GET, POST, DELETE };
+
  private:
-  int         _status_code;     // status code of response
-  std::string _status_message;  // status message of response
+  HttpMethod  _method;          // HTTP method of request
+  std::string _uri;             // URI of request
 };
 
 #endif  // HTTP_REQUEST_HPP

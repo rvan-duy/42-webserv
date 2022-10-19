@@ -17,6 +17,7 @@ class HttpMessage {
  protected:
   HttpVersion                        _version;  // HTTP version of message
   std::map<std::string, std::string> _headers;  // headers of message
+  std::string                        _body;     // body of message
 };
 
 #endif  // HTTP_MESSAGE_HPP

@@ -20,7 +20,10 @@ HEADERS 		:= 	include/Socket.hpp \
 
 INCLUDE_FLAGS 	:= $(addprefix -I, $(sort $(dir $(HEADERS))))
 
-SOURCES			:= 	src/Socket.cpp
+SOURCES			:= 	src/Socket.cpp \
+					src/HttpMessage.cpp \
+					src/HttpRequest.cpp \
+					src/HttpResponse.cpp
 
 ################################################################################
 

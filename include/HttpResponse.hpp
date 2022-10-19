@@ -14,8 +14,8 @@ class HttpResponse : public HttpMessage {
   enum HttpMethod { GET, POST, DELETE };
 
  private:
-  HttpMethod  _method;  // HTTP method of request
-  std::string _uri;     // URI of request
+  int         _status_code;     // status code of response
+  std::string _status_message;  // status message of response
 };
 
 #endif  // HTTP_RESPONSE_HPP
