@@ -1,4 +1,5 @@
-#include "catch2/catch.hpp"
+#define CONFIG_CATCH_MAIN
+#include "catch.hpp"
 
 SCENARIO("Another example test") {
   GIVEN("An empty vector") {
