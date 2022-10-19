@@ -1,8 +1,17 @@
-#include <iostream>
+#include "Socket.hpp"
+
+#define SERVER_PORT 8080
 
 int main() {
-  std::cout << "Hello Webserver!" << std::endl;
+  {
+    try {
+      Socket socket(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
+      socket.prepare(10);
+      socket.wait_for_connections();
+    } catch (std::exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
+  }
 
-  // Great success
   return 0;
 }

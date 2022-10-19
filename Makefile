@@ -27,7 +27,11 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
-export SRCS			:=	
+export SRCS			:=	Socket.cpp \
+						HttpMessage.cpp \
+						HttpRequest.cpp \
+						HttpResponse.cpp
+
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp
 MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
@@ -47,8 +51,6 @@ $(OBJ_DIR)/%.o: $(notdir %.cpp)
 
 run: $(NAME)
 	./$(NAME)
-
-debug: $(NAME)
 
 lldb: $(NAME)
 	lldb $(NAME)
