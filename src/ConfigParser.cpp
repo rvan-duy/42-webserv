@@ -4,18 +4,29 @@
  * Constructors / destructors
 */
 ConfigParser::ConfigParser(std::string const& filePath) {
-	
+	Logger& logger = Logger::getInstance();
+	try {
+		openFile(filePath);
+	} catch (std::exception &e) {
+		// logger.error(e.what());
+	}
+	logger.log("Opened config file");
 }
 
 ConfigParser::~ConfigParser() {
-	
+	if (isFileOpen()) {
+		_file.close();
+	}
 }
 
 /**
  * File functions
 */
 void	ConfigParser::openFile(std::string const& filePath) {
-	_file.open("test");
+	_file.open(filePath);
+	if (!isFileOpen()) {
+		throw FileOpenException();
+	}
 }
 
 /**

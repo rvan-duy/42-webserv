@@ -20,6 +20,7 @@ LIGHT_CYAN 			:=	\e[96m
 ################################################################################
 # DIRECTORIES
 INCL_DIR			:=	include
+LOG_DIR				:=	logs
 SRC_DIR				:=	src
 OBJ_DIR				:=	obj
 TEST_DIR			:=	test
@@ -34,6 +35,8 @@ MAIN				:=	main.cpp
 MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
 OBJS				:=	$(TEST_OBJS) $(MAIN_OBJ)
 ################################################################################
+# ARGS FOR DEV
+ARGS				:=	config/config0.confee
 
 all: $(NAME)
 
@@ -47,10 +50,10 @@ $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@printf "$(notdir $(basename $@)) created\n"
 
 run: $(NAME)
-	./$(NAME) config/config0.conf
+	./$(NAME) $(ARGS)
 
 lldb: $(NAME)
-	lldb $(NAME)
+	lldb $(NAME) -- $(ARGS)
 
 clean:
 	@rm -rf $(OBJ_DIR)
@@ -66,6 +69,11 @@ $(OBJ_DIR):
 
 runtest: $(OBJ_DIR) $(OBJS)
 	@$(MAKE) -C $(TEST_DIR)
+
+deletelogs:
+	@rm -rf $(LOG_DIR)
+	@mkdir $(LOG_DIR)
+	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)"
 
 echo:
 	@echo $(OBJS)

@@ -4,6 +4,7 @@
 #include <exception>
 #include <errno.h>
 #include <fstream>
+#include <Logger.hpp>
 
 class ConfigParser {
 	public:
