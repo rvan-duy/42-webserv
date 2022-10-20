@@ -57,6 +57,7 @@ void Socket::prepare(const int backlog) const {
  * Wait for incoming connections
  */
 void Socket::wait_for_connections() {
+  Logger         &logger   = Logger::getInstance();
   const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
   int             new_fd;                        // file descriptor for new socket
   char            buffer[50000] = {0};           // buffer to read incoming data into
@@ -66,7 +67,7 @@ void Socket::wait_for_connections() {
   /**************************************************/
 
   while (1) {
-    std::cout << "Waiting for connections on port " << _port << "..." << std::endl;
+    logger.log("Waiting for connections on port " + std::to_string(_port));
 
     /**************************************************/
     /* Accept an incoming connection                  */
@@ -79,6 +80,7 @@ void Socket::wait_for_connections() {
     /**************************************************/
 
     if ((new_fd = accept(_fd, (struct sockaddr *)&_servaddr, (socklen_t *)&sock_len)) == -1) {
+      logger.error("Socket accept failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket accept failed: " + std::string(strerror(errno)));
     }
 
@@ -86,16 +88,21 @@ void Socket::wait_for_connections() {
     /* Read data from the incoming connection         */
     /**************************************************/
 
+    logger.log("Reading data from socket");
+
     bzero(buffer, sizeof(buffer));
-    if (read(new_fd, buffer, sizeof(buffer)) == -1) {
+    ssize_t bytes_read = read(new_fd, buffer, sizeof(buffer));
+    if (bytes_read == -1) {
+      logger.error("Socket read failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket read failed: " + std::string(strerror(errno)));
     }
 
+    logger.log("Successfully read " + std::to_string(bytes_read) + " bytes from socket");
+
     /**************************************************/
-    /* Print the received message                     */
+    /* Log the received message                       */
     /**************************************************/
 
-    Logger &logger = Logger::getInstance();
     logger.log("Received response\n---------------------------\n" + std::string(buffer) +
                "\n---------------------------\n");
 
@@ -104,10 +111,16 @@ void Socket::wait_for_connections() {
     /**************************************************/
 
     {
-      HttpRequest request;
+      HttpRequest  request;
+      HttpResponse response;
+
       request.parse(buffer);
-      std::string response = get_response_to_str(request);  // Get the response to the request
-      if (write(new_fd, response.c_str(), response.length()) == -1) {
+      response.create_response(request, "root");  // TODO: make root configurable, not hardcoded
+
+      std::string response_str = response.to_str();
+
+      if (write(new_fd, response_str.c_str(), response_str.length()) == -1) {
+        logger.error("Socket write failed: " + std::string(strerror(errno)));
         throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
       }
     }
@@ -117,6 +130,7 @@ void Socket::wait_for_connections() {
     /**************************************************/
 
     if (close(new_fd) == -1) {
+      logger.error("Socket close failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
     }
   }
@@ -129,14 +143,16 @@ Socket::~Socket() {
   /**************************************************/
   /* Close the socket                               */
   /**************************************************/
+  Logger &logger = Logger::getInstance();
 
-  // Destructor should not throw exceptions, prob need better solution for this
   if (close(_fd) == -1) {
-    std::cerr << "Socket close failed: " << std::string(strerror(errno)) << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(EXIT_FAILURE);
+    logger.log("Socket close failed: " + std::string(strerror(errno)));
   }
 }
+
+/**************************************************/
+/* Legacy code                                    */
+/**************************************************/
 
 /*
  * Get response to the request

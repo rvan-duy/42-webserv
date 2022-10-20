@@ -16,6 +16,22 @@ HttpMessage::HttpVersion HttpMessage::get_version() const {
 }
 
 /*
+ * Getter for the HTTP version of the message as a string
+ */
+std::string HttpMessage::get_version_to_str() const {
+  switch (_version) {
+    case HttpMessage::HTTP_1_1:
+      return "HTTP/1.1";
+    case HttpMessage::HTTP_2_0:
+      return "HTTP/2.0";
+    case HttpMessage::HTTP_3_0:
+      return "HTTP/3.0";
+    default:
+      return "HTTP/1.1";
+  }
+}
+
+/*
  * Getter for the headers of the message
  */
 std::map<std::string, std::string> HttpMessage::get_headers() const {

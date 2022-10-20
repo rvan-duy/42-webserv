@@ -2,6 +2,8 @@
 
 #define SERVER_PORT 8080
 
+// IMPORTANT BUG: server crashes when the request is empty
+
 int main() {
   {
     try {

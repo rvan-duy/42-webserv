@@ -2,16 +2,11 @@
 
 #include "Logger.hpp"
 
-Logger &logger = Logger::getInstance();
-
 HttpRequest::HttpRequest() {}
 
-HttpRequest::HttpRequest(const HttpRequest &obj) {
+HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj) {
   _method  = obj._method;
   _uri     = obj._uri;
-  _version = obj._version;
-  _headers = obj._headers;
-  _body    = obj._body;
 }
 
 HttpRequest::~HttpRequest() {}
@@ -33,11 +28,14 @@ Accept-Language: en, mi
  * @param message the request string
  */
 void HttpRequest::parse(const std::string &message) {
+  Logger &logger = Logger::getInstance();
+  logger.log("Parsing request");
+
   /**************************************************/
   /* Start of by parsing the request line           */
   /**************************************************/
 
-  logger.log("Parsing request line");
+  logger.log("1. Parsing request line");
   std::string request_line = message.substr(0, message.find("\r\n"));
   std::string method       = request_line.substr(0, request_line.find(" "));
   std::string uri =
@@ -45,34 +43,34 @@ void HttpRequest::parse(const std::string &message) {
   std::string version =
       request_line.substr(request_line.rfind(" ") + 1, request_line.length() - request_line.rfind(" ") - 1);
   request_line = method + " " + uri + " " + version;
-  logger.log("Request line parsed: [" + request_line + "]");
+  logger.log("- Request line parsed: [" + request_line + "]");
 
   /**************************************************/
   /* Parse the request method                       */
   /**************************************************/
 
   _method = parse_method(method);
-  logger.log("Method parsed: [" + method + "]");
+  logger.log("- Method parsed: [" + method + "]");
 
   /**************************************************/
   /* Parse the request URI                          */
   /**************************************************/
 
   _uri = uri;
-  logger.log("URI parsed: [" + uri + "]");
+  logger.log("- URI parsed: [" + uri + "]");
 
   /**************************************************/
   /* Parse the request version                      */
   /**************************************************/
 
   _version = parse_version(version);
-  logger.log("Version parsed: [" + version + "]");
+  logger.log("- Version parsed: [" + version + "]");
 
   /**************************************************/
   /* Parse the headers                              */
   /**************************************************/
 
-  logger.log("Parsing headers:");
+  logger.log("2. Parsing headers:");
   std::string headers = message.substr(message.find("\r\n") + 2, message.rfind("\r\n") - message.find("\r\n") - 2);
   std::string header;
   while ((header = headers.substr(0, headers.find("\r\n"))) != "") {
@@ -87,12 +85,12 @@ void HttpRequest::parse(const std::string &message) {
   /* Parse the body                                 */
   /**************************************************/
 
-  logger.log("Parsing body");
+  logger.log("3. Parsing body");
   _body = message.substr(message.rfind("\r\n") + 2, message.length() - message.rfind("\r\n") - 2);
   if (_body != "") {
-    logger.log("Body parsed: [" + _body + "]");
+    logger.log("- Body parsed: [" + _body + "]");
   } else {
-    logger.log("No body found");
+    logger.log("- No body found");
   }
 
   /**************************************************/

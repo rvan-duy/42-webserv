@@ -11,11 +11,9 @@ class HttpMessage {
 
   enum HttpVersion { HTTP_1_1, HTTP_2_0, HTTP_3_0 };
 
-  // Methods
-  virtual void parse(const std::string &message) = 0;
-
   // Getters
   HttpVersion                        get_version() const;
+  std::string                        get_version_to_str() const;
   std::map<std::string, std::string> get_headers() const;
   std::string                        get_header(const std::string &key) const;
   std::string                        get_body() const;
