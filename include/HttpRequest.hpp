@@ -22,7 +22,7 @@ class HttpRequest : public HttpMessage {
   HttpMethod  _method;  // HTTP method of request
   std::string _uri;     // URI of request
 
-  HttpMethod  parse_method(const std::string &method);
+  HttpMethod  _parse_method(const std::string &method);
 };
 
 #endif  // HTTP_REQUEST_HPP

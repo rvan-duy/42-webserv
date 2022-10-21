@@ -49,7 +49,7 @@ void HttpRequest::parse(const std::string &message) {
   /* Parse the request method                       */
   /**************************************************/
 
-  _method = parse_method(method);
+  _method = _parse_method(method);
   logger.log("- Method parsed: [" + method + "]");
 
   /**************************************************/
@@ -63,7 +63,7 @@ void HttpRequest::parse(const std::string &message) {
   /* Parse the request version                      */
   /**************************************************/
 
-  _version = parse_version(version);
+  _version = _parse_version(version);
   logger.log("- Version parsed: [" + version + "]");
 
   /**************************************************/
@@ -119,7 +119,7 @@ std::string HttpRequest::get_uri() const {
  * @param method the method string
  * @return the method enum
  */
-HttpRequest::HttpMethod HttpRequest::parse_method(const std::string &method) {
+HttpRequest::HttpMethod HttpRequest::_parse_method(const std::string &method) {
   std::map<std::string, HttpMethod> method_map;
 
   method_map["GET"]    = GET;

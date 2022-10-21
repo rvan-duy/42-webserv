@@ -23,7 +23,7 @@ class HttpMessage {
   std::map<std::string, std::string> _headers;  // headers of message
   std::string                        _body;     // body of message
 
-  HttpVersion                        parse_version(const std::string &version);
+  HttpVersion                        _parse_version(const std::string &version);
 };
 
 #endif  // HTTP_MESSAGE_HPP

@@ -21,6 +21,8 @@ class HttpResponse : public HttpMessage {
  private:
   int         _status_code;     // status code of response
   std::string _status_message;  // status message of response
+
+  bool       _file_exists(const std::string &path) const;
 };
 
 #endif  // HTTP_RESPONSE_HPP

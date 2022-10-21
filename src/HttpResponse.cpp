@@ -58,6 +58,26 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
           _body = body;
           break;
         }
+      } else {
+        /**************************************************/
+        /* Respond with the file if it exists             */
+        /**************************************************/
+
+        requested_path.seekg(0, std::ios::end);
+        std::stringstream ss;
+        ss << requested_path.tellg();
+        _status_code               = 200;
+        _status_message            = "OK";
+        _headers["Content-Type"]   = "text/html";
+        _headers["Content-Length"] = ss.str();
+        requested_path.close();
+        std::ifstream requested_path2(root + request.get_uri(), std::ios::binary);
+        if (requested_path2.is_open()) {
+          std::string body((std::istreambuf_iterator<char>(requested_path2)), std::istreambuf_iterator<char>());
+          requested_path2.close();
+          _body = body;
+          break;
+        }
       }
 
       /**************************************************/

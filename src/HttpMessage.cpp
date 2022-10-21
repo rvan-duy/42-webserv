@@ -64,7 +64,7 @@ std::string HttpMessage::get_body() const {
  * @param version the version string
  * @return the version enum
  */
-HttpMessage::HttpVersion HttpMessage::parse_version(const std::string &version) {
+HttpMessage::HttpVersion HttpMessage::_parse_version(const std::string &version) {
   std::map<std::string, HttpVersion> version_map;
 
   version_map["HTTP/1.1"] = HTTP_1_1;
