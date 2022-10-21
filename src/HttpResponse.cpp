@@ -38,13 +38,31 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
       /**************************************************/
 
       if (!requested_path) {
+        std::ifstream file("root/404/index.html", std::ios::binary);
+        if (!file) {
+          logger.error("404 file not found");
+          throw std::runtime_error("404 file not found");
+        }
+        file.seekg(0, std::ios::end);
+        std::stringstream ss;
+        ss << file.tellg();
         _status_code               = 404;
         _status_message            = "Not Found";
-        _body                      = "404 Not Found";
-        _headers["Content-Length"] = std::to_string(_body.length());
-        _headers["Content-Type"]   = "text/plain";
-        break;
+        _headers["Content-Type"]   = "text/html";
+        _headers["Content-Length"] = ss.str();
+        file.close();
+        std::ifstream file2("root/404/index.html", std::ios::binary);
+        if (file2.is_open()) {
+          std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
+          file2.close();
+          _body = body;
+          break;
+        }
       }
+
+      /**************************************************/
+      /* Respond with the file if it exists             */
+      /**************************************************/
 
       _version = request.get_version();
 

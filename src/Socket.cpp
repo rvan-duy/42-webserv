@@ -97,13 +97,15 @@ void Socket::wait_for_connections() {
       throw std::runtime_error("Socket read failed: " + std::string(strerror(errno)));
     }
 
+    // it will sometimes read 0 bytes, which is not an error, but we don't want to process it
+
     logger.log("Successfully read " + std::to_string(bytes_read) + " bytes from socket");
 
     /**************************************************/
     /* Log the received message                       */
     /**************************************************/
 
-    logger.log("Received response\n---------------------------\n" + std::string(buffer) +
+    logger.log("Received request\n---------------------------\n" + std::string(buffer) +
                "\n---------------------------\n");
 
     /**************************************************/
@@ -118,8 +120,9 @@ void Socket::wait_for_connections() {
       response.create_response(request, "root");  // TODO: make root configurable, not hardcoded
 
       std::string response_str = response.to_str();
+      std::string response_str_TEMP = get_response_to_str(request); // TEMPORARY SOLUTION, sends a 404 response
 
-      if (write(new_fd, response_str.c_str(), response_str.length()) == -1) {
+      if (write(new_fd, response_str_TEMP.c_str(), response_str_TEMP.length()) == -1) {
         logger.error("Socket write failed: " + std::string(strerror(errno)));
         throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
       }
@@ -164,7 +167,7 @@ std::string Socket::get_response_to_str(const HttpRequest &request) const {
   std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
 
   // Find Content-Length which is the size of the file (/root/404/404.html)
-  std::ifstream file("root/404/404.html", std::ios::binary);
+  std::ifstream file("root/404/index.html", std::ios::binary);
   if (file.is_open()) {
     file.seekg(0, std::ios::end);
     std::stringstream ss;
@@ -176,7 +179,7 @@ std::string Socket::get_response_to_str(const HttpRequest &request) const {
   }
 
   // Fill the body of the response with the content of the file
-  std::ifstream file2("root/404/404.html", std::ios::binary);
+  std::ifstream file2("root/404/index.html", std::ios::binary);
   if (file2.is_open()) {
     std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
     file2.close();

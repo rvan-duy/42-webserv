@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 #include "HttpMessage.hpp"
 #include "HttpRequest.hpp"
