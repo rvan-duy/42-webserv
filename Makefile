@@ -45,7 +45,7 @@ ARGS				:=	config/config0.confee
 
 all: $(NAME)
 
-$(NAME):	$(OBJ_DIR) $(OBJS)
+$(NAME):	$(OBJ_DIR) $(LOG_DIR) $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
 
@@ -71,6 +71,9 @@ re: fclean all
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
+
+$(LOG_DIR):
+	@mkdir -p $(LOG_DIR)
 
 runtest: $(OBJ_DIR) $(OBJS)
 	@$(MAKE) -C $(TEST_DIR)

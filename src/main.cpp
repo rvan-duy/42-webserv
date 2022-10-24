@@ -16,14 +16,13 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   parseConfigFile(argv[1]);
-
-  try {
-      Socket socket(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
-      socket.prepare(10);
-      socket.wait_for_connections();
-    } catch (std::exception &e) {
-      std::cerr << e.what() << std::endl;
-    }
+  // try {
+  //     Socket socket(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
+  //     socket.prepare(10);
+  //     socket.wait_for_connections();
+  //   } catch (std::exception &e) {
+  //     std::cerr << e.what() << std::endl;
+  //   }
   // Great success
   return EXIT_SUCCESS;
 }
