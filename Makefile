@@ -33,6 +33,7 @@ export SRCS			:=	ConfigParser.cpp \
 						Socket.cpp \
 						HttpMessage.cpp \
 						HttpRequest.cpp \
+						config_parsing.cpp \
 						HttpResponse.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
@@ -41,7 +42,7 @@ MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
 OBJS				:=	$(TEST_OBJS) $(MAIN_OBJ)
 ################################################################################
 # ARGS FOR DEV
-ARGS				:=	config/config0.confee
+ARGS				:=	config/config0.conf
 
 all: $(NAME)
 

@@ -14,9 +14,8 @@ class ConfigParser {
 		class FileOpenException: public std::exception {
 			public:
 				char const *what() const throw() {
-					std::string message("Error opening file");
-					message.append(strerror(errno));
-					return message.c_str();
+					// std::string message("Error opening file: ");
+					return strerror(errno);
 				}
 		};
 

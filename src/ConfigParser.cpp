@@ -8,7 +8,8 @@ ConfigParser::ConfigParser(std::string const& filePath) {
 	try {
 		openFile(filePath);
 	} catch (std::exception &e) {
-		// logger.error(e.what());
+		logger.error("Error opening file: " + std::string(e.what()));
+		throw e;
 	}
 	logger.log("Opened config file");
 }

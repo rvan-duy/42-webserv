@@ -7,9 +7,12 @@ Logger* Logger::_logger = NULL;
  * Constructors / destructors
 */
 Logger::Logger(): _parentPid(getpid()) {
+	// Open file in append mode
 	std::string filePath(LOG_DEST);
 	filePath.append("log.log");
 	_file.open(filePath, std::ios::out | std::ios::app);
+
+	
 	if (!isFileOpen()) {
 		std::string errorMsg("Error: can't open log file: ");
 		errorMsg.append(strerror(errno));
@@ -34,7 +37,7 @@ void Logger::log(std::string const& message) {
 }
 
 void Logger::error(std::string const& message) {
-	logToConsole("\033[1;31m[ERROR]  \033[0m", ERROR, message);
+	logToConsole("\033[1;31m[ERROR]: \033[0m", ERROR, message);
 	logToFile("[ERROR]:   ", message);
 }
 
@@ -83,6 +86,8 @@ void Logger::logToConsole(std::string const& levelMsg, ELogLevel level, std::str
 	fullMsg.append(getPid());
 	fullMsg.append(levelMsg);
 	fullMsg.append(message);
+
+	// Print to stdout or stderr based on level
 	switch (level)
 	{
 	case INFO:
