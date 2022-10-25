@@ -43,7 +43,6 @@ std::map<std::string, std::string> HttpMessage::get_headers() const {
  * @param key the key of the header
  * @return the value of the header
  */
-
 std::string HttpMessage::get_header(const std::string &key) const {
   return _headers.at(key);
 }
