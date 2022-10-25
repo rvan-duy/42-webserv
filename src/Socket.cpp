@@ -2,6 +2,8 @@
 
 #include "Logger.hpp"
 
+#define SSTR(x) static_cast<std::ostringstream &>((std::ostringstream() << std::dec << x)).str()
+
 /*
  * Constructor for Socket class
  * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
@@ -70,8 +72,11 @@ void Socket::wait_for_connections() {
   /**************************************************/
 
   while (1) {
-    logger.log("Waiting for connections on port " + std::to_string(_port));
-
+    { // This block is just for the logger
+      std::ostringstream ss;
+      ss << "Waiting for connections on port " << _port << std::endl;
+      logger.log(ss.str());
+    }
     /**************************************************/
     /* Accept an incoming connection                  */
     /* - Blocks until a connection is present         */
@@ -105,7 +110,11 @@ void Socket::wait_for_connections() {
       continue;
     }
 
-    logger.log("Successfully read " + std::to_string(bytes_read) + " bytes from socket");
+    { // This block is just for the logger
+      std::ostringstream ss;
+      ss << "Successfully read " << bytes_read << " bytes from socket" << std::endl;
+      logger.log(ss.str());
+    }
 
     /**************************************************/
     /* Log the received message                       */
