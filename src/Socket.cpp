@@ -2,8 +2,6 @@
 
 #include "Logger.hpp"
 
-#define SSTR(x) static_cast<std::ostringstream &>((std::ostringstream() << std::dec << x)).str()
-
 /*
  * Constructor for Socket class
  * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
