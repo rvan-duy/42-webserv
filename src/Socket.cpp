@@ -4,10 +4,10 @@
 
 /*
  * Constructor for Socket class
- * @param domain communication domain
- * @param type communication semantics
- * @param protocol protocol to be used with the socket
- * @param port port number of socket
+ * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
+ * @param type communication semantics (SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW)
+ * @param protocol protocol to be used with the socket (0 for default)
+ * @param port port number of socket (0 for random)
  */
 Socket::Socket(const int domain, const int type, const int protocol, const int port) : _port(port) {
   /**************************************************/
@@ -20,7 +20,10 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
   }
 
-  // TEMPORARY SOLUTION TO ENABLE REUSING OF PORTS
+  /**************************************************/
+  /* Set options on socket to reuse address         */
+  /**************************************************/
+
   int opt = 1;
   setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
@@ -150,42 +153,4 @@ Socket::~Socket() {
   if (close(_fd) == -1) {
     logger.log("Socket close failed: " + std::string(strerror(errno)));
   }
-}
-
-/**************************************************/
-/* Legacy code                                    */
-/**************************************************/
-
-/*
- * Get response to the request
- * @param request request to get response to
- * @return response to the request
- */
-std::string Socket::get_response_to_str(const HttpRequest &request) const {
-  // By default send back 404 Not Found which is located at /root/404/404.html
-  std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
-
-  // Find Content-Length which is the size of the file (/root/404/404.html)
-  std::ifstream file("root/404/index.html", std::ios::binary);
-  if (file.is_open()) {
-    file.seekg(0, std::ios::end);
-    std::stringstream ss;
-    ss << file.tellg();
-    header += "Content-Length: " + ss.str() + "\r\n\r\n";
-    file.close();
-  } else {
-    throw std::runtime_error("File not found");
-  }
-
-  // Fill the body of the response with the content of the file
-  std::ifstream file2("root/404/index.html", std::ios::binary);
-  if (file2.is_open()) {
-    std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
-    file2.close();
-    header += body;
-  } else {
-    throw std::runtime_error("File not found");
-  }
-
-  return header;
 }
