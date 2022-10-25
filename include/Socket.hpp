@@ -39,7 +39,7 @@ class Socket {
   ~Socket();
 
   // Methods
-  void prepare(const int backlog) const;
+  void prepare(const int backlog = 10) const;
   void wait_for_connections();
 
  private:
