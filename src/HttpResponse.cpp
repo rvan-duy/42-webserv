@@ -120,8 +120,12 @@ std::string HttpResponse::to_str() const {
   /* Add the status line                            */
   /**************************************************/
 
-  logger.log("1. Adding status line");
-  response_string += get_version_to_str() + " " + std::to_string(_status_code) + " " + _status_message + "\r\n";
+  {
+    logger.log("1. Adding status line");
+    std::ostringstream ss;
+    ss << get_version_to_str() << " " << _status_code << " " << _status_message << "\r\n";
+    response_string += ss.str();
+  }
 
   /**************************************************/
   /* Add the headers                                */
@@ -181,7 +185,7 @@ void HttpResponse::_set_response(const std::string &path, const int status_code,
                                  const HttpVersion version) {
   Logger       &logger = Logger::getInstance();
 
-  std::ifstream file(path, std::ios::binary);  // Open the file in binary mode
+  std::ifstream file(path);  // Open the file
   logger.log("Requested path: " + path);
 
   file.seekg(0, std::ios::end);                          // Seek to the end of the file

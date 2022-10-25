@@ -74,7 +74,7 @@ void Socket::wait_for_connections() {
   while (1) {
     { // This block is just for the logger
       std::ostringstream ss;
-      ss << "Waiting for connections on port " << _port << std::endl;
+      ss << "Waiting for connections on port " << _port;
       logger.log(ss.str());
     }
     /**************************************************/
@@ -112,7 +112,7 @@ void Socket::wait_for_connections() {
 
     { // This block is just for the logger
       std::ostringstream ss;
-      ss << "Successfully read " << bytes_read << " bytes from socket" << std::endl;
+      ss << "Successfully read " << bytes_read << " bytes from socket";
       logger.log(ss.str());
     }
 
