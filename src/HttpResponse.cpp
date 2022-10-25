@@ -185,7 +185,7 @@ void HttpResponse::_set_response(const std::string &path, const int status_code,
                                  const HttpVersion version) {
   Logger       &logger = Logger::getInstance();
 
-  std::ifstream file(path);  // Open the file
+  std::ifstream file(path.c_str()); // Open the file
   logger.log("Requested path: " + path);
 
   file.seekg(0, std::ios::end);                          // Seek to the end of the file
