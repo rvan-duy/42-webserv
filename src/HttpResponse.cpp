@@ -17,8 +17,9 @@ HttpResponse::~HttpResponse() {}
  * Create the response
  * @param request Information from the request object
  * @param root Directory to serve files from
+ * @param index Index file to serve
  */
-void HttpResponse::create_response(const HttpRequest &request, const std::string &root) {
+void HttpResponse::create_response(const HttpRequest &request, const std::string &root, const std::string &index) {
   /**************************************************/
   /* Respond based on the request method            */
   /**************************************************/
@@ -31,7 +32,7 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
 
     case HttpRequest::GET: {
       logger.log("Response type: GET");
-      const std::string path = root + request.get_uri();
+      std::string path = root + request.get_uri();
       logger.log("Path: " + path);
 
       /**************************************************/
@@ -39,39 +40,35 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
       /**************************************************/
 
       if (!_file_exists(path)) {
-        logger.error("File does not exist, sending back 404");
-        set_to_404_page("Not found");
-        return;
-      }
+        /**************************************************/
+        /* If the file doesn't exist, look for an index   */
+        /* file in the directory                          */
+        /**************************************************/
 
-      std::ifstream requested_path(path, std::ios::binary);
-      logger.log("Requested path: " + path);
+        logger.log("File doesn't exist");
+        const std::string index_path = path + index;
+        logger.log("Looking for index path: " + index_path);
 
-      /**************************************************/
-      /* Respond with the file if it exists             */
-      /**************************************************/
+        /**************************************************/
+        /* If the index file doesn't exist, respond with  */
+        /* a 404 error                                    */
+        /**************************************************/
 
-      requested_path.seekg(0, std::ios::end);
-      std::stringstream ss;
-      ss << requested_path.tellg();
-      _status_code               = 200;
-      _status_message            = "OK";
-      _headers["Content-Type"]   = "text/html";
-      _headers["Content-Length"] = ss.str();
-      requested_path.close();
-      std::ifstream requested_path2(root + request.get_uri(), std::ios::binary);
-      if (requested_path2.is_open()) {
-        std::string body((std::istreambuf_iterator<char>(requested_path2)), std::istreambuf_iterator<char>());
-        requested_path2.close();
-        _body = body;
-        break;
+        if (!_file_exists(index_path)) {
+          logger.log("Index file doesn't exist");
+          _set_response("root/404/index.html", 404, "Not Found", request.get_version());
+          return;
+        } else {
+          logger.log("Index file exists");
+          path = index_path;
+        }
       }
 
       /**************************************************/
-      /* Respond with the file if it exists             */
+      /* Respond with the file                          */
       /**************************************************/
 
-      _version = request.get_version();
+      _set_response(path, 200, "OK", request.get_version());
 
       break;
     }
@@ -172,27 +169,27 @@ std::string HttpResponse::get_status_message() const {
 }
 
 /*
- * Set the HttpResponse to a 404 html page
- * @param message The message to send back
+ * TODO yey yeyeye lots of comments explaining this func
  */
-void HttpResponse::set_to_404_page(const std::string &message) {
-  std::ifstream file("root/404/index.html", std::ios::binary);
-  if (!file) {
-    logger.error("404 file not found");
-    throw std::runtime_error("404 file not found");
-  }
+void HttpResponse::_set_response(const std::string &path, const int status_code, const std::string &status_message,
+                                 const HttpVersion version) {
+  std::ifstream file(path, std::ios::binary);
+  logger.log("Requested path: " + path);
+
   file.seekg(0, std::ios::end);
   std::stringstream ss;
   ss << file.tellg();
-  _headers["Content-Length"] = ss.str();  // set the content length
+  _status_code               = status_code;              // Set the status code
+  _status_message            = status_message;           // Set the status message
+  _version                   = version;                  // Set the version
+  _headers["Content-Length"] = ss.str();                 // Set the content length header
+  _headers["Content-Type"]   = _get_content_type(path);  // Set the content type header
   file.seekg(0, std::ios::beg);
-  std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-  file.close();
-  _body                    = body;         // set the body
-  _version                 = HTTP_1_1;     // set the version
-  _status_code             = 404;          // set the status code
-  _status_message          = message;      // set the status message
-  _headers["Content-Type"] = "text/html";  // set the content type
+  if (file.is_open()) {
+    std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    file.close();
+    _body = body;
+  }
 }
 
 /*
@@ -208,4 +205,41 @@ bool HttpResponse::_file_exists(const std::string &path) const {
   if (buffer.st_mode & S_IFDIR) return false;           // if the file is a directory
   if (buffer.st_mode & S_IFREG) return true;            // if the file is a regular file
   return false;                                         // if the file is something else
+}
+
+/*
+ * Get the file type of a file
+ * @param path The path to the file to check
+ * @return The content type of the file
+ */
+std::string HttpResponse::_get_content_type(const std::string &path) const {
+  /**************************************************/
+  /* The map of file extensions to content types    */
+  /**************************************************/
+
+  std::map<std::string, std::string> file_types;
+
+  file_types["html"] = "text/html";
+  file_types["css"]  = "text/css";
+  file_types["js"]   = "application/javascript";
+  file_types["png"]  = "image/png";
+
+  // add more file types here if needed
+
+  /**************************************************/
+  /* Get the file extension                         */
+  /**************************************************/
+
+  std::string file_extension = path.substr(path.find_last_of(".") + 1);
+
+  /**************************************************/
+  /* Check if the file extension is in the map, if  */
+  /* it is, return the file type, otherwise return  */
+  /* text/plain                                     */
+  /**************************************************/
+
+  if (file_types.find(file_extension) != file_types.end()) {
+    return file_types[file_extension];
+  }
+  return "text/plain";
 }

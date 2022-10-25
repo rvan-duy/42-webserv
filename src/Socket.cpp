@@ -100,7 +100,10 @@ void Socket::wait_for_connections() {
       throw std::runtime_error("Socket read failed: " + std::string(strerror(errno)));
     }
 
-    // it will sometimes read 0 bytes, which is not an error, but we don't want to process it
+    if (bytes_read == 0) {
+      logger.log("Socket read 0 bytes, ignoring");
+      continue;
+    }
 
     logger.log("Successfully read " + std::to_string(bytes_read) + " bytes from socket");
 
@@ -120,7 +123,7 @@ void Socket::wait_for_connections() {
       HttpResponse response;
 
       request.parse(buffer);
-      response.create_response(request, "root");  // TODO: make root configurable, not hardcoded
+      response.create_response(request, "root", "index.html");  // TODO: make root configurable, not hardcoded, same for index
 
       std::string response_str = response.to_str();
 
