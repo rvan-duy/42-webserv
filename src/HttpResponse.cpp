@@ -2,8 +2,6 @@
 
 #include "Logger.hpp"
 
-Logger &logger = Logger::getInstance();
-
 HttpResponse::HttpResponse() {}
 
 HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
@@ -20,6 +18,8 @@ HttpResponse::~HttpResponse() {}
  * @param index Index file to serve
  */
 void HttpResponse::create_response(const HttpRequest &request, const std::string &root, const std::string &index) {
+  Logger &logger = Logger::getInstance();
+
   /**************************************************/
   /* Respond based on the request method            */
   /**************************************************/
@@ -106,6 +106,8 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
  * @return The response as a string
  */
 std::string HttpResponse::to_str() const {
+  Logger &logger = Logger::getInstance();
+
   /**************************************************/
   /* Create the response string to store the        */
   /* response in                                    */
@@ -169,24 +171,31 @@ std::string HttpResponse::get_status_message() const {
 }
 
 /*
- * TODO yey yeyeye lots of comments explaining this func
+ * Sets the HttpResponse Class attributes to the given values
+ * @param path Path to the file to serve, relative to the root directory
+ * @param status_code Status code to respond with
+ * @param status_message Status message to respond with
+ * @param version HTTP version to respond with
  */
 void HttpResponse::_set_response(const std::string &path, const int status_code, const std::string &status_message,
                                  const HttpVersion version) {
-  std::ifstream file(path, std::ios::binary);
+  Logger       &logger = Logger::getInstance();
+
+  std::ifstream file(path, std::ios::binary);  // Open the file in binary mode
   logger.log("Requested path: " + path);
 
-  file.seekg(0, std::ios::end);
-  std::stringstream ss;
-  ss << file.tellg();
+  file.seekg(0, std::ios::end);                          // Seek to the end of the file
+  std::stringstream ss;                                  // Create a stringstream to store the file contents in
+  ss << file.tellg();                                    // Get the file size
   _status_code               = status_code;              // Set the status code
   _status_message            = status_message;           // Set the status message
   _version                   = version;                  // Set the version
   _headers["Content-Length"] = ss.str();                 // Set the content length header
   _headers["Content-Type"]   = _get_content_type(path);  // Set the content type header
-  file.seekg(0, std::ios::beg);
+  file.seekg(0, std::ios::beg);                          // Seek back to the beginning of the file
   if (file.is_open()) {
-    std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string body((std::istreambuf_iterator<char>(file)),
+                     std::istreambuf_iterator<char>());  // Read the file into a string
     file.close();
     _body = body;
   }
@@ -198,13 +207,24 @@ void HttpResponse::_set_response(const std::string &path, const int status_code,
  * @return True if the file exists, false otherwise
  */
 bool HttpResponse::_file_exists(const std::string &path) const {
-  std::cout << "Checking if file exists: " << path << std::endl;
+  Logger     &logger = Logger::getInstance();
 
-  struct stat buffer;                                   // stat struct to store the file info
-  if (stat(path.c_str(), &buffer) == -1) return false;  // if the file doesn't exist
-  if (buffer.st_mode & S_IFDIR) return false;           // if the file is a directory
-  if (buffer.st_mode & S_IFREG) return true;            // if the file is a regular file
-  return false;                                         // if the file is something else
+  struct stat buffer;  // stat struct to store the file info
+  if (stat(path.c_str(), &buffer) == -1) {
+    logger.log("_file_exists -> File doesn't exist (" + path + ")");
+    return false;
+  }
+  if (buffer.st_mode & S_IFDIR) {
+    logger.log("_file_exists -> File is a directory (" + path + ")");
+    return false;
+  }
+  if (buffer.st_mode & S_IFREG) {
+    logger.log("_file_exists -> File is a regular file (" + path + ")");
+    return true;
+  }
+  logger.log("_file_exists -> File is something else (" + path + ")");
+  logger.error("WARNING: logic probably not implemented yet");
+  return false;
 }
 
 /*

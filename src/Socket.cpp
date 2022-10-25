@@ -123,7 +123,8 @@ void Socket::wait_for_connections() {
       HttpResponse response;
 
       request.parse(buffer);
-      response.create_response(request, "root", "index.html");  // TODO: make root configurable, not hardcoded, same for index
+      response.create_response(request, "root",
+                               "index.html");  // TODO: make root configurable, not hardcoded, same for index
 
       std::string response_str = response.to_str();
 

@@ -5,8 +5,8 @@
 HttpRequest::HttpRequest() {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj) {
-  _method  = obj._method;
-  _uri     = obj._uri;
+  _method = obj._method;
+  _uri    = obj._uri;
 }
 
 HttpRequest::~HttpRequest() {}
