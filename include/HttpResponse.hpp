@@ -24,9 +24,6 @@ class HttpResponse : public HttpMessage {
   int         get_status_code() const;
   std::string get_status_message() const;
 
-  // Set HttpResponse to hardcoded responses
-  void set_to_404_page(const std::string &message);
-
  private:
   int         _status_code;     // status code of response
   std::string _status_message;  // status message of response
