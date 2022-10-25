@@ -120,9 +120,8 @@ void Socket::wait_for_connections() {
       response.create_response(request, "root");  // TODO: make root configurable, not hardcoded
 
       std::string response_str = response.to_str();
-      std::string response_str_TEMP = get_response_to_str(request); // TEMPORARY SOLUTION, sends a 404 response
 
-      if (write(new_fd, response_str_TEMP.c_str(), response_str_TEMP.length()) == -1) {
+      if (write(new_fd, response_str.c_str(), response_str.length()) == -1) {
         logger.error("Socket write failed: " + std::string(strerror(errno)));
         throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
       }
