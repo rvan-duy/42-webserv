@@ -51,8 +51,6 @@ class Socket {
                                    in_port_t       sin_port;
                                    struct  in_addr sin_addr;
                                    char            sin_zero[8]; */
-
-  std::string get_response_to_str(const HttpRequest &request) const;
 };
 
 #endif  // SOCKET_HPP
