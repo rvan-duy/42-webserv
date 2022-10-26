@@ -3,14 +3,14 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <sys/poll.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <cstring>
 #include <sstream>
 
 /****************************************************************************************************/
@@ -46,7 +46,7 @@ class Socket {
   // Getters
   int get_fd() const;
 
- private: 
+ private:
   int                _fd;        // file descriptor for socket
   const int          _port;      // port number of socket
   struct sockaddr_in _servaddr;  // socket address structure
