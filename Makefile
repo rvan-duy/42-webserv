@@ -29,13 +29,13 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
 export SRCS			:=	ConfigParser.cpp \
-						Logger.cpp \
 						Socket.cpp \
 						HttpMessage.cpp \
 						HttpRequest.cpp \
 						Lexer.cpp \
 						Token.cpp \
-						HttpResponse.cpp
+						HttpResponse.cpp \
+						Logger.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp

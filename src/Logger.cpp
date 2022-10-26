@@ -6,13 +6,10 @@ Logger* Logger::_logger = NULL;
 /**
  * Constructors / destructors
 */
-Logger::Logger(): _parentPid(getpid()) {
-	// Open file in append mode
+Logger::Logger() {
 	std::string filePath(LOG_DEST);
 	filePath.append("log.log");
-	_file.open(filePath, std::ios::out | std::ios::app);
-
-	
+	_file.open(filePath.c_str(), std::ios::out | std::ios::app);
 	if (!isFileOpen()) {
 		std::string errorMsg("Error: can't open log file: ");
 		errorMsg.append(strerror(errno));

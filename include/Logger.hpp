@@ -1,12 +1,10 @@
 #pragma once
 
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <errno.h>
-#include <ctime>
 #include <unistd.h>
-#include <stdio.h>
 
 #define LOG_DEST "logs/"
 
@@ -43,13 +41,16 @@ class Logger {
 		// Logging file
 		std::ofstream	_file;
 		pid_t			_parentPid;
-		// Gets if file is open
-		bool	isFileOpen() const;
 
 		std::string	getTimeStamp() const;
 		std::string getPid() const;
-		void	restart();
 
 		void logToConsole(std::string const& levelMsg, ELogLevel level, std::string const& message);
 		void logToFile(std::string const& levelMsg, std::string const& message);
+
+		// Gets if file is open
+		bool	isFileOpen() const;
+
+		// Prints restart message to log
+		void	restart();
 };
