@@ -2,8 +2,6 @@
 
 #include "Logger.hpp"
 
-#define SSTR(x) static_cast<std::ostringstream &>((std::ostringstream() << std::dec << x)).str()
-
 /*
  * Constructor for Socket class
  * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
@@ -58,6 +56,8 @@ void Socket::prepare(const int backlog) const {
   }
 }
 
+// Poll is used to check if blocking functions can be called without actually blocking the thread
+
 /*
  * Wait for incoming connections
  */
@@ -65,18 +65,19 @@ void Socket::wait_for_connections() {
   Logger         &logger   = Logger::getInstance();
   const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
   int             new_fd;                        // file descriptor for new socket
-  char            buffer[50000] = {0};           // buffer to read incoming data into
+  char            buffer[100000] = {0};          // buffer to read incoming data into
 
   /**************************************************/
   /* Start accepting incoming connections           */
   /**************************************************/
 
   while (1) {
-    { // This block is just for the logger
+    {  // This block is just for the logger
       std::ostringstream ss;
       ss << "Waiting for connections on port " << _port;
       logger.log(ss.str());
     }
+
     /**************************************************/
     /* Accept an incoming connection                  */
     /* - Blocks until a connection is present         */
@@ -110,7 +111,7 @@ void Socket::wait_for_connections() {
       continue;
     }
 
-    { // This block is just for the logger
+    {  // This block is just for the logger
       std::ostringstream ss;
       ss << "Successfully read " << bytes_read << " bytes from socket";
       logger.log(ss.str());
@@ -152,6 +153,10 @@ void Socket::wait_for_connections() {
       throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
     }
   }
+}
+
+int Socket::get_fd() const {
+  return _fd;
 }
 
 /*

@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <sys/poll.h>
 
 #include <cstdlib>
 #include <fstream>
@@ -42,7 +43,10 @@ class Socket {
   void prepare(const int backlog = 10) const;
   void wait_for_connections();
 
- private:
+  // Getters
+  int get_fd() const;
+
+ private: 
   int                _fd;        // file descriptor for socket
   const int          _port;      // port number of socket
   struct sockaddr_in _servaddr;  // socket address structure
