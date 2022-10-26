@@ -20,6 +20,10 @@ enum ELogLevel {
  * Usage:
  * 		Logger& logger = Logger::getInstance();
  * 		logger.log("example log");
+ * 
+ * 		OR
+ * 
+ * 		Logger::getInstance().log("Example");
 */
 class Logger {
 	public:
