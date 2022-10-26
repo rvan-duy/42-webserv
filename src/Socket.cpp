@@ -1,11 +1,13 @@
 #include "Socket.hpp"
 
+#include "Logger.hpp"
+
 /*
  * Constructor for Socket class
- * @param domain communication domain
- * @param type communication semantics
- * @param protocol protocol to be used with the socket
- * @param port port number of socket
+ * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
+ * @param type communication semantics (SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW)
+ * @param protocol protocol to be used with the socket (0 for default)
+ * @param port port number of socket (0 for random)
  */
 Socket::Socket(const int domain, const int type, const int protocol, const int port) : _port(port) {
   /**************************************************/
@@ -18,7 +20,10 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
   }
 
-  // TEMPORARY SOLUTION TO ENABLE REUSING OF PORTS
+  /**************************************************/
+  /* Set options on socket to reuse address         */
+  /**************************************************/
+
   int opt = 1;
   setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
@@ -55,6 +60,7 @@ void Socket::prepare(const int backlog) const {
  * Wait for incoming connections
  */
 void Socket::wait_for_connections() {
+  Logger         &logger   = Logger::getInstance();
   const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
   int             new_fd;                        // file descriptor for new socket
   char            buffer[50000] = {0};           // buffer to read incoming data into
@@ -64,8 +70,11 @@ void Socket::wait_for_connections() {
   /**************************************************/
 
   while (1) {
-    std::cout << "Waiting for connections on port " << _port << "..." << std::endl;
-
+    { // This block is just for the logger
+      std::ostringstream ss;
+      ss << "Waiting for connections on port " << _port;
+      logger.log(ss.str());
+    }
     /**************************************************/
     /* Accept an incoming connection                  */
     /* - Blocks until a connection is present         */
@@ -77,6 +86,7 @@ void Socket::wait_for_connections() {
     /**************************************************/
 
     if ((new_fd = accept(_fd, (struct sockaddr *)&_servaddr, (socklen_t *)&sock_len)) == -1) {
+      logger.error("Socket accept failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket accept failed: " + std::string(strerror(errno)));
     }
 
@@ -84,28 +94,51 @@ void Socket::wait_for_connections() {
     /* Read data from the incoming connection         */
     /**************************************************/
 
+    logger.log("Reading data from socket");
+
     bzero(buffer, sizeof(buffer));
-    if (read(new_fd, buffer, sizeof(buffer)) == -1) {
+    ssize_t bytes_read = read(new_fd, buffer, sizeof(buffer));
+    if (bytes_read == -1) {
+      logger.error("Socket read failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket read failed: " + std::string(strerror(errno)));
     }
 
+    if (bytes_read == 0) {
+      logger.log("Socket read 0 bytes, ignoring");
+      continue;
+    }
+
+    { // This block is just for the logger
+      std::ostringstream ss;
+      ss << "Successfully read " << bytes_read << " bytes from socket";
+      logger.log(ss.str());
+    }
+
     /**************************************************/
-    /* Print the received message                     */
+    /* Log the received message                       */
     /**************************************************/
 
-    std::cout << "Received message from " << inet_ntoa(_servaddr.sin_addr) << ":" << ntohs(_servaddr.sin_port)
-              << std::endl;
-    std::cout << buffer << std::endl;
+    logger.log("Received request\n---------------------------\n" + std::string(buffer) +
+               "\n---------------------------\n");
 
     /**************************************************/
     /* Send response to the client                    */
     /**************************************************/
 
-    HttpRequest request;
-    request.parse(buffer);
-    std::string response = get_response_to_str(request);  // Get the response to the request
-    if (write(new_fd, response.c_str(), response.length()) == -1) {
-      throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
+    {
+      HttpRequest  request;
+      HttpResponse response;
+
+      request.parse(buffer);
+      response.create_response(request, "root",
+                               "index.html");  // TODO: make root configurable, not hardcoded, same for index
+
+      std::string response_str = response.to_str();
+
+      if (write(new_fd, response_str.c_str(), response_str.length()) == -1) {
+        logger.error("Socket write failed: " + std::string(strerror(errno)));
+        throw std::runtime_error("Socket write failed: " + std::string(strerror(errno)));
+      }
     }
 
     /**************************************************/
@@ -113,6 +146,7 @@ void Socket::wait_for_connections() {
     /**************************************************/
 
     if (close(new_fd) == -1) {
+      logger.error("Socket close failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
     }
   }
@@ -125,47 +159,9 @@ Socket::~Socket() {
   /**************************************************/
   /* Close the socket                               */
   /**************************************************/
+  Logger &logger = Logger::getInstance();
 
-  // Destructor should not throw exceptions, prob need better solution for this
   if (close(_fd) == -1) {
-    std::cerr << "Socket close failed: " << std::string(strerror(errno)) << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(EXIT_FAILURE);
+    logger.log("Socket close failed: " + std::string(strerror(errno)));
   }
-}
-
-/*
- * Get response to the request
- * @param request request to get response to
- * @return response to the request
- */
-std::string Socket::get_response_to_str(const HttpRequest &request) const {
-  (void)request;
-
-  // By default send back 404 Not Found which is located at /root/404/404.html
-  std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
-
-  // Find Content-Length which is the size of the file (/root/404/404.html)
-  std::ifstream file("root/404/404.html", std::ios::binary);
-  if (file.is_open()) {
-    file.seekg(0, std::ios::end);
-    std::stringstream ss;
-    ss << file.tellg();
-    header += "Content-Length: " + ss.str() + "\r\n\r\n";
-    file.close();
-  } else {
-    throw std::runtime_error("File not found");
-  }
-
-  // Fill the body of the response with the content of the file
-  std::ifstream file2("root/404/404.html", std::ios::binary);
-  if (file2.is_open()) {
-    std::string body((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
-    file2.close();
-    header += body;
-  } else {
-    throw std::runtime_error("File not found");
-  }
-
-  return header;
 }
