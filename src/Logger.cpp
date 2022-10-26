@@ -41,6 +41,7 @@ void Logger::error(std::string const& message) {
 	logToFile("[ERROR]:   ", message);
 }
 
+// Logs restart message to logfile
 void Logger::restart(void) {
 	logToFile("[RESTART]", "");
 }

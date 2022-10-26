@@ -33,7 +33,8 @@ export SRCS			:=	ConfigParser.cpp \
 						Socket.cpp \
 						HttpMessage.cpp \
 						HttpRequest.cpp \
-						config_parsing.cpp \
+						Lexer.cpp \
+						Token.cpp \
 						HttpResponse.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))

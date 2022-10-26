@@ -1,8 +1,9 @@
 NAME			:= tester
 CC				:= c++
-CFLAGS			:= -Wall -Wextra -g3 -std=c++98 -pedantic -fsanitize=address
+CFLAGS			:= -Wall -Wextra -I$(INCL_DIR) -g3 -std=c++98 -pedantic -fsanitize=address
 ################################################################################
 OBJ_DIR			:= ../obj
+INCL_DIR		:= ../include
 SRCS			+= $(wildcard *.cpp)
 OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 ################################################################################
