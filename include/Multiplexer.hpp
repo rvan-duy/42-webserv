@@ -1,14 +1,28 @@
 #ifndef MULTIPLEXER_HPP
 #define MULTIPLEXER_HPP
 
+#include <poll.h>
+
+#include "Socket.hpp"
+
+/***************************************************************************************/
+/* file_descriptor struct                                                              */
+/* - The file_descriptor structure is used to store file descriptor information for    */
+/*   the poll() function.                                                              */
+/* - it can be cast to a pollfd structure.                                             */
+/***************************************************************************************/
+
+typedef struct file_descriptor {
+  int     fd;       // file descriptor
+  short   events;   // requested events
+  short   revents;  // returned events
+  Socket *socket;   // socket
+} fds;
+
 /****************************************************************************************/
 /* The Multiplexer Class                                                                */
 /* - The multiplexer class is used to multiplex the file descriptors of the sockets.    */
 /****************************************************************************************/
-
-#include <poll.h>
-
-#include "Socket.hpp"
 
 class Multiplexer {
  public:
@@ -25,8 +39,8 @@ class Multiplexer {
   int get_number_of_fds() const;
 
  private:
-  struct pollfd *_fds;            // file descriptors
-  int            _number_of_fds;  // number of file descriptors
+  fds *_fds;            // file descriptors
+  int  _number_of_fds;  // number of file descriptors
 };
 
 #endif  // MULTIPLEXER_HPP

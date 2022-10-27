@@ -6,6 +6,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -41,20 +42,26 @@ class Socket {
 
   // Methods
   void prepare(const int backlog = 10) const;
+  void accept_connection();
+  void send_response(const HttpResponse &response) const;
+
+  // Legacy methods
   void wait_for_connections();
 
   // Getters
   int get_fd() const;
 
  private:
-  int                _fd;        // file descriptor for socket
-  const int          _port;      // port number of socket
-  struct sockaddr_in _servaddr;  // socket address structure
-                                 /*__uint8_t       sin_len;
-                                   sa_family_t     sin_family;
-                                   in_port_t       sin_port;
-                                   struct  in_addr sin_addr;
-                                   char            sin_zero[8]; */
+  int                _fd;             // file descriptor for socket
+  char               _buffer[10000];  // buffer for reading data from socket
+  int                _accepted;       // file descriptor for accepted connection, -1 if no connection
+  const int          _port;           // port number of socket
+  struct sockaddr_in _servaddr;       // socket address structure
+                                      /*__uint8_t       sin_len;
+                                        sa_family_t     sin_family;
+                                        in_port_t       sin_port;
+                                        struct  in_addr sin_addr;
+                                        char            sin_zero[8]; */
 };
 
 #endif  // SOCKET_HPP

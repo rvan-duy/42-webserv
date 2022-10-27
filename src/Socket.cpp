@@ -9,7 +9,9 @@
  * @param protocol protocol to be used with the socket (0 for default)
  * @param port port number of socket (0 for random)
  */
-Socket::Socket(const int domain, const int type, const int protocol, const int port) : _port(port) {
+Socket::Socket(const int domain, const int type, const int protocol, const int port) : _accepted(-1), _port(port) {
+  Logger &logger = Logger::getInstance();
+
   /**************************************************/
   /* Create an socket to receive incoming           */
   /* connections on                                 */
@@ -17,6 +19,7 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
 
   _fd = socket(domain, type, protocol);
   if (_fd == -1) {
+    logger.error("Failed to create socket: " + std::string(strerror(errno)));
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
   }
 
@@ -25,7 +28,23 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /**************************************************/
 
   int opt = 1;
-  setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+    logger.error("Failed to set socket options: " + std::string(strerror(errno)));
+    close(_fd);
+    throw std::runtime_error("Socket options failed: " + std::string(strerror(errno)));
+  }
+
+  /*************************************************************/
+  /* Set socket to be nonblocking. All of the sockets for      */
+  /* the incoming connections will also be nonblocking since   */
+  /* they will inherit that state from the listening socket.   */
+  /*************************************************************/
+
+  if (ioctl(_fd, FIONBIO, (char *)&opt) == -1) {
+    logger.error("fcntl() failed: " + std::string(strerror(errno)));
+    close(_fd);
+    throw std::runtime_error("fcntl() failed: " + std::string(strerror(errno)));
+  }
 
   /**************************************************/
   /* Set all bytes in socket address structure to   */
@@ -42,7 +61,23 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /**************************************************/
 
   if (bind(_fd, (struct sockaddr *)&_servaddr, sizeof(_servaddr)) == -1) {
+    logger.error("Failed to bind socket: " + std::string(strerror(errno)));
+    close(_fd);
     throw std::runtime_error("Socket bind failed: " + std::string(strerror(errno)));
+  }
+}
+
+/*
+ * Destructor for Socket class
+ */
+Socket::~Socket() {
+  /**************************************************/
+  /* Close the socket                               */
+  /**************************************************/
+  Logger &logger = Logger::getInstance();
+
+  if (close(_fd) == -1) {
+    logger.log("Socket close failed: " + std::string(strerror(errno)));
   }
 }
 
@@ -57,6 +92,88 @@ void Socket::prepare(const int backlog) const {
 }
 
 // Poll is used to check if blocking functions can be called without actually blocking the thread
+
+/*
+ * Accept an incoming connection
+ */
+void Socket::accept_connection() {
+  Logger         &logger   = Logger::getInstance();
+  const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
+
+  {  // This block is just for the logger
+    std::ostringstream ss;
+    ss << "Waiting for connections on port " << _port;
+    logger.log(ss.str());
+  }
+
+  /**************************************************/
+  /* Accept an incoming connection                  */
+  /* - Blocks until a connection is present         */
+  /* - Because the accept() function expects a      */
+  /* sockaddr structure, it needs to be cast to the */
+  /* correct type, the sockaddr_in structure is a   */
+  /* "subclass" of sockaddr, so we can cast it to a */
+  /* sockaddr structure                             */
+  /**************************************************/
+
+  if ((_accepted = accept(_fd, (struct sockaddr *)&_servaddr, (socklen_t *)&sock_len)) == -1) {
+    logger.error("Socket accept failed: " + std::string(strerror(errno)));
+    throw std::runtime_error("Socket accept failed: " + std::string(strerror(errno)));
+  }
+
+  logger.log("New connection accepted");
+
+  /**************************************************/
+  /* Read data from the incoming connection         */
+  /**************************************************/
+
+  logger.log("Reading data from connection");
+
+  bzero(_buffer, sizeof(_buffer));
+  ssize_t bytes_read = read(_accepted, _buffer, sizeof(_buffer));
+  if (bytes_read == -1) {
+    logger.error("Socket read failed: " + std::string(strerror(errno)));
+    throw std::runtime_error("Socket read failed: " + std::string(strerror(errno)));
+  }
+
+  if (bytes_read == 0) {
+    logger.log("Socket read 0 bytes, ignoring");
+    return;
+  }
+
+  {  // This block is just for the logger
+    std::ostringstream ss;
+    ss << "Successfully read " << bytes_read << " bytes from socket";
+    logger.log(ss.str());
+  }
+
+  /**************************************************/
+  /* Log the incoming data                          */
+  /**************************************************/
+
+  logger.log("Received data:\n---------------------------\n" + std::string(_buffer) +
+             "\n---------------------------\n");
+
+  /**************************************************/
+  /* End of data receiver, data is now stored       */
+  /* inside the object:                             */
+  /* - _buffer: contains the data                   */
+  /* - _accepted: contains the accepted socket      */
+  /**************************************************/
+
+  return;
+}
+
+int Socket::get_fd() const {
+  return _fd;
+}
+
+/**************************************************/
+/* LEGACY CODE                                    */
+/*                                                */
+/* This code is not used anymore, but is kept     */
+/* here for reference                             */
+/**************************************************/
 
 /*
  * Wait for incoming connections
@@ -152,23 +269,5 @@ void Socket::wait_for_connections() {
       logger.error("Socket close failed: " + std::string(strerror(errno)));
       throw std::runtime_error("Socket close failed: " + std::string(strerror(errno)));
     }
-  }
-}
-
-int Socket::get_fd() const {
-  return _fd;
-}
-
-/*
- * Destructor for Socket class
- */
-Socket::~Socket() {
-  /**************************************************/
-  /* Close the socket                               */
-  /**************************************************/
-  Logger &logger = Logger::getInstance();
-
-  if (close(_fd) == -1) {
-    logger.log("Socket close failed: " + std::string(strerror(errno)));
   }
 }
