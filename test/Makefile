@@ -16,7 +16,7 @@ $(NAME): $(OBJS)
 	@./$(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -I$(INCL_DIR) -c $< -o $@
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	@printf "$(notdir $(basename $@)) created\n"
 
