@@ -5,17 +5,44 @@
 #include <fstream>
 #include <Lexer.hpp>
 
-int assertTokenType(std::vector<Token>::iterator *it, ETokenType expected)
-{
+std::vector<Token> tokens;
+std::vector<Token>::iterator it;
+
+void	resetVars() {
+	tokens.clear();
+	it = tokens.begin();
 }
 
-void openFile(std::ifstream &file, std::string path)
+void	assertToken(ETokenType expected)
+{
+	REQUIRE(it->getType() == expected);
+	REQUIRE(it->getWord() == "");
+	it++;
+}
+
+void	assertWord(std::string expected)
+{
+	REQUIRE(it->getType() == WORD);
+	REQUIRE(it->getWord().compare(expected) == 0);
+	it++;
+}
+
+// Used to generate file urls with testcase added ot the back
+// Example: testconfigs/key_value_[testnumber]
+std::string	getFileDest(std::string &baseUrl, int currentTest) {
+	std::string fullDest(baseUrl);
+	return fullDest.append(std::to_string(currentTest));
+}
+
+int openFile(std::ifstream &file, std::string path)
 {
 	file.open(path);
 	if (!file.is_open())
 	{
 		WARN("Error opening file");
+		return 1;
 	}
+	return 0;
 }
 
 SCENARIO("Incorrect lexing input")
@@ -24,10 +51,13 @@ SCENARIO("Incorrect lexing input")
 	{
 		std::ifstream unopenedFile;
 
-		THEN("Lexer should throw error")
+		THEN("Lexer should return empty tokenlist")
 		{
 			// simulate error
-			REQUIRE(unopenedFile.is_open() == true);
+			REQUIRE(unopenedFile.is_open() == false);
+			tokens = Lexer::tokenizeFile(unopenedFile);
+			REQUIRE(tokens.size() == 0);
+			resetVars();
 		}
 	}
 }
@@ -36,28 +66,43 @@ SCENARIO("Empty config file")
 {
 	std::ifstream emptyFile;
 	openFile(emptyFile, "testconfigs/empty");
-	std::vector<Token> tokens;
 
-	// REQUIRE(emptyFile.is_open() == true);
-
+	REQUIRE(emptyFile.is_open() == true);
 	WHEN("Empty config file is passed")
 	{
 		tokens = Lexer::tokenizeFile(emptyFile);
 		THEN("Should return empty list of tokens")
 		{
-			// REQUIRE(true);
+			REQUIRE(tokens.size() == 0);
 		}
 	}
 }
 
-// SCENARIO("Basic config files") {
-// 	std::string	testConfPath("testconfigs/basic_");
-// 	std::vector<Token>	tokens;
-// 	std::vector<Token>::iterator it = tokens.begin()
+SCENARIO("Simple key value pairs")
+{
+	std::string	fileDest("testconfigs/key_value_");
+	std::ifstream cFile;
+	int i = 0;
 
-// 	SECTION("basic_0") {
-// 		testConfPath.append("0");
-// 		tokens = Lexer::tokenizeFile(testConfPath);
+	// key_value_0
+	WHEN(getFileDest(fileDest, i)) {
+		if (openFile(cFile, getFileDest(fileDest, i))) {
+			WARN("Error opening file");
+			return ;
+		}
+		std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
+		REQUIRE(tokens.size() == 3);
+	}
+	i++;
 
-// 	}
-// }
+	// key_value_1
+	WHEN(getFileDest(fileDest, i)) {
+		if (openFile(cFile, getFileDest(fileDest, i))) {
+			WARN("Error opening file");
+			return ;
+		}
+		std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
+		REQUIRE(tokens.size() == 3);
+	}
+	i++;
+}
