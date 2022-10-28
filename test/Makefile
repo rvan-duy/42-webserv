@@ -13,12 +13,14 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
-	@./$(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@$(CC) $(CFLAGS) -I$(INCL_DIR) -c $< -o $@
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	@printf "$(notdir $(basename $@)) created\n"
+
+run: $(NAME)
+	@./$(NAME)
 
 clean:
 	@rm -f $(NAME)

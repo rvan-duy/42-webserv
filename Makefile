@@ -77,8 +77,11 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	@mkdir -p $(LOG_DIR)
 
-runtest: $(OBJ_DIR) $(OBJS)
+compiletest: $(OBJ_DIR) $(OBJS)
 	@$(MAKE) -C $(TEST_DIR)
+
+runtest: $(OBJ_DIR) $(OBJS)
+	@$(MAKE) -C $(TEST_DIR) run
 
 deletelogs:
 	@rm -rf $(LOG_DIR)

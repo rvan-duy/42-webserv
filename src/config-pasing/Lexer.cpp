@@ -15,12 +15,12 @@ std::vector<Token>	Lexer::tokenizeFile(std::ifstream &file) {
 	*/
 	std::string line;
 	while (std::getline(file, line)) {
-		parseLine(tokens, line);
+		parseLine(&tokens, line);
 	}
 	return tokens;
 }
 
-void	Lexer::parseLine(std::vector<Token> tokens, std::string &line) {
+void	Lexer::parseLine(std::vector<Token> *tokens, std::string &line) {
 	std::string::iterator it = line.begin();
 	std::string word("");
 	ETokenType	type;
@@ -28,13 +28,17 @@ void	Lexer::parseLine(std::vector<Token> tokens, std::string &line) {
 	while (it != line.end()) {
 		while (isspace(*it))
 			it++;
+		if (!*it) {
+			return ;
+		}
 		type = getType(*it);
 		if (type == WORD) {
 			word = parseWord(it);
-			it + word.length();
+			tokens->push_back(Token(word));
+			it += word.length();
 			word = "";
 		} else {
-			tokens.push_back(Token(type));
+			tokens->push_back(Token(type));
 			it++;
 		}
 	}

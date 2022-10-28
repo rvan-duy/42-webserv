@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     logger.error("Usage: ./webserver [path_to_configfile]");
     return EXIT_FAILURE;
   }
-	//   parseConfigFile(argv[1]);
+	parseConfigFile(argv[1]);	
   // Great success
   return EXIT_SUCCESS;
 }
