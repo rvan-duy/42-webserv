@@ -38,12 +38,15 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /* Set socket to be nonblocking. All of the sockets for      */
   /* the incoming connections will also be nonblocking since   */
   /* they will inherit that state from the listening socket.   */
+  /*                                                           */
+  /* poll() needs this to be nonblocking so it can loop        */
+  /* through all of the sockets and check for events.          */
   /*************************************************************/
 
-  if (ioctl(_fd, FIONBIO, (char *)&opt) == -1) {
-    logger.error("fcntl() failed: " + std::string(strerror(errno)));
+  if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1) {
+    logger.error("Failed to set socket to nonblocking: " + std::string(strerror(errno)));
     close(_fd);
-    throw std::runtime_error("fcntl() failed: " + std::string(strerror(errno)));
+    throw std::runtime_error("Socket nonblocking failed: " + std::string(strerror(errno)));
   }
 
   /**************************************************/
