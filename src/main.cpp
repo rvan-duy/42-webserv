@@ -22,7 +22,14 @@ int	parseConfigFile(std::string const& filePath) {
 	return 0;
 }
 
+void	test() {
+	Token	token("test");
+
+	int i = token.isWordEqualTo("test");
+}
+ 
 int main(int argc, char **argv) {
+	test();
   Logger& logger = Logger::getInstance();
   if (argc != 2) {
     logger.error("Usage: ./webserver [path_to_configfile]");

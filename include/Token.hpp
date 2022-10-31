@@ -1,19 +1,23 @@
 #include <string>
 
-enum ETokenType {
-	WORD,
-	SEMICOLON,
-	OPEN_CURL,
-	CLOSE_CURL
-};
-
 class Token {
 	public:
-		Token(ETokenType type);
-		Token(std::string word);
+		enum ETokenType {
+			WORD,
+			SEMICOLON,
+			OPEN_CURL,
+			CLOSE_CURL
+		};
 
-		ETokenType	getType() const;
-		std::string getWord() const;
+		Token(Token::ETokenType type);
+		Token(std::string word);
+		~Token();
+
+		Token::ETokenType	&getType();
+		std::string 		&getWord();
+		
+		bool	isWordEqualTo(std::string const& value) const;
+		bool	isType(Token::ETokenType const& type) const;
 
 	private:
 		std::string	_word;

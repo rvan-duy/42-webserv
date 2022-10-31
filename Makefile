@@ -28,12 +28,14 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
-export SRCS			:=	ConfigParser.cpp \
-						Socket.cpp \
+export SRCS			:=	Socket.cpp \
 						HttpMessage.cpp \
 						HttpRequest.cpp \
 						Lexer.cpp \
 						Token.cpp \
+						Server.cpp \
+						Parser.cpp \
+						Route.cpp \
 						HttpResponse.cpp \
 						Logger.cpp
 

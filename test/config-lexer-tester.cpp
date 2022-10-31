@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <Lexer.hpp>
+#include <stdio.h>
 
 /**************************************************/
 /* Testing template                         		*/
@@ -34,17 +35,17 @@ std::ifstream file;
 /**
  * Token assertions
 */
-void	assertToken(ETokenType expected)
+void	assertToken(Token::ETokenType expected)
 {
 	REQUIRE(it->getType() == expected);
 	REQUIRE(it->getWord() == "");
 	it++;
 }
 
-void	assertWord(std::string expected)
+void	assertTokenWord(std::string expected)
 {
-	REQUIRE(it->getType() == WORD);
-	REQUIRE(it->getWord().compare(expected) == 0);
+	REQUIRE(it->getType() == Token::WORD);
+	REQUIRE(it->getWord() == expected);
 	it++;
 }
 
@@ -135,8 +136,8 @@ SCENARIO("(Semi-) empty config files")
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 2);
-		assertWord("test");
-		assertToken(OPEN_CURL);
+		assertTokenWord("test");
+		assertToken(Token::OPEN_CURL);
 
 		destructTest();
 	}
@@ -152,9 +153,9 @@ SCENARIO("Simple key value pairs")
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 3);
-		assertWord("test");
-		assertWord("blabla");
-		assertToken(SEMICOLON);
+		assertTokenWord("test");
+		assertTokenWord("blabla");
+		assertToken(Token::SEMICOLON);
 
 		destructTest();
 	}
@@ -165,12 +166,12 @@ SCENARIO("Simple key value pairs")
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 6);
-		assertWord("test");
-		assertWord("blabla");
-		assertToken(SEMICOLON);
-		assertWord("test");
-		assertWord("blabla");
-		assertToken(SEMICOLON);
+		assertTokenWord("test");
+		assertTokenWord("blabla");
+		assertToken(Token::SEMICOLON);
+		assertTokenWord("test");
+		assertTokenWord("blabla");
+		assertToken(Token::SEMICOLON);
 
 		destructTest();
 	}
@@ -181,10 +182,10 @@ SCENARIO("Simple key value pairs")
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 4);
-		assertWord("bla");
-		assertWord("bla");
-		assertToken(OPEN_CURL);
-		assertToken(CLOSE_CURL);
+		assertTokenWord("bla");
+		assertTokenWord("bla");
+		assertToken(Token::OPEN_CURL);
+		assertToken(Token::CLOSE_CURL);
 
 		destructTest();
 	}
@@ -195,29 +196,31 @@ SCENARIO("Lots of icons")
 	std::string	fileDest("testconfigs/icons_");
 	int i = 0;
 
+	// icons_0
 	WHEN(getFileDest(fileDest, i)) {
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 5);
-		assertToken(OPEN_CURL);
-		assertToken(CLOSE_CURL);
-		assertToken(SEMICOLON);
-		assertWord("word");
-		assertToken(SEMICOLON);
+		assertToken(Token::OPEN_CURL);
+		assertToken(Token::CLOSE_CURL);
+		assertToken(Token::SEMICOLON);
+		assertTokenWord("word");
+		assertToken(Token::SEMICOLON);
 		destructTest();
 	}
 
 	i++;
+	// icons_1
 	WHEN(getFileDest(fileDest, i)) {
 		initTest(fileDest, i);
 
 		REQUIRE(tokens.size() == 6);
-		assertToken(OPEN_CURL);
-		assertToken(SEMICOLON);
-		assertToken(CLOSE_CURL);
-		assertToken(SEMICOLON);
-		assertToken(OPEN_CURL);
-		assertToken(CLOSE_CURL);
+		assertToken(Token::OPEN_CURL);
+		assertToken(Token::SEMICOLON);
+		assertToken(Token::CLOSE_CURL);
+		assertToken(Token::SEMICOLON);
+		assertToken(Token::OPEN_CURL);
+		assertToken(Token::CLOSE_CURL);
 		
 		destructTest();
 	}

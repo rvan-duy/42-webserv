@@ -23,7 +23,7 @@ std::vector<Token>	Lexer::tokenizeFile(std::ifstream &file) {
 void	Lexer::parseLine(std::vector<Token> *tokens, std::string &line) {
 	std::string::iterator it = line.begin();
 	std::string word("");
-	ETokenType	type;
+	Token::ETokenType	type;
 
 	while (it != line.end()) {
 		while (isspace(*it))
@@ -32,7 +32,7 @@ void	Lexer::parseLine(std::vector<Token> *tokens, std::string &line) {
 			return ;
 		}
 		type = getType(*it);
-		if (type == WORD) {
+		if (type == Token::WORD) {
 			word = parseWord(it);
 			tokens->push_back(Token(word));
 			it += word.length();
@@ -54,17 +54,17 @@ std::string	Lexer::parseWord(std::string::iterator it) {
 	return word;
 }
 
-ETokenType	Lexer::getType(int c) {
+Token::ETokenType	Lexer::getType(int c) {
 	switch (c)
 	{
 	case ';':
-		return SEMICOLON;
+		return Token::SEMICOLON;
 	case '{':
-		return OPEN_CURL;
+		return Token::OPEN_CURL;
 	case '}':
-		return CLOSE_CURL;
+		return Token::CLOSE_CURL;
 	default:
-		return WORD;
+		return Token::WORD;
 	}
 }
 
