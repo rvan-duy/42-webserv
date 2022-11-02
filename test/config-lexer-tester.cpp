@@ -30,7 +30,7 @@ SCENARIO("Name here")
 */
 std::vector<Token> tokens;
 std::vector<Token>::iterator it;
-std::ifstream file;
+int configTestN = 0;
 
 /**
  * Token assertions
@@ -52,9 +52,8 @@ void	assertTokenWord(std::string expected)
 /**
  * Test init & destruct functions
 */
-int openFile(std::string path)
+static int openFile(std::ifstream &file, std::string path)
 {
-	file.close();
 	file.open(path);
 	if (!file.is_open())
 	{
@@ -66,29 +65,32 @@ int openFile(std::string path)
 
 // Used to generate file urls with testcase added to the back
 // Example: testconfigs/key_value_[testnumber]
-std::string	getFileDest(std::string &baseUrl, int currentTest) {
+static std::string	getFileDest(std::string &baseUrl, int currentTest) {
 	std::string fullDest(baseUrl);
 	return fullDest.append(std::to_string(currentTest));
 }
 
-void	initTest(std::string baseUrl, int i) {
-	std::string fullUrl = getFileDest(baseUrl, i);
-	if (openFile(fullUrl)) {
-		WARN("Error opening file");
+void	initTest(std::string baseUrl, int configTestN) {
+	// Open file
+	std::ifstream file;
+	std::string fullUrl = getFileDest(baseUrl, configTestN);
+	if (openFile(file, fullUrl)) {
 		return ;
 	}
+	// Lex file
 	tokens = Lexer::tokenizeFile(file);
+	file.close();
 	it = tokens.begin();
 }
 
 void	destructTest() {
 	REQUIRE(it == tokens.end());
 	tokens.clear();
-	file.close();
+	configTestN += 1;
 }
 
 /**************************************************/
-/* TEST					                           */
+/* TESTS					                      */
 /**************************************************/
 SCENARIO("Incorrect lexing input")
 {
@@ -96,9 +98,8 @@ SCENARIO("Incorrect lexing input")
 	{
 		THEN("Lexer should return empty tokenlist")
 		{
-			file.close();
 			// simulate error
-			REQUIRE(file.is_open() == false);
+			std::ifstream file;
 			tokens = Lexer::tokenizeFile(file);
 			REQUIRE(tokens.size() == 0);
 			destructTest();
@@ -109,31 +110,29 @@ SCENARIO("Incorrect lexing input")
 SCENARIO("(Semi-) empty config files")
 {
 	std::string	fileDest("testconfigs/empty_");
-	int i = 0;
+	configTestN = 0;
 
 	// empty_0
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 0);
 
 		destructTest();
 	}
 	
-	i += 1;
 	// empty_1
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 0);
 
 		destructTest();
 	}
 
-	i += 1;
 	// empty_2
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 2);
 		assertTokenWord("test");
@@ -146,11 +145,11 @@ SCENARIO("(Semi-) empty config files")
 SCENARIO("Simple key value pairs")
 {
 	std::string	fileDest("testconfigs/key_value_");
-	int i = 0;
+	configTestN = 0;
 
 	// key_value_0
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 3);
 		assertTokenWord("test");
@@ -160,10 +159,9 @@ SCENARIO("Simple key value pairs")
 		destructTest();
 	}
 	
-	i += 1;
 	// key_value_1
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 6);
 		assertTokenWord("test");
@@ -176,10 +174,9 @@ SCENARIO("Simple key value pairs")
 		destructTest();
 	}
 
-	i += 1;
 	// key_value_2
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 4);
 		assertTokenWord("bla");
@@ -194,11 +191,11 @@ SCENARIO("Simple key value pairs")
 SCENARIO("Lots of icons")
 {
 	std::string	fileDest("testconfigs/icons_");
-	int i = 0;
+	configTestN = 0;
 
 	// icons_0
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 5);
 		assertToken(Token::OPEN_CURL);
@@ -209,10 +206,9 @@ SCENARIO("Lots of icons")
 		destructTest();
 	}
 
-	i++;
 	// icons_1
-	WHEN(getFileDest(fileDest, i)) {
-		initTest(fileDest, i);
+	WHEN(getFileDest(fileDest, configTestN)) {
+		initTest(fileDest, configTestN);
 
 		REQUIRE(tokens.size() == 6);
 		assertToken(Token::OPEN_CURL);

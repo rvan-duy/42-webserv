@@ -1,6 +1,5 @@
 #include <Server.hpp>
 
-
 /**
  * Constructors / destructors
 */
@@ -81,6 +80,10 @@ bool	Server::hasMaxBody() const {
 
 bool	Server::hasErrorPage() const {
 	return (_defaultErrorPage != NULL);
+}
+
+bool	Server::hasRoutes() const {
+	return (_routes.size() != 0);
 }
 
 /**

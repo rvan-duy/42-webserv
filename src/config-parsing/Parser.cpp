@@ -25,14 +25,15 @@ int		Parser::parseTokens(std::vector<Server> *servers, std::vector<Token>& token
 		}
 		it++;
 		// If this is correct, start parsing server configuration
-		parseServerData(servers, &it, tokens.end());
+		if (parseServerData(servers, &it, tokens.end()) == 1)
+			return 1;
 	}
 	return 0;
 }
 
 int		Parser::parseServerData(std::vector<Server> *servers, std::vector<Token>::iterator *it, std::vector<Token>::iterator const& end) {
-	Server				newServer;
 	Token::ETokenType	currentType;
+	Server				newServer;
 
 	while (const_cast<std::vector<Token>::iterator&>(*it) != end) {
 		currentType = (*it)->getType();
@@ -57,5 +58,7 @@ int		Parser::parseServerData(std::vector<Server> *servers, std::vector<Token>::i
 }
 
 int		Parser::parseServerWord(Server *server, std::vector<Token>::iterator *it, std::vector<Token>::iterator const& end) {
-
+	while (const_cast<std::vector<Token>::iterator&>(*it) != end) {
+		
+	}
 }

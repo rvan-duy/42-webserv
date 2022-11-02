@@ -7,6 +7,9 @@ Logger* Logger::_logger = NULL;
  * Constructors / destructors
 */
 Logger::Logger() {
+	if (!LOG_ENABLED) {
+		return ;
+	}
 	std::string filePath(LOG_DEST);
 	filePath.append("log.log");
 	_file.open(filePath.c_str(), std::ios::out | std::ios::app);

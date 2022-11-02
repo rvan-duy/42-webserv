@@ -1,6 +1,6 @@
 NAME			:= tester
 CC				:= c++
-CFLAGS			:= -Wall -Wextra -I$(INCL_DIR) -g3 -std=c++98 -pedantic -fsanitize=address
+CFLAGS			:= -Wall -Wextra -g3 -std=c++98 -pedantic -fsanitize=address -DLOG_ENABLED=$(LOG_ENABLED)
 ################################################################################
 OBJ_DIR			:= ../obj
 INCL_DIR		:= ../include
@@ -12,7 +12,7 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJS) $(CFLAGS) -I$(INCL_DIR) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@$(CC) $(CFLAGS) -I$(INCL_DIR) -c $< -o $@
@@ -26,5 +26,5 @@ clean:
 	@rm -f $(NAME)
 
 echo:
-	@echo $(OBJS)
+	@echo $(LOG_ENABLED)
 	

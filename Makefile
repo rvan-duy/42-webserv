@@ -1,7 +1,7 @@
 NAME				:=	webserv
 CC					:=	c++
-CFLAGS				:=	-Wall -Wextra -std=c++98 -pedantic
-
+export LOG_ENABLED	:=	1
+CFLAGS				:=	-Wall -Wextra -std=c++98 -pedantic -DLOG_ENABLED=$(LOG_ENABLED)
 ################################################################################
 # EXTRA FLAGS
 ifdef PROD
@@ -51,7 +51,7 @@ all: $(NAME)
 
 $(NAME):	$(OBJ_DIR) $(LOG_DIR) $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJS) -DLOG_ENABLED=$(LOG_ENABLED) $(CFLAGS) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@$(CC) $(CFLAGS) -c $< -I$(INCL_DIR) -o $@
@@ -79,10 +79,11 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	@mkdir -p $(LOG_DIR)
 
-compiletest: $(OBJ_DIR) $(OBJS)
-	@$(MAKE) -C $(TEST_DIR)
+compiletest: fclean $(OBJ_DIR) $(OBJS)
+	@export LOG_ENABLED=0 && $(MAKE) -C $(TEST_DIR)
 
-runtest: $(OBJ_DIR) $(OBJS)
+runtest: export LOG_ENABLED=0
+runtest: fclean $(OBJ_DIR) $(OBJS)
 	@$(MAKE) -C $(TEST_DIR) run
 
 deletelogs:
@@ -90,7 +91,10 @@ deletelogs:
 	@mkdir $(LOG_DIR)
 	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)"
 
+# For debugging makefile
 echo:
-	@echo $(OBJS)
+	@echo $(LOG_ENABLED)
+	@$(MAKE) -C $(TEST_DIR) echo
+
 
 .PHONY: all clean fclean re lldb

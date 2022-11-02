@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 #include <Route.hpp>
@@ -41,6 +42,7 @@ class Server {
 		bool	hasPort() const;
 		bool	hasMaxBody() const;
 		bool	hasErrorPage() const;
+		bool	hasRoutes() const;
 
 		//  Getters
 		std::string		&getServerName() const;

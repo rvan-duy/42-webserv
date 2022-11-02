@@ -13,6 +13,10 @@ enum ELogLevel {
 	ERROR
 };
 
+#ifndef LOG_ENABLED
+# define LOG_ENABLED 1
+#endif
+
 /**
  * Singleton logger
  * Will automatically open file in LOG_DEST and append to it
