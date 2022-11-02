@@ -1,7 +1,7 @@
 NAME				:=	webserv
 CC					:=	c++
 export LOG_ENABLED	:=	1
-CFLAGS				:=	-Wall -Wextra -std=c++98 -pedantic -DLOG_ENABLED=$(LOG_ENABLED)
+CFLAGS				=	-Wall -Wextra -std=c++98 -pedantic -D LOG_ENABLED=$(LOG_ENABLED)
 ################################################################################
 # EXTRA FLAGS
 ifdef PROD
@@ -51,12 +51,18 @@ all: $(NAME)
 
 $(NAME):	$(OBJ_DIR) $(LOG_DIR) $(OBJS)
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
-	$(CC) $(OBJS) -DLOG_ENABLED=$(LOG_ENABLED) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(notdir %.cpp)
 	@$(CC) $(CFLAGS) -c $< -I$(INCL_DIR) -o $@
 	@printf "$(LIGHT_CYAN)$(BOLD)make$(RESET)   [$(LIGHT_GREEN)$(NAME)$(RESET)] : "
 	@printf "$(notdir $(basename $@)) created\n"
+
+# TODO:
+prod: export PROD=1
+prod: $(NAME)
+	@echo $(CFLAGS)
+	./$(NAME) $(ARGS)
 
 run: $(NAME)
 	./$(NAME) $(ARGS)
@@ -79,8 +85,9 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	@mkdir -p $(LOG_DIR)
 
+compiletest: export LOG_ENABLED=0
 compiletest: fclean $(OBJ_DIR) $(OBJS)
-	@export LOG_ENABLED=0 && $(MAKE) -C $(TEST_DIR)
+	@$(MAKE) -C $(TEST_DIR)
 
 runtest: export LOG_ENABLED=0
 runtest: fclean $(OBJ_DIR) $(OBJS)
@@ -92,8 +99,9 @@ deletelogs:
 	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)"
 
 # For debugging makefile
+echo: export LOG_ENABLED=0
 echo:
-	@echo $(LOG_ENABLED)
+	@echo $(CFLAGS)
 	@$(MAKE) -C $(TEST_DIR) echo
 
 

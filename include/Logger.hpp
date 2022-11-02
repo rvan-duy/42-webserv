@@ -14,7 +14,7 @@ enum ELogLevel {
 };
 
 #ifndef LOG_ENABLED
-# define LOG_ENABLED 1
+# define LOG_ENABLED 3
 #endif
 
 /**

@@ -1,6 +1,6 @@
 NAME			:= tester
 CC				:= c++
-CFLAGS			:= -Wall -Wextra -g3 -std=c++98 -pedantic -fsanitize=address -DLOG_ENABLED=$(LOG_ENABLED)
+CFLAGS			:= -Wall -Wextra -g3 -std=c++98 -pedantic -fsanitize=address -D LOG_ENABLED=$(LOG_ENABLED)
 ################################################################################
 OBJ_DIR			:= ../obj
 INCL_DIR		:= ../include
@@ -26,5 +26,5 @@ clean:
 	@rm -f $(NAME)
 
 echo:
-	@echo $(LOG_ENABLED)
+	@echo make: $(CFLAGS)
 	

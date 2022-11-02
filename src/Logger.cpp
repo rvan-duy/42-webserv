@@ -72,7 +72,7 @@ std::string	Logger::getPid() const {
 }
 
 void Logger::logToFile(std::string const& levelMsg, std::string const& message) {
-	if (!isFileOpen()) {
+	if (!isFileOpen() || LOG_ENABLED == 0) {
 		return ;
 	}
 	std::string fullMsg = getTimeStamp();
@@ -83,6 +83,9 @@ void Logger::logToFile(std::string const& levelMsg, std::string const& message) 
 }
 
 void Logger::logToConsole(std::string const& levelMsg, ELogLevel level, std::string const& message) {
+	if (LOG_ENABLED == 0) {
+		return ;
+	}
 	std::string fullMsg = getTimeStamp();
 	fullMsg.append(getPid());
 	fullMsg.append(levelMsg);
