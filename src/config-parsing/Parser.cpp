@@ -3,30 +3,39 @@
 /**
  * Constructors / destructors
 */
-Parser::Parser() {}
+Parser::Parser(std::vector<Token> tokens): _tokens(tokens), _it(tokens.begin()) {}
 
 Parser::~Parser() {}
 
 /**
  * Parsing functions
 */
-int		Parser::parseTokens(std::vector<Server> *servers, std::vector<Token>& tokens) {
-	std::vector<Token>::iterator it = tokens.begin();
+int		Parser::parseTokens(std::vector<Server> *servers) {
+	Logger& logger = Logger::getInstance();
+	if (servers == NULL) {
+		logger.error("Incorrect input in token parser");
+		return 1;
+	}
+	logger.log("Starting parsing tokens");
 
-	while (it != tokens.end()) {
+	while (_it != tokens.end()) {
 		// Server block always starts with server word
-		if (!it->isWordEqualTo("server")) {
+		if (!_it->isWordEqualTo("server")) {
+			servers->clear();
 			return 1;
 		}
-		it++;
+		_it++;
 		// Followed by OPEN_CURL
-		if (!it->isType(Token::OPEN_CURL)) {
+		if (!_it->isType(Token::OPEN_CURL)) {
+			servers->clear();
 			return 1;
 		}
-		it++;
+		_it++;
 		// If this is correct, start parsing server configuration
-		if (parseServerData(servers, &it, tokens.end()) == 1)
+		if (parseServerData(servers, tokens.end()) == 1) {
+			servers->clear();
 			return 1;
+		}
 	}
 	return 0;
 }
@@ -48,13 +57,13 @@ int		Parser::parseServerData(std::vector<Server> *servers, std::vector<Token>::i
 			case Token::CLOSE_CURL:
 				// Ends server block
 				*it += 1;
-				break;
+				servers->push_back(newServer);
+				return 0;
 			default:
 				parseServerWord(&newServer, it, end);
 		}
 	}
-	servers->push_back(newServer);
-	return 0;
+	return 1;
 }
 
 int		Parser::parseServerWord(Server *server, std::vector<Token>::iterator *it, std::vector<Token>::iterator const& end) {

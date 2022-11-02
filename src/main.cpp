@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Logger.hpp>
 #include <Lexer.hpp>
+#include <Parser.hpp>
 #include "Socket.hpp"
 
 #define SERVER_PORT 8080
@@ -16,20 +17,17 @@ int	parseConfigFile(std::string const& filePath) {
 	}
 	logger.log("Opened config file");
 
-  std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
-
+  	std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
+	std::vector<Server> servers;
+	if (Parser::parseTokens(&servers, tokens)) {
+		logger.error("Error parsing tokens from configfile");
+	}
+	logger.log("Tokens successfully parsed");
 	cFile.close();
 	return 0;
 }
 
-void	test() {
-	Token	token("test");
-
-	int i = token.isWordEqualTo("test");
-}
- 
 int main(int argc, char **argv) {
-	test();
   Logger& logger = Logger::getInstance();
   if (argc != 2) {
     logger.error("Usage: ./webserver [path_to_configfile]");
