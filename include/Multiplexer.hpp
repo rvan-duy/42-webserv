@@ -3,21 +3,9 @@
 
 #include <poll.h>
 
+#include <vector>
+
 #include "Socket.hpp"
-
-/***************************************************************************************/
-/* file_descriptor struct                                                              */
-/* - The file_descriptor structure is used to store file descriptor information for    */
-/*   the poll() function.                                                              */
-/* - it can be cast to a pollfd structure.                                             */
-/***************************************************************************************/
-
-typedef struct file_descriptor {
-  int     fd;       // file descriptor
-  short   events;   // requested events
-  short   revents;  // returned events
-  Socket *socket;   // socket
-} fds;
 
 /****************************************************************************************/
 /* The Multiplexer Class                                                                */
@@ -30,8 +18,7 @@ class Multiplexer {
   ~Multiplexer();
 
   // Methods
-  void add_socket(Socket *socket, const short events);
-  void remove_socket(Socket *socket);
+  void add_server(const int fd, const short events);
   void wait_for_events(const int timeout = -1);
 
   // Getters
@@ -39,8 +26,15 @@ class Multiplexer {
   int get_number_of_fds() const;
 
  private:
-  fds *_fds;            // file descriptors
-  int  _number_of_fds;  // number of file descriptors
+  // maybe rename _fds to _clients
+  std::vector<pollfd> _fds;              // vector of fds to poll
+  std::vector<int>    _servers;          // vector of server fds
+  char                _buffer[1000000];  // buffer for reading data
+  bool                _end_server;       // flag to end server
+
+  // Methods
+  int  _poll_sockets(const int timeout);
+  void _get_event(const pollfd &fd);
 };
 
 #endif  // MULTIPLEXER_HPP

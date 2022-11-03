@@ -3,10 +3,10 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <sys/fcntl.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -37,7 +37,7 @@
 
 class Socket {
  public:
-  Socket(const int domain, const int type, const int protocol, const int port);
+  Socket(const int domain, const int type, const int port);
   ~Socket();
 
   // Methods
@@ -52,16 +52,11 @@ class Socket {
   int get_fd() const;
 
  private:
-  int                _fd;             // file descriptor for socket
-  char               _buffer[10000];  // buffer for reading data from socket
-  int                _accepted;       // file descriptor for accepted connection, -1 if no connection
-  const int          _port;           // port number of socket
-  struct sockaddr_in _servaddr;       // socket address structure
-                                      /*__uint8_t       sin_len;
-                                        sa_family_t     sin_family;
-                                        in_port_t       sin_port;
-                                        struct  in_addr sin_addr;
-                                        char            sin_zero[8]; */
+  int                 _fd;             // file descriptor for socket
+  char                _buffer[10000];  // buffer for reading data from socket
+  int                 _accepted;       // file descriptor for accepted connection, -1 if no connection
+  const int           _port;           // port number of socket
+  struct sockaddr_in6 _servaddr;       // server address
 };
 
 #endif  // SOCKET_HPP

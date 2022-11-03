@@ -6,14 +6,11 @@ int main() {
   {
     try {
       Multiplexer multiplexer;
-      Socket      socket1(AF_INET, SOCK_STREAM, 0, SERVER_PORT);
+      Socket      socket(AF_INET6, SOCK_STREAM, SERVER_PORT);
 
-      multiplexer.add_socket(&socket1, POLLIN);
-
+      socket.prepare();
+      multiplexer.add_server(socket.get_fd(), POLLIN);
       multiplexer.wait_for_events();
-
-      multiplexer.remove_socket(&socket1);
-
     } catch (std::exception &e) {
       std::cerr << e.what() << std::endl;
     }

@@ -6,18 +6,18 @@
  * Constructor for Socket class
  * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
  * @param type communication semantics (SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW)
- * @param protocol protocol to be used with the socket (0 for default)
  * @param port port number of socket (0 for random)
  */
-Socket::Socket(const int domain, const int type, const int protocol, const int port) : _accepted(-1), _port(port) {
+Socket::Socket(const int domain, const int type, const int port) : _accepted(-1), _port(port) {
   Logger &logger = Logger::getInstance();
+  int     on     = 1;  // used for setsockopt() and ioctl() calls
 
   /**************************************************/
   /* Create an socket to receive incoming           */
   /* connections on                                 */
   /**************************************************/
 
-  _fd = socket(domain, type, protocol);
+  _fd = socket(domain, type, 0);
   if (_fd == -1) {
     logger.error("Failed to create socket: " + std::string(strerror(errno)));
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
@@ -27,8 +27,7 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /* Set options on socket to reuse address         */
   /**************************************************/
 
-  int opt = 1;
-  if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+  if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
     logger.error("Failed to set socket options: " + std::string(strerror(errno)));
     close(_fd);
     throw std::runtime_error("Socket options failed: " + std::string(strerror(errno)));
@@ -38,12 +37,9 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /* Set socket to be nonblocking. All of the sockets for      */
   /* the incoming connections will also be nonblocking since   */
   /* they will inherit that state from the listening socket.   */
-  /*                                                           */
-  /* poll() needs this to be nonblocking so it can loop        */
-  /* through all of the sockets and check for events.          */
   /*************************************************************/
 
-  if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1) {
+  if (ioctl(_fd, FIONBIO, (char *)&on) == -1) {
     logger.error("Failed to set socket to nonblocking: " + std::string(strerror(errno)));
     close(_fd);
     throw std::runtime_error("Socket nonblocking failed: " + std::string(strerror(errno)));
@@ -55,9 +51,9 @@ Socket::Socket(const int domain, const int type, const int protocol, const int p
   /**************************************************/
 
   memset(&_servaddr, 0, sizeof(_servaddr));
-  _servaddr.sin_family      = domain;
-  _servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  _servaddr.sin_port        = htons(_port);
+  _servaddr.sin6_family = domain;
+  memcpy(&_servaddr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
+  _servaddr.sin6_port = htons(_port);
 
   /**************************************************/
   /* Bind the address and port number to the socket */
@@ -89,12 +85,25 @@ Socket::~Socket() {
  * @param backlog number of connections allowed on the incoming queue
  */
 void Socket::prepare(const int backlog) const {
+  Logger &logger = Logger::getInstance();
+
   if (listen(_fd, backlog) == -1) {
+    logger.error("Failed to prepare socket: " + std::string(strerror(errno)));
+    close(_fd);
     throw std::runtime_error("Socket listen failed: " + std::string(strerror(errno)));
   }
 }
 
-// Poll is used to check if blocking functions can be called without actually blocking the thread
+int Socket::get_fd() const {
+  return _fd;
+}
+
+/**************************************************/
+/* LEGACY CODE                                    */
+/*                                                */
+/* This code is not used anymore, but is kept     */
+/* here for reference                             */
+/**************************************************/
 
 /*
  * Accept an incoming connection
@@ -166,17 +175,6 @@ void Socket::accept_connection() {
 
   return;
 }
-
-int Socket::get_fd() const {
-  return _fd;
-}
-
-/**************************************************/
-/* LEGACY CODE                                    */
-/*                                                */
-/* This code is not used anymore, but is kept     */
-/* here for reference                             */
-/**************************************************/
 
 /*
  * Wait for incoming connections
