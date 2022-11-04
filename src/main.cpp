@@ -9,8 +9,8 @@ int main() {
       Socket      socket(AF_INET6, SOCK_STREAM, SERVER_PORT);
 
       socket.prepare();
-      multiplexer.add_server(socket.get_fd(), POLLIN);
-      multiplexer.wait_for_events();
+      multiplexer.addServer(socket.getFd(), POLLIN);
+      multiplexer.waitForEvents();
     } catch (std::exception &e) {
       std::cerr << e.what() << std::endl;
     }

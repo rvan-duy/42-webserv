@@ -3,6 +3,7 @@
 
 #include <poll.h>
 
+#include <iterator>
 #include <vector>
 
 #include "Socket.hpp"
@@ -18,23 +19,25 @@ class Multiplexer {
   ~Multiplexer();
 
   // Methods
-  void add_server(const int fd, const short events);
-  void wait_for_events(const int timeout = -1);
+  void addServer(const int fd, const short events);
+  void waitForEvents(const int timeout = -1);
 
   // Getters
-  int get_fd(const int index) const;
-  int get_number_of_fds() const;
+  int getFd(const int index) const;
+  int getNumberOfFds() const;
 
  private:
-  // maybe rename _fds to _clients
-  std::vector<pollfd> _fds;              // vector of fds to poll
+  std::vector<pollfd> _clients;          // vector of fds to poll
   std::vector<int>    _servers;          // vector of server fds
   char                _buffer[1000000];  // buffer for reading data
-  bool                _end_server;       // flag to end server
+  bool                _endServer;        // flag to end server
 
   // Methods
-  int  _poll_sockets(const int timeout);
-  void _get_event(const pollfd &fd);
+  int         _pollSockets(const int timeout);
+  void        _addClient(const int socket);
+  void        _removeClient(const int socket);
+  std::string _readData(const int socket);
+  int         _getEvent(const pollfd &fd);
 };
 
 #endif  // MULTIPLEXER_HPP

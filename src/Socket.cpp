@@ -94,7 +94,7 @@ void Socket::prepare(const int backlog) const {
   }
 }
 
-int Socket::get_fd() const {
+int Socket::getFd() const {
   return _fd;
 }
 
@@ -272,3 +272,7 @@ void Socket::wait_for_connections() {
     }
   }
 }
+
+/**************************************************/
+/* END OF LEGACY CODE                             */
+/**************************************************/

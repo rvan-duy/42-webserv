@@ -42,14 +42,14 @@ class Socket {
 
   // Methods
   void prepare(const int backlog = 10) const;
-  void accept_connection();
   void send_response(const HttpResponse &response) const;
 
   // Legacy methods
+  void accept_connection();
   void wait_for_connections();
 
   // Getters
-  int get_fd() const;
+  int getFd() const;
 
  private:
   int                 _fd;             // file descriptor for socket
