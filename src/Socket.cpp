@@ -251,10 +251,10 @@ void Socket::wait_for_connections() {
       HttpResponse response;
 
       request.parse(buffer);
-      response.create_response(request, "root",
+      response.createResponse(request, "root",
                                "index.html");  // TODO: make root configurable, not hardcoded, same for index
 
-      std::string response_str = response.to_str();
+      std::string response_str = response.toStr();
 
       if (write(new_fd, response_str.c_str(), response_str.length()) == -1) {
         logger.error("Socket write failed: " + std::string(strerror(errno)));

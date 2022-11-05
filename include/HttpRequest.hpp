@@ -15,14 +15,14 @@ class HttpRequest : public HttpMessage {
   void parse(const std::string &message);
 
   // Getters
-  HttpMethod  get_method() const;
-  std::string get_uri() const;
+  HttpMethod  getMethod() const;
+  std::string getUri() const;
 
  private:
   HttpMethod  _method;  // HTTP method of request
   std::string _uri;     // URI of request
 
-  HttpMethod  _parse_method(const std::string &method);
+  HttpMethod  _parseMethod(const std::string &method);
 };
 
 #endif  // HTTP_REQUEST_HPP

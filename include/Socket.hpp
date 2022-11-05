@@ -42,7 +42,7 @@ class Socket {
 
   // Methods
   void prepare(const int backlog = 10) const;
-  void send_response(const HttpResponse &response) const;
+  void sendResponse(const HttpResponse &response) const;
 
   // Legacy methods
   void accept_connection();
