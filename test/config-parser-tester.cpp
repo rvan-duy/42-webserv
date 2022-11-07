@@ -5,7 +5,6 @@
 #include <Lexer.hpp>
 
 std::vector<Server>	servers;
-int configTest = 0;
 
 /**
  * Test init & destruct functions
@@ -38,35 +37,21 @@ static int initConfigTest(std::string baseUrl, int i) {
 	// Lex file
 	std::vector<Token> tokens = Lexer::tokenizeFile(file);
 	file.close();
-	return Parser::parseTokens(&servers, tokens);
+	Parser	parser(tokens);
+	return parser.parseTokens();
 }
 
 static void	destructConfig() {
 	servers.clear();
-	configTest += 1;
 }
-
-/**
- * Matching functions
-*/
 
 /**************************************************/
 /* TESTS				                           */
 /**************************************************/
 
-SCENARIO("Wrong input") {
-	std::vector<Token> tokens;
-	WHEN("Null pointer for servers") {
-		THEN("Ret should be 1 without crashing") {
-			int ret = Parser::parseTokens(NULL, tokens);
-			REQUIRE(ret == 1);
-		}
-	}
-}
-
 SCENARIO("Empty files 'n shit") {
 	std::string	fileDest("testconfigs/empty_");
-	configTest = 0;
+	int configTest = 0;
 
 	// empty_0
 	WHEN(getFileDest(fileDest, configTest)) {
@@ -84,6 +69,7 @@ SCENARIO("Empty files 'n shit") {
 		REQUIRE(servers.size() == 0);
 		destructConfig();
 	}
+	configTest++;
 
 	// empty_2
 	WHEN(getFileDest(fileDest, configTest)) {
@@ -93,11 +79,29 @@ SCENARIO("Empty files 'n shit") {
 		destructConfig();
 	}
 	configTest++;
+
+	// empty_3
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 0);
+		REQUIRE(servers.size() == 0);
+		destructConfig();
+	}
+	configTest++;
+
+	// empty_4
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 0);
+		REQUIRE(servers.size() == 0);
+		destructConfig();
+	}
+	configTest++;
 }
 
 SCENARIO("Bad config files") {
 	std::string	fileDest("testconfigs/bad_");
-	configTest = 0;
+	int configTest = 0;
 	// bad_0
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
@@ -107,6 +111,7 @@ SCENARIO("Bad config files") {
 	}
 	configTest++;
 
+	// bad_1
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
 		REQUIRE(ret == 1);
@@ -115,6 +120,7 @@ SCENARIO("Bad config files") {
 	}
 	configTest++;
 
+	// bad_2
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
 		REQUIRE(ret == 1);
@@ -123,11 +129,37 @@ SCENARIO("Bad config files") {
 	}
 	configTest++;
 
+	// bad_3
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 1);
+		REQUIRE(servers.size() == 0);
+		destructConfig();
+	}
+	configTest++;
+
+	// bad_4
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 1);
+		REQUIRE(servers.size() == 0);
+		destructConfig();
+	}
+	configTest++;
+
+	// bad_5
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 1);
+		REQUIRE(servers.size() == 0);
+		destructConfig();
+	}
+	configTest++;
 }
 
 SCENARIO("Test config files") {
 	std::string	fileDest("testconfigs/parser_");
-	configTest = 0;
+	int configTest = 0;
 	// parser_0
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
@@ -142,7 +174,30 @@ SCENARIO("Test config files") {
 		destructConfig();
 	}
 	configTest++;
+
 	// parser_1
+	WHEN(getFileDest(fileDest, configTest)) {
+		int ret = initConfigTest(fileDest, configTest);
+		REQUIRE(ret == 0);
+		REQUIRE(servers.size() == 2);
+		REQUIRE_FALSE(servers[0].hasServerName());
+		REQUIRE_FALSE(servers[0].hasHost());
+		REQUIRE_FALSE(servers[0].hasPort());
+		REQUIRE_FALSE(servers[0].hasMaxBody());
+		REQUIRE_FALSE(servers[0].hasErrorPage());
+		REQUIRE_FALSE(servers[0].hasRoutes());
+
+		REQUIRE_FALSE(servers[1].hasServerName());
+		REQUIRE_FALSE(servers[1].hasHost());
+		REQUIRE_FALSE(servers[1].hasPort());
+		REQUIRE_FALSE(servers[1].hasMaxBody());
+		REQUIRE_FALSE(servers[1].hasErrorPage());
+		REQUIRE_FALSE(servers[1].hasRoutes());
+		destructConfig();
+	}
+	configTest++;
+
+	// parser_2
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
 		REQUIRE(ret == 0);

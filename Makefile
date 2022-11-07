@@ -35,7 +35,6 @@ export SRCS			:=	Socket.cpp \
 						Token.cpp \
 						Server.cpp \
 						Parser.cpp \
-						Route.cpp \
 						HttpResponse.cpp \
 						Logger.cpp
 

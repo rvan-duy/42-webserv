@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <Route.hpp>
 #include <Logger.hpp>
 
 /*
@@ -31,6 +30,26 @@ You must provide some configuration files and default basic files to test and de
 
 #define MAX_PORT 65535
 
+enum EHttpMethods {
+	GET,
+	POST,
+	DELETE
+};
+
+struct Route {
+	std::string					_route;
+	std::vector<EHttpMethods>	_allowedMethods;
+	std::string					_httpRedirection;
+	std::string					_searchDirectory;
+	std::string					_defaultFile;
+	bool						_directoryListing;
+};
+
+struct PageData {
+	int			statusCode;
+	std::string filePath;
+};
+
 class Server {
 	public:
 		Server();
@@ -45,24 +64,24 @@ class Server {
 		bool	hasRoutes() const;
 
 		//  Getters
-		std::string		&getServerName() const;
-		std::string		&getHost() const;
-		std::string		&getErrorPage() const;
-		unsigned int	&getMaxBody() const;
-		int				&getPort() const;
+		std::vector<std::string>	getServerName() const;
+		PageData					&getHost() const;
+		PageData					&getErrorPage() const;
+		int 						getMaxBody() const;
+		int							getPort() const;
 
 		// Setters
-		void	setServerName(std::string const& value);
-		void	setHost(std::string const& value);
-		void	setErrorPage(std::string const& value);
+		int		setHost(int const& statusCode, std::string const& filePath);
+		int		setErrorPage(int const& statusCode, std::string const& filePath);
+		void	setServerName(std::vector<std::string> value);
 		int		setPort(int const& value);
 		int		setMaxBody(double const& value);
 
 	private:
-		std::string*		_serverName;
-		std::string*		_host;
-		int*				_port;
-		unsigned int* 		_maxBodySize;
-		std::string*		_defaultErrorPage;
-		std::vector<Route>	_routes;
+		PageData*					_pDefaultErrorPage;
+		PageData*					_pHost;
+		int							_port;
+		int				 			_maxBodySize;
+		std::vector<std::string>	_serverName;
+		std::vector<Route>			_routes;
 };

@@ -15,24 +15,27 @@ SCENARIO("Constructing a new server class") {
 		}
 
 		THEN("Server name can be set correctly") {
-			std::string serverName = "test";
+			std::vector<std::string> serverName;
+			serverName.push_back("test");
 			testServer.setServerName(serverName);
 			REQUIRE(testServer.hasServerName());
-			REQUIRE(serverName.compare(testServer.getServerName()) == 0);
+			REQUIRE(testServer.getServerName() == serverName);
 		}
 
 		THEN("Host can be set correctly") {
-			std::string host = "test";
-			testServer.setHost(host);
+			testServer.setHost(300, "bla");
+			PageData host = testServer.getHost();
 			REQUIRE(testServer.hasHost());
-			REQUIRE(host.compare(testServer.getHost()) == 0);
+			REQUIRE(host.statusCode == 300);
+			REQUIRE(host.filePath == "bla");
 		}
 
 		THEN("Error page can be set correctly") {
-			std::string errorPage = "test";
-			testServer.setErrorPage(errorPage);
+			testServer.setErrorPage(300, "bla");
+			PageData host = testServer.getErrorPage();
 			REQUIRE(testServer.hasErrorPage());
-			REQUIRE(errorPage.compare(testServer.getErrorPage()) == 0);
+			REQUIRE(host.statusCode == 300);
+			REQUIRE(host.filePath == "bla");
 		}
 
 		THEN("Port can be set correctly") {

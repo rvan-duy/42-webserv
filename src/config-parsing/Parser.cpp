@@ -1,73 +1,113 @@
 #include <Parser.hpp>
 
-/**
- * Constructors / destructors
-*/
-Parser::Parser(std::vector<Token> tokens): _tokens(tokens), _it(tokens.begin()) {}
+/**************************************************/
+/* General parser functions			 	          */
+/**************************************************/
+Parser::Parser(std::vector<Token>& tokens): _tokens(tokens), _it(_tokens.begin()) {}
 
 Parser::~Parser() {}
 
-/**
- * Parsing functions
-*/
-int		Parser::parseTokens(std::vector<Server> *servers) {
-	Logger& logger = Logger::getInstance();
-	if (servers == NULL) {
-		logger.error("Incorrect input in token parser");
+int		Parser::parseTokens() {
+	if (makeAst()) {
 		return 1;
 	}
-	logger.log("Starting parsing tokens");
+	// while (_it != _tokens.end()) {
+	// 	parseDataBlock(&blocks);
+	// 	_it++;
+	// }
+	return 0;
+}
 
-	while (_it != tokens.end()) {
-		// Server block always starts with server word
-		if (!_it->isWordEqualTo("server")) {
-			servers->clear();
-			return 1;
-		}
+/**************************************************/
+/* Making abstract syntax tree		 	          */
+/**************************************************/
+/**
+ * Looks ahead in tokens to see what kind of parsing is needed
+ * Different parsing method is used for open curl or semicolon
+ * 
+ * !!! Returns WORD in case no special char is found
+ * 	This is because both a WORD and no special char ends up in errors
+*/
+Token::ETokenType	Parser::lookAhead(std::vector<Token>::iterator it, std::vector<Token>::iterator const& end) {
+	while (it != end && it->isType(Token::WORD)) {
+		it++;
+	}
+	// TODO: Better error handling
+	if (it == end) {
+		return Token::WORD;
+	}
+	return it->getType();
+}
+
+/**
+ * Iterates over tokens until it encounters a special char
+ * Then returns all words from tokens it parsed
+ * !!! Doesn't do any error or end of vector checking
+*/
+std::vector<std::string>	Parser::parseUntilSpecialChar() {
+	std::vector<std::string>	line;
+
+	while (_it->isType(Token::WORD)) {
+		line.push_back(_it->getWord());
 		_it++;
-		// Followed by OPEN_CURL
-		if (!_it->isType(Token::OPEN_CURL)) {
-			servers->clear();
+	}
+	_it++;
+	return line;
+}
+
+/**
+ * A data block is a block that is opened and closed by curls
+*/
+int		Parser::parseDataBlock(std::vector<DataBlock> *pDest) {
+	Token::ETokenType currentType;
+	DataBlock	block;
+
+	block._name = parseUntilSpecialChar();
+	while (_it != _tokens.end()) {
+		currentType = lookAhead(_it, _tokens.end());
+
+		if (currentType == Token::WORD) {
 			return 1;
+		} 
+		else if (currentType == Token::SEMICOLON) {
+			block._dataLines.push_back(parseUntilSpecialChar());
+		} 
+		else if (currentType == Token::OPEN_CURL) {
+			if (parseDataBlock(&block._blocks)) {
+				return 1;
+			}
 		}
-		_it++;
-		// If this is correct, start parsing server configuration
-		if (parseServerData(servers, tokens.end()) == 1) {
-			servers->clear();
+		else if (currentType == Token::CLOSE_CURL) {
+			pDest->push_back(block);
+			_it++;
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int	Parser::makeAst() {
+	Token::ETokenType currentType;
+
+	while (_it != _tokens.end()) {
+		currentType = lookAhead(_it, _tokens.end());
+		if (currentType == Token::SEMICOLON) {
+			_tree._dataLines.push_back(parseUntilSpecialChar());
+		} else if (currentType == Token::OPEN_CURL) {
+			if (parseDataBlock(&_tree._blocks)) {
+				return 1;
+			}
+		} else {
 			return 1;
 		}
 	}
 	return 0;
 }
 
-int		Parser::parseServerData(std::vector<Server> *servers, std::vector<Token>::iterator *it, std::vector<Token>::iterator const& end) {
-	Token::ETokenType	currentType;
-	Server				newServer;
+/**************************************************/
+/* Parsing abstract syntax tree		 	          */
+/**************************************************/
 
-	while (const_cast<std::vector<Token>::iterator&>(*it) != end) {
-		currentType = (*it)->getType();
-		switch (currentType) {
-			case Token::OPEN_CURL:
-				// Can't have another open curl
-				return 1;
-			case Token::SEMICOLON:
-				// Skip random semicolons
-				*it += 1;
-				continue;
-			case Token::CLOSE_CURL:
-				// Ends server block
-				*it += 1;
-				servers->push_back(newServer);
-				return 0;
-			default:
-				parseServerWord(&newServer, it, end);
-		}
-	}
-	return 1;
-}
-
-int		Parser::parseServerWord(Server *server, std::vector<Token>::iterator *it, std::vector<Token>::iterator const& end) {
-	while (const_cast<std::vector<Token>::iterator&>(*it) != end) {
-		
-	}
+int	Parser::parseAst() {
+	return 0;
 }
