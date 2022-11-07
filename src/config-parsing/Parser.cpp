@@ -3,6 +3,7 @@
 /**************************************************/
 /* General parser functions			 	          */
 /**************************************************/
+
 Parser::Parser(std::vector<Token>& tokens): _tokens(tokens), _it(_tokens.begin()) {}
 
 Parser::~Parser() {}
@@ -106,9 +107,22 @@ int	Parser::makeAst() {
 /* Parsing abstract syntax tree		 	          */
 /**************************************************/
 
+t_comp Parser::parserFuncTable[3] = {
+	{"listen", &Parser::parsePort},
+	{"serverName", &Parser::parsePort},
+	{"errorPage", &Parser::parsePort},
+};
+
+void	Parser::parsePort(Server *dest, t_dataLine line) {
+	// Loop through parserfunctable
+}
+
 /* Converts datablock into server class */
-Server	convertBlockToServer(DataBlock block) {
+Server	Parser::convertBlockToServer(DataBlock block) {
+
 	Server	server;
+	std::vector<t_dataLine >::iterator it = block._dataLines.begin();
+
 
 	return server;
 }

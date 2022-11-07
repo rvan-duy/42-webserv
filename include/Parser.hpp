@@ -1,11 +1,22 @@
 #pragma once
 #include <Token.hpp>
+#include <array>
 #include <Server.hpp>
 #include <string>
 #include <vector>
 #include <map>
 #include <Logger.hpp>
 
+class Parser;
+typedef void	(Parser::*ParserFunc)(Server *dest, std::vector<std::string> dataLine);
+
+typedef struct s_comp
+{
+    std::string	key;
+    ParserFunc 	func;
+}	t_comp;
+
+typedef std::vector<std::string> t_dataLine;
 /*
 	Example datablock:
 	server {
@@ -14,18 +25,18 @@
 */
 struct DataBlock {
 	// Name of datablock (positioned before the open_curl)
-	std::vector<std::string>				_name;
+	std::vector<std::string>	_name;
 	// Nested blocks with brackets
-	std::vector<DataBlock>					_blocks;
+	std::vector<DataBlock>		_blocks;
 	// Semi-colon ended lines in config file
-	std::vector<std::vector<std::string> >	_dataLines;
+	std::vector<t_dataLine>		_dataLines;
 };
 
 struct AbstractSyntaxTree {
 	// Server blocks opened and closed with curls
-	std::vector<DataBlock>					_blocks;	
+	std::vector<DataBlock>		_blocks;	
 	// Random lines with config info
-	std::vector<std::vector<std::string> >	_dataLines;
+	std::vector<t_dataLine>		_dataLines;
 };
 
 /**
@@ -43,11 +54,16 @@ class Parser {
 		int							parseDataBlock(std::vector<DataBlock> *pDest);
 		int							makeAst();
 
-
+		t_comp	*generateParserFuncTable();
 		void	parseAst(std::vector<Server>* pServers);
+		void	parsePort(Server *dest, t_dataLine line);
+		Server	convertBlockToServer(DataBlock block);
 
+		/* table with key value pairs for parsing AST */
+		static t_comp	parserFuncTable[];
 
 		std::vector<Token>				_tokens;
 		AbstractSyntaxTree				_tree;
 		std::vector<Token>::iterator	_it;
+
 };
