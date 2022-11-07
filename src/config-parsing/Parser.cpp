@@ -7,14 +7,12 @@ Parser::Parser(std::vector<Token>& tokens): _tokens(tokens), _it(_tokens.begin()
 
 Parser::~Parser() {}
 
-int		Parser::parseTokens() {
+int		Parser::parseTokens(std::vector<Server>* pServers) {
+	/* First transform tokens into abstract syntax tree*/
 	if (makeAst()) {
 		return 1;
 	}
-	// while (_it != _tokens.end()) {
-	// 	parseDataBlock(&blocks);
-	// 	_it++;
-	// }
+	parseAst(pServers);
 	return 0;
 }
 
@@ -108,6 +106,21 @@ int	Parser::makeAst() {
 /* Parsing abstract syntax tree		 	          */
 /**************************************************/
 
-int	Parser::parseAst() {
-	return 0;
+/* Converts datablock into server class */
+Server	convertBlockToServer(DataBlock block) {
+	Server	server;
+
+	return server;
+}
+
+void	Parser::parseAst(std::vector<Server>* pServers) {
+	// TODO: replace with iterator
+	for (int i = 0; i < _tree._blocks.size(); i++) {
+		/* If datablock.name == "server" */
+		if (_tree._blocks.at(i)._name.size() == 1 &&
+			_tree._blocks.at(i)._name[0] == "server") {
+				/* Convert datablock into server class */
+				convertBlockToServer(_tree._blocks.at(i));
+			}
+	}
 }
