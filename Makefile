@@ -27,7 +27,7 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
-export SRCS			:=	Socket.cpp \
+export SRCS			:=	Server.cpp \
 						HttpMessage.cpp \
 						HttpRequest.cpp \
 						HttpResponse.cpp \

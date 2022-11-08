@@ -1,23 +1,42 @@
-#include "Socket.hpp"
+#include "Server.hpp"
 
 #include "Logger.hpp"
 
 /*
- * Constructor for Socket class
- * @param domain communication domain (AF_INET, AF_INET6, AF_LOCAL, AF_ROUTE, AF_KEY)
- * @param type communication semantics (SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW)
- * @param port port number of socket (0 for random)
+ * Constructor for Server class
  */
-Socket::Socket(const int domain, const int type, const int port) : _accepted(-1), _port(port) {
+Server::Server() : _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _port(-1), _maxBodySize(-1), _accepted(-1) {
+  memset(&_servaddr, 0, sizeof(_servaddr));
+  memset(&_buffer, 0, sizeof(_buffer));
+  memset(&_defaultErrorPage, 0, sizeof(_defaultErrorPage));
+  memset(&_host, 0, sizeof(_host));
+  _defaultErrorPage.statusCode = -1;
+  _host.statusCode = -1;
+}
+
+/*
+ * Destructor for Server class
+ */
+Server::~Server() {
+  close(_fd);
+}
+
+/*
+ * Prepare the socket for incoming connections
+ * @param backlog number of connections allowed on the incoming queue
+ */
+void Server::prepare(const int backlog) {
   Logger &logger = Logger::getInstance();
   int     on     = 1;  // used for setsockopt() and ioctl() calls
+
+  logger.log("Preparing " + _serverName[0] + ":" + std::to_string(_port));
 
   /**************************************************/
   /* Create an socket to receive incoming           */
   /* connections on                                 */
   /**************************************************/
 
-  _fd = socket(domain, type, 0);
+  _fd = socket(_domain, _type, 0);
   if (_fd == -1) {
     logger.error("Failed to create socket: " + std::string(strerror(errno)));
     throw std::runtime_error("Socket creation failed: " + std::string(strerror(errno)));
@@ -29,7 +48,6 @@ Socket::Socket(const int domain, const int type, const int port) : _accepted(-1)
 
   if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
     logger.error("Failed to set socket options: " + std::string(strerror(errno)));
-    close(_fd);
     throw std::runtime_error("Socket options failed: " + std::string(strerror(errno)));
   }
 
@@ -41,7 +59,6 @@ Socket::Socket(const int domain, const int type, const int port) : _accepted(-1)
 
   if (ioctl(_fd, FIONBIO, (char *)&on) == -1) {
     logger.error("Failed to set socket to nonblocking: " + std::string(strerror(errno)));
-    close(_fd);
     throw std::runtime_error("Socket nonblocking failed: " + std::string(strerror(errno)));
   }
 
@@ -51,7 +68,7 @@ Socket::Socket(const int domain, const int type, const int port) : _accepted(-1)
   /**************************************************/
 
   memset(&_servaddr, 0, sizeof(_servaddr));
-  _servaddr.sin6_family = domain;
+  _servaddr.sin6_family = _domain;
   memcpy(&_servaddr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
   _servaddr.sin6_port = htons(_port);
 
@@ -61,41 +78,108 @@ Socket::Socket(const int domain, const int type, const int port) : _accepted(-1)
 
   if (bind(_fd, (struct sockaddr *)&_servaddr, sizeof(_servaddr)) == -1) {
     logger.error("Failed to bind socket: " + std::string(strerror(errno)));
-    close(_fd);
     throw std::runtime_error("Socket bind failed: " + std::string(strerror(errno)));
   }
-}
-
-/*
- * Destructor for Socket class
- */
-Socket::~Socket() {
-  /**************************************************/
-  /* Close the socket                               */
-  /**************************************************/
-  Logger &logger = Logger::getInstance();
-
-  if (close(_fd) == -1) {
-    logger.log("Socket close failed: " + std::string(strerror(errno)));
-  }
-}
-
-/*
- * Prepare the socket for incoming connections
- * @param backlog number of connections allowed on the incoming queue
- */
-void Socket::prepare(const int backlog) const {
-  Logger &logger = Logger::getInstance();
 
   if (listen(_fd, backlog) == -1) {
     logger.error("Failed to prepare socket: " + std::string(strerror(errno)));
-    close(_fd);
     throw std::runtime_error("Socket listen failed: " + std::string(strerror(errno)));
   }
 }
 
-int Socket::getFd() const {
+/**************************************************/
+/* Getters and setters                            */
+/**************************************************/
+
+int Server::getFd() const {
   return _fd;
+}
+
+std::vector<std::string> Server::getServerName() const {
+  return _serverName;
+}
+
+PageData Server::getHost() const {
+  return _host;
+}
+
+PageData Server::getErrorPage() const {
+  return _defaultErrorPage;
+}
+
+int Server::getPort() const {
+  return _port;
+}
+
+int Server::getMaxBody() const {
+  return _maxBodySize;
+}
+
+int Server::setHost(int const &statusCode, std::string const &filePath) {
+  if (statusCode < 0) {
+    Logger::getInstance().error("Incorrect statuscode set");
+    return 1;
+  }
+  _host.statusCode = statusCode;
+  _host.filePath   = filePath;
+  return 0;
+}
+
+int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
+  if (statusCode < 0) {
+    Logger::getInstance().error("Incorrect statuscode set");
+    return 1;
+  }
+  _defaultErrorPage.statusCode = statusCode;
+  _defaultErrorPage.filePath   = filePath;
+  return 0;
+}
+
+void Server::setServerName(std::vector<std::string> value) {
+  _serverName = value;
+}
+
+int Server::setPort(int const &value) {
+  if (value > MAX_PORT) {
+    Logger::getInstance().error("Port higher than MAX_PORT");
+    return 1;
+  } else if (value <= 0) {
+    Logger::getInstance().error("Port higher than MAX_PORT");
+    return 1;
+  }
+  _port = value;
+  return 0;
+}
+
+/**************************************************/
+/* End of getters and setters                     */
+/**************************************************/
+
+/*
+ * To check if variables are set
+ */
+bool	Server::hasServerName() const {
+	return (_serverName.size() == 0);
+}
+
+bool	Server::hasHost() const {
+	return (_host.statusCode == -1);
+}
+
+bool	Server::hasPort() const {
+	return (_port != -1);
+}
+
+bool	Server::hasMaxBody() const {
+	return (_maxBodySize != -1);
+}
+
+bool	Server::hasErrorPage() const {
+	return (_defaultErrorPage.statusCode == -1);
+}
+
+bool	Server::hasRoutes() const {
+	return (_routes.size() != 0);
 }
 
 /**************************************************/
@@ -108,7 +192,7 @@ int Socket::getFd() const {
 /*
  * Accept an incoming connection
  */
-void Socket::accept_connection() {
+void Server::accept_connection() {
   Logger         &logger   = Logger::getInstance();
   const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
 
@@ -179,7 +263,7 @@ void Socket::accept_connection() {
 /*
  * Wait for incoming connections
  */
-void Socket::wait_for_connections() {
+void Server::wait_for_connections() {
   Logger         &logger   = Logger::getInstance();
   const socklen_t sock_len = sizeof(_servaddr);  // size of socket address structure
   int             new_fd;                        // file descriptor for new socket
@@ -252,7 +336,7 @@ void Socket::wait_for_connections() {
 
       request.parse(buffer);
       response.createResponse(request, "root",
-                               "index.html");  // TODO: make root configurable, not hardcoded, same for index
+                              "index.html");  // TODO: make root configurable, not hardcoded, same for index
 
       std::string response_str = response.toStr();
 
