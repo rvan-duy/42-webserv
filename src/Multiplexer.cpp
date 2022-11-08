@@ -13,14 +13,15 @@ Multiplexer::~Multiplexer() {}
  * @param fd The file descriptor of the server
  * @param events The events to listen for
  */
-void Multiplexer::addServer(const int fd, const short events) {
+void Multiplexer::addServer(const Server &server, const short events) {
   Logger &logger = Logger::getInstance();
 
-  logger.log("Adding server to multiplexer: " + std::to_string(fd));
+  // TODO: Can a server have multiple names????????? for now lets add [0]
+  logger.log("Adding server to multiplexer: " + server.getServerName()[0] + ":" + std::to_string(server.getPort()));
 
-  pollfd server = {fd, events, 0};
-  _servers.push_back(fd);
-  _clients.push_back(server);
+  pollfd serverAsPollFD = {server.getFd(), events, 0};
+  _servers.push_back(server);
+  _clients.push_back(serverAsPollFD);
 
   logger.log("Server added to multiplexer, total number of stored sockets: " + std::to_string(_clients.size()));
 }
@@ -41,55 +42,88 @@ void Multiplexer::waitForEvents(const int timeout) {
     /* socket has an event to handle.                 */
     /**************************************************/
 
-    {
-      logger.log("Poll returned successfully, checking for events on sockets");
-      const int NUMBER_OF_SOCKETS_TO_CHECK = _clients.size();
-      for (int i = 0; i < NUMBER_OF_SOCKETS_TO_CHECK; i++) {  // Loop through all sockets inside the multiplexer
-        int eventType = _getEvent(_clients[i]);               // Logging is done inside the _getEvent() method
+    logger.log("Poll returned successfully, checking for events on sockets");
+    const int NUMBER_OF_SOCKETS_TO_CHECK = _clients.size();
+    for (int i = 0; i < NUMBER_OF_SOCKETS_TO_CHECK; i++) {  // Loop through all sockets inside the multiplexer
+      int eventType = _getEvent(_clients[i]);               // Logging is done inside the _getEvent() method
+
+      /**************************************************/
+      /* Main switch to handle the different events     */
+      /**************************************************/
+      switch (eventType) {
+        /**************************************************/
+        /* No event                                       */
+        /**************************************************/
+        case 0: {
+          break;
+        }
 
         /**************************************************/
-        /* Main switch to handle the different events     */
+        /* Read event                                     */
         /**************************************************/
-        switch (eventType) {
-          /**************************************************/
-          /* No event                                       */
-          /**************************************************/
-          case 0: {
-            break;
-          }
-
-          /**************************************************/
-          /* Read event                                     */
-          /**************************************************/
-          case POLLIN: {
-            if (std::find(_servers.begin(), _servers.end(), _clients[i].fd) != _servers.end()) {
-              _addClient(_clients[i].fd);                    // If the fd is a server, accept it as a client
-            } else {                                         // If not, this means it is a client
-              std::string data = _readData(_clients[i].fd);  // Read the data
-              if (data.empty()) {                            // If the data is empty, the client has disconnected
-                _removeClient(_clients[i].fd);               // Remove the client from the multiplexer
-              } else {                                       // If the data is not empty, the client has sent data
-                logger.error("CODE NOT IMPLEMENTED YET");    // TODO: Handle the data
-                _removeClient(_clients[i].fd);
-              }
+        case POLLIN: {
+          if (_isServer(_clients[i].fd)) {                         // If the socket is a server
+            _addClient(_clients[i].fd);                            // Accept it as a client
+          } else {                                                 // If not, this means it is a client
+            std::string data = _readData(_clients[i].fd);          // Read the data
+            if (data.empty()) {                                    // If the data is empty, the client has disconnected
+              _removeClient(_clients[i].fd);                       // Remove the client from the multiplexer
+            } else {                                               // If the data is not empty, the client has sent data
+              logger.log("Received data from client: \n" + data);  // Log the data
+              _handleData(data);                                   // Handle the data
+              _removeClient(_clients[i].fd);                       // Remove the client from the multiplexer
             }
-            break;
           }
+          break;
+        }
 
-          // case POLLOUT, POLLERR, POLLHUP?
+        // case POLLOUT, POLLERR, POLLHUP?
 
-          /**************************************************/
-          /* Default event                                  */
-          /**************************************************/
-          default: {
-            logger.error("CODE NOT IMPLEMENTED YET");
-            break;
-          }
+        /**************************************************/
+        /* Default event                                  */
+        /**************************************************/
+        default: {
+          logger.error("CODE NOT IMPLEMENTED YET");
+          break;
         }
       }
     }
 
   } while (_endServer == false);
+}
+
+/*
+ * TODO: handle data
+ */
+void Multiplexer::_handleData(const std::string &data) {
+  Logger &logger = Logger::getInstance();
+  logger.log("Handling data: " + data);
+
+  // Steps:
+  // 1. Parse the data into a Request object
+  // 2. Check for which server the data is intended (how is a server identified?)
+  // 2.1 Each server has its own variables...
+  // 3. 
+
+}
+
+/*
+ * Check if a fd is a server
+ * @param fd The file descriptor to check
+ * @return True if the fd is a server, false if not
+ */
+bool Multiplexer::_isServer(const int fd) const {
+  for (std::vector<Server>::const_iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    if (it->getFd() == fd) return true;
+  }
+  return false;
+}
+
+Server Multiplexer::_getServer(const int fd) const {
+  for (std::vector<Server>::const_iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    if (it->getFd() == fd) return *it;
+  }
+  return Server();
 }
 
 /*
@@ -109,6 +143,13 @@ void Multiplexer::_addClient(const int socket) {
   logger.log("New connection accepted: " + std::to_string(newSocket));
   pollfd client = {newSocket, POLLIN, 0};
   _clients.push_back(client);
+  for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    if (it->getFd() == socket) {
+      it->addClient(newSocket);
+      logger.log("Added new client to the " + it->getServerName()[0] + ":" + std::to_string(it->getPort()) + " server");
+      break;
+    }
+  }
   logger.log("New connection added to multiplexer, total number of stored sockets: " + std::to_string(_clients.size()));
 }
 
@@ -127,6 +168,10 @@ void Multiplexer::_removeClient(const int socket) {
       logger.log("Client socket " + std::to_string(socket) + " removed from multiplexer");
       break;
     }
+  }
+  for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    it->removeClient(socket);
+    logger.log("Removed client from the " + it->getServerName()[0] + ":" + std::to_string(it->getPort()) + " server");
   }
 }
 

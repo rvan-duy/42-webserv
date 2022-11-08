@@ -78,6 +78,9 @@ class Server {
   // Methods
   void prepare(const int backlog = 10);
   void sendResponse(const HttpResponse& response) const;
+  void addClient(const int fd);
+  void removeClient(const int fd);
+
   bool hasServerName() const;
   bool hasPort() const;
   bool hasMaxBody() const;
@@ -117,6 +120,7 @@ class Server {
   std::vector<Route>       _routes;            // list of routes
   PageData                 _defaultErrorPage;  // default error page
   PageData                 _host;              // default host page
+  std::vector<int>         _connectedClients;  // list of connected clients
 };
 
 #endif  // SOCKET_HPP

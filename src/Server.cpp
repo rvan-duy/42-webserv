@@ -11,7 +11,7 @@ Server::Server() : _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _port(-1), _m
   memset(&_defaultErrorPage, 0, sizeof(_defaultErrorPage));
   memset(&_host, 0, sizeof(_host));
   _defaultErrorPage.statusCode = -1;
-  _host.statusCode = -1;
+  _host.statusCode             = -1;
 }
 
 /*
@@ -87,6 +87,33 @@ void Server::prepare(const int backlog) {
   }
 }
 
+/*
+ * Add a client socket to the server
+ */
+void Server::addClient(const int socket) {
+  Logger &logger = Logger::getInstance();
+
+  logger.log("Adding client " + std::to_string(socket) + " to server " + _serverName[0] + ":" + std::to_string(_port));
+
+  _connectedClients.push_back(socket);
+}
+
+/*
+ * Remove a client socket from the server
+ */
+void Server::removeClient(const int socket) {
+  Logger &logger = Logger::getInstance();
+
+  logger.log("Removing client " + std::to_string(socket) + " from server " + _serverName[0] + ":" +
+             std::to_string(_port));
+  for (std::vector<int>::iterator it = _connectedClients.begin(); it != _connectedClients.end(); ++it) {
+    if (*it == socket) {
+      _connectedClients.erase(it);
+      break;
+    }
+  }
+}
+
 /**************************************************/
 /* Getters and setters                            */
 /**************************************************/
@@ -158,28 +185,28 @@ int Server::setPort(int const &value) {
 /*
  * To check if variables are set
  */
-bool	Server::hasServerName() const {
-	return (_serverName.size() == 0);
+bool Server::hasServerName() const {
+  return (_serverName.size() == 0);
 }
 
-bool	Server::hasHost() const {
-	return (_host.statusCode == -1);
+bool Server::hasHost() const {
+  return (_host.statusCode == -1);
 }
 
-bool	Server::hasPort() const {
-	return (_port != -1);
+bool Server::hasPort() const {
+  return (_port != -1);
 }
 
-bool	Server::hasMaxBody() const {
-	return (_maxBodySize != -1);
+bool Server::hasMaxBody() const {
+  return (_maxBodySize != -1);
 }
 
-bool	Server::hasErrorPage() const {
-	return (_defaultErrorPage.statusCode == -1);
+bool Server::hasErrorPage() const {
+  return (_defaultErrorPage.statusCode == -1);
 }
 
-bool	Server::hasRoutes() const {
-	return (_routes.size() != 0);
+bool Server::hasRoutes() const {
+  return (_routes.size() != 0);
 }
 
 /**************************************************/

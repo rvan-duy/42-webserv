@@ -20,7 +20,7 @@ int main() {
     // Iterate through all servers and add them to the multiplexer
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
       it->prepare(); // socket() + bind() + listen()
-      multiplexer.addServer(it->getFd(), POLLIN);
+      multiplexer.addServer(*it, POLLIN);
     }
     multiplexer.waitForEvents(); // Start the multiplexer loop, does all the polling and handling of events etc.
   } catch (std::exception &e) {
