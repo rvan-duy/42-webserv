@@ -44,12 +44,13 @@ enum EHttpMethods {
 };
 
 struct Route {
-	std::string					_route;
-	std::vector<EHttpMethods>	_allowedMethods;
-	std::string					_httpRedirection;
-	std::string					_searchDirectory;
-	std::string					_defaultFile;
-	bool						_directoryListing;
+	std::string					route;
+	std::vector<EHttpMethods>	allowedMethods;
+	std::string					httpRedirection;
+	std::string					searchDirectory;
+	std::string					defaultFile;
+	std::string					cgiParam;
+	bool						autoIndex;
 };
 
 struct PageData {
@@ -81,6 +82,7 @@ class Server {
 		void	setServerName(std::vector<std::string> value);
 		int		setPort(int const& value);
 		int		setMaxBody(double const& value);
+		void	addRoute(Route route);
 
 	private:
 		PageData					_defaultErrorPage;

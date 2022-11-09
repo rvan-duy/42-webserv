@@ -15,6 +15,10 @@ Server::~Server() {}
 /**
  * Setters
 */
+void	Server::addRoute(Route route) {
+	_routes.push_back(route);
+}
+
 int	Server::setHost(int const statusCode, std::string const filePath) {
 	if (statusCode < 0) {
 		Logger::getInstance().error("Incorrect statuscode set");

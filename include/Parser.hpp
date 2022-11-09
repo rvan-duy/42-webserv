@@ -8,11 +8,12 @@
 #include <Logger.hpp>
 
 #define PARSER_FUNC_N 5
+#define BLOCK_FUNC_N 4
 
 /* Circle inclusion, so doesn't compile without this parser definition */
 class Parser;
 /* Parser member function typedef */
-typedef void	(Parser::*ParserFunc)(Server *dest, std::vector<std::string> dataLine);
+typedef void	(Parser::*ParserFunc)(void *dest, std::vector<std::string> dataLine);
 
 /* Key - parser function pair */
 typedef struct s_comp
@@ -31,18 +32,18 @@ typedef std::vector<std::string> t_dataLine;
 */
 struct DataBlock {
 	// Name of datablock (positioned before the open_curl)
-	std::vector<std::string>	_name;
+	std::vector<std::string>	name;
 	// Nested blocks with brackets
-	std::vector<DataBlock>		_blocks;
+	std::vector<DataBlock>		blocks;
 	// Semi-colon ended lines in config file
-	std::vector<t_dataLine>		_dataLines;
+	std::vector<t_dataLine>		dataLines;
 };
 
 struct AbstractSyntaxTree {
 	// Server blocks opened and closed with curls
-	std::vector<DataBlock>		_blocks;	
+	std::vector<DataBlock>		blocks;	
 	// Random lines with config info
-	std::vector<t_dataLine>		_dataLines;
+	std::vector<t_dataLine>		dataLines;
 };
 
 /**
@@ -61,16 +62,24 @@ class Parser {
 		int							makeAst();
 
 		void	parseAst(std::vector<Server>* pServers);
+		void	parseDataLines(Server *pServer, std::vector<t_dataLine> const& lines);
+		void	parseDataBlocks(Server *pServer, std::vector<DataBlock> const& blocks);
 		Server	convertBlockToServer(DataBlock block);
 
-		/* AST parsing functions */
-		void	parsePort(Server *dest, t_dataLine line);
-		void	parseMaxBodySize(Server *dest, t_dataLine line);
-		void	parseErrorPage(Server *dest, t_dataLine line);
-		void	parseHost(Server *dest, t_dataLine line);
-		void	parseServerName(Server *dest, t_dataLine line);
+		/* AST line parsing functions */
+		void	parsePort(void *dest, t_dataLine line);
+		void	parseMaxBodySize(void *dest, t_dataLine line);
+		void	parseErrorPage(void *dest, t_dataLine line);
+		void	parseHost(void *dest, t_dataLine line);
+		void	parseServerName(void *dest, t_dataLine line);
+		/* AST block parsing functions */
+		void	parseRoot(void *dest, t_dataLine line);
+		void	parseIndex(void *dest, t_dataLine line);
+		void	parseAutoIndex(void *dest, t_dataLine line);
+		void	parseCgiParam(void *dest, t_dataLine line);
 		/* table with key value pairs for parsing AST */
-		static t_comp parserFuncTable[PARSER_FUNC_N];
+		static t_comp lineParsingFuncs[PARSER_FUNC_N];
+		static t_comp blockParsingFuncs[BLOCK_FUNC_N];
 
 		std::vector<Token>				_tokens;
 		AbstractSyntaxTree				_tree;
