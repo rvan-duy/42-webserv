@@ -16,12 +16,3 @@ jobs:
     - uses: actions/checkout@v2
     - name: build webserver
       run:  make PROD=1 && make fclean
-
-  ubuntu_build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: build webserver
-      run:  make PROD=1 && make fclean
