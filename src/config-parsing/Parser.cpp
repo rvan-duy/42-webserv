@@ -268,7 +268,7 @@ void	Parser::parseIndex(void *dest, t_dataLine line) {
 	if (!dest || line.size() != 2) {
 		return ;
 	}
-	Route *route = static_cast<Route *>(dest);
+	// Route *route = static_cast<Route *>(dest);
 	// TODO
 }
 
