@@ -85,6 +85,7 @@ void Multiplexer::waitForEvents(const int timeout) {
         /* Default event                                  */
         /**************************************************/
         default: {
+          logger.error("[POLLING] Multiplexer: Unknown event type: " + std::to_string(eventType));
           logger.error("[POLLING] Multiplexer: CODE NOT IMPLEMENTED YET");
           break;
         }
@@ -205,9 +206,15 @@ int Multiplexer::_getEvent(const pollfd &fd) {
   } else if (fd.revents & POLLOUT) {
     logger.log("[POLLING] Multiplexer: POLLOUT event on socket " + std::to_string(fd.fd));
     return POLLOUT;
+  } else if (fd.revents & POLLERR) {
+    logger.log("[POLLING] Multiplexer: POLLERR event on socket " + std::to_string(fd.fd));
+    return POLLERR;
+  } else if (fd.revents & POLLHUP) {
+    logger.log("[POLLING] Multiplexer: POLLHUP event on socket " + std::to_string(fd.fd));
+    return POLLHUP;
   } else {
     logger.log("[POLLING] Multiplexer: Unknown event on socket " + std::to_string(fd.fd));
-    return POLLERR;
+    return -1;
   }
 }
 
