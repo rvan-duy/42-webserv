@@ -1,8 +1,7 @@
 #include <Server.hpp>
 
-/**
- * Constructors / destructors
-*/
+/* Is deze code nog nodig?
+
 Server::Server(): _port(-1), _maxBodySize(-1) {
 	_defaultErrorPage.statusCode = DEFAULT_ERROR_STATUS;
 	_defaultErrorPage.filePath = DEFAULT_ERROR_PATH;
@@ -12,9 +11,6 @@ Server::Server(): _port(-1), _maxBodySize(-1) {
 
 Server::~Server() {}
 
-/**
- * Setters
-*/
 void	Server::addRoute(Route route) {
 	_routes.push_back(route);
 }
@@ -60,7 +56,6 @@ int		Server::setPort(int const& value) {
 }
 
 int		Server::setMaxBody(double const& value) {
-	// TODO: check if 0 is possible
 	if (value <= 0) {
 		Logger::getInstance().error("Max body <= 0");
 		return 1;
@@ -72,9 +67,6 @@ int		Server::setMaxBody(double const& value) {
 	return 0;
 }
 
-/**
- * To check if variables are set
-*/
 bool	Server::hasServerName() const {
 	return (_serverName.size() == 0);
 }
@@ -91,9 +83,6 @@ bool	Server::hasRoutes() const {
 	return (_routes.size() != 0);
 }
 
-/**
- * Getters
-*/
 std::vector<std::string>	Server::getServerName() const {
 	return _serverName;
 }
@@ -113,3 +102,5 @@ int		Server::getPort() const {
 int		Server::getMaxBody() const {
 	return _maxBodySize;
 }
+
+*/

@@ -10,8 +10,10 @@ Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _typ
   memset(&_buffer, 0, sizeof(_buffer));
   memset(&_defaultErrorPage, 0, sizeof(_defaultErrorPage));
   memset(&_host, 0, sizeof(_host));
-  _defaultErrorPage.statusCode = -1;
-  _host.statusCode             = -1;
+  _defaultErrorPage.statusCode = DEFAULT_ERROR_STATUS;
+	_defaultErrorPage.filePath = DEFAULT_ERROR_PATH;
+	_host.statusCode = DEFAULT_HOST_STATUS;
+	_host.filePath = DEFAULT_HOST_PATH;
 }
 
 /*
@@ -143,14 +145,17 @@ int Server::getMaxBody() const {
   return _maxBodySize;
 }
 
-int Server::setMaxBody(double const &value) {
-  if (value > INT_MAX) {
-    return 1;
-  } else if (value < 0) {
-    return 1;
-  }
-  _maxBodySize = value;
-  return 0;
+int		Server::setMaxBody(double const& value) {
+	// TODO: check if 0 is possible
+	if (value <= 0) {
+		Logger::getInstance().error("Max body <= 0");
+		return 1;
+	} else if (value > INT_MAX) {
+		Logger::getInstance().error("Max body > UINT_MAX");
+		return 1;
+	}
+	_maxBodySize = value;
+	return 0;
 }
 
 int Server::setHost(int const &statusCode, std::string const &filePath) {
