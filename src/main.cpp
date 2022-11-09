@@ -7,6 +7,7 @@ int main() {
   // int i = parseConfigFile( &servers, argv[1]); // fills the servers vector with the servers from the config file
   // ^ this shouldn't be throwing exceptions, since the config file is checked for errors before the program is started
 
+  /* TEMPORARY CODE */
   Server my_server = Server();  // create a server object
   std::vector<std::string> serverName;
   serverName.push_back("localhost");
@@ -15,6 +16,7 @@ int main() {
   my_server.setHost(200, "index.html");
   my_server.setErrorPage(404, "404");
   servers.push_back(my_server);
+  /* END OF TEMPORARY CODE */
 
   try {
     // Iterate through all servers and add them to the multiplexer
