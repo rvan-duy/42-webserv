@@ -143,7 +143,7 @@ int Server::getMaxBody() const {
   return _maxBodySize;
 }
 
-int		Server::setMaxBody(double const& value) {
+int Server::setMaxBody(double const &value) {
   if (value > INT_MAX) {
     return 1;
   } else if (value < 0) {
@@ -153,7 +153,7 @@ int		Server::setMaxBody(double const& value) {
   return 0;
 }
 
-int Server::setHost(int const& statusCode, std::string const& filePath) {
+int Server::setHost(int const &statusCode, std::string const &filePath) {
   if (statusCode < 0) {
     Logger::getInstance().error("Incorrect statuscode set");
     return 1;
@@ -163,7 +163,7 @@ int Server::setHost(int const& statusCode, std::string const& filePath) {
   return 0;
 }
 
-int Server::setErrorPage(int const& statusCode, std::string const& filePath) {
+int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
   if (statusCode < 0) {
     Logger::getInstance().error("Incorrect statuscode set");
     return 1;
@@ -173,7 +173,7 @@ int Server::setErrorPage(int const& statusCode, std::string const& filePath) {
   return 0;
 }
 
-void Server::setServerName(std::vector<std::string> const& value) {
+void Server::setServerName(std::vector<std::string> const &value) {
   _serverName = value;
 }
 
@@ -189,7 +189,7 @@ int Server::setPort(int const &value) {
   return 0;
 }
 
-void	Server::addRoute(Route const& route) {
+void Server::addRoute(Route const &route) {
   _routes.push_back(route);
 }
 
