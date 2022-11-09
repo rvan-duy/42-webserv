@@ -26,14 +26,15 @@ int	parseConfigFile(std::string const& filePath) {
 }
 
 int main(int argc, char **argv) {
+  if (argc != 2) {
+    std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
+    return 1;
+  }
 
-  parseConfigFile(argv[1]);
+  // parseConfigFile( &servers, argv[1] );
 
   std::vector<Server> servers;      // vector of servers
   Multiplexer         multiplexer;  // the multiplexer object that is responsible for handling all the servers
-
-  // int i = parseConfigFile( &servers, argv[1]); // fills the servers vector with the servers from the config file
-  // ^ this shouldn't be throwing exceptions, since the config file is checked for errors before the program is started
 
   /* TEMPORARY CODE */
   Server my_server = Server();  // create a server object
