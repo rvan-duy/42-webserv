@@ -2,6 +2,21 @@
 #include <string>
 #include <vector>
 #include <Logger.hpp>
+#include <HttpRequest.hpp>
+#include <HttpResponse.hpp>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <cstring>
+#include <sstream>
 
 /*
 In the configuration file, you should be able to:
@@ -63,6 +78,16 @@ class Server {
 		Server();
 		~Server();
 
+		// Methods
+		void prepare(const int backlog = 10);
+		void sendResponse(const HttpResponse& response) const;
+		void addClient(const int fd);
+		void removeClient(const int fd);
+
+		// LEGACY METHODS
+		void accept_connection();
+		void wait_for_connections();
+
 		// To check if variables have been set
 		bool	hasServerName() const;
 		bool	hasPort() const;
@@ -75,20 +100,31 @@ class Server {
 		PageData					getErrorPage() const;
 		int 						getMaxBody() const;
 		int							getPort() const;
+		int							getFd() const;
 
 		// Setters
-		int		setHost(int const statusCode, std::string const filePath);
-		int		setErrorPage(int const statusCode, std::string const filePath);
-		void	setServerName(std::vector<std::string> value);
+		int 	setHost(int const& statusCode, std::string const& filePath);
+		int 	setErrorPage(int const& statusCode, std::string const& filePath);
+		void 	setServerName(std::vector<std::string> const& value);
 		int		setPort(int const& value);
 		int		setMaxBody(double const& value);
-		void	addRoute(Route route);
+		void	addRoute(Route const& route);
 
 	private:
+		/* Config variables */
 		PageData					_defaultErrorPage;
 		PageData					_host;
 		int							_port;
 		int				 			_maxBodySize;
 		std::vector<std::string>	_serverName;
 		std::vector<Route>			_routes;
+
+
+		int                      _fd;                // file descriptor for socket
+		int                      _domain;            // domain of socket (IPv4 or IPv6)
+		int                      _type;              // type of socket (TCP or UDP)
+		char                     _buffer[1000000];   // buffer for reading data from socket
+		int                      _accepted;          // file descriptor for accepted connection, -1 if no connection
+		struct sockaddr_in6      _servaddr;          // server address
+		std::vector<int>         _connectedClients;  // list of connected clients
 };

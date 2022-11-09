@@ -5,8 +5,8 @@
 HttpResponse::HttpResponse() {}
 
 HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
-  _status_code    = obj._status_code;
-  _status_message = obj._status_message;
+  _statusCode    = obj._statusCode;
+  _statusMessage = obj._statusMessage;
 }
 
 HttpResponse::~HttpResponse() {}
@@ -17,7 +17,7 @@ HttpResponse::~HttpResponse() {}
  * @param root Directory to serve files from
  * @param index Index file to serve
  */
-void HttpResponse::create_response(const HttpRequest &request, const std::string &root, const std::string &index) {
+void HttpResponse::createResponse(const HttpRequest &request, const std::string &root, const std::string &index) {
   Logger &logger = Logger::getInstance();
 
   /**************************************************/
@@ -25,21 +25,21 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
   /**************************************************/
 
   logger.log("Creating response");
-  switch (request.get_method()) {
+  switch (request.getMethod()) {
       /**************************************************/
       /* Respond to a GET request                       */
       /**************************************************/
 
     case HttpRequest::GET: {
       logger.log("Response type: GET");
-      std::string path = root + request.get_uri();
+      std::string path = root + request.getUri();
       logger.log("Path: " + path);
 
       /**************************************************/
       /* First check if the file exists                 */
       /**************************************************/
 
-      if (!_file_exists(path)) {
+      if (!_fileExists(path)) {
         /**************************************************/
         /* If the file doesn't exist, look for an index   */
         /* file in the directory                          */
@@ -54,9 +54,9 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
         /* a 404 error                                    */
         /**************************************************/
 
-        if (!_file_exists(index_path)) {
+        if (!_fileExists(index_path)) {
           logger.log("Index file doesn't exist");
-          _set_response("root/404/index.html", 404, "Not Found", request.get_version());
+          _setResponse("root/404/index.html", 404, "Not Found", request.getVersion());
           return;
         } else {
           logger.log("Index file exists");
@@ -68,7 +68,7 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
       /* Respond with the file                          */
       /**************************************************/
 
-      _set_response(path, 200, "OK", request.get_version());
+      _setResponse(path, 200, "OK", request.getVersion());
 
       break;
     }
@@ -105,7 +105,7 @@ void HttpResponse::create_response(const HttpRequest &request, const std::string
  * Convert the response to a string
  * @return The response as a string
  */
-std::string HttpResponse::to_str() const {
+std::string HttpResponse::toStr() const {
   Logger &logger = Logger::getInstance();
 
   /**************************************************/
@@ -123,7 +123,7 @@ std::string HttpResponse::to_str() const {
   {
     logger.log("1. Adding status line");
     std::ostringstream ss;
-    ss << get_version_to_str() << " " << _status_code << " " << _status_message << "\r\n";
+    ss << getVersionToStr() << " " << _statusCode << " " << _statusMessage << "\r\n";
     response_string += ss.str();
   }
 
@@ -163,15 +163,15 @@ std::string HttpResponse::to_str() const {
 /*
  * Get the status code
  */
-int HttpResponse::get_status_code() const {
-  return _status_code;
+int HttpResponse::getStatusCode() const {
+  return _statusCode;
 }
 
 /*
  * Get the status message
  */
-std::string HttpResponse::get_status_message() const {
-  return _status_message;
+std::string HttpResponse::getStatusMessage() const {
+  return _statusMessage;
 }
 
 /*
@@ -181,21 +181,21 @@ std::string HttpResponse::get_status_message() const {
  * @param status_message Status message to respond with
  * @param version HTTP version to respond with
  */
-void HttpResponse::_set_response(const std::string &path, const int status_code, const std::string &status_message,
+void HttpResponse::_setResponse(const std::string &path, const int status_code, const std::string &status_message,
                                  const HttpVersion version) {
   Logger       &logger = Logger::getInstance();
 
-  std::ifstream file(path.c_str()); // Open the file
+  std::ifstream file(path.c_str());  // Open the file
   logger.log("Requested path: " + path);
 
   file.seekg(0, std::ios::end);                          // Seek to the end of the file
   std::stringstream ss;                                  // Create a stringstream to store the file contents in
   ss << file.tellg();                                    // Get the file size
-  _status_code               = status_code;              // Set the status code
-  _status_message            = status_message;           // Set the status message
+  _statusCode               = status_code;              // Set the status code
+  _statusMessage            = status_message;           // Set the status message
   _version                   = version;                  // Set the version
   _headers["Content-Length"] = ss.str();                 // Set the content length header
-  _headers["Content-Type"]   = _get_content_type(path);  // Set the content type header
+  _headers["Content-Type"]   = _getContentType(path);  // Set the content type header
   file.seekg(0, std::ios::beg);                          // Seek back to the beginning of the file
   if (file.is_open()) {
     std::string body((std::istreambuf_iterator<char>(file)),
@@ -210,23 +210,23 @@ void HttpResponse::_set_response(const std::string &path, const int status_code,
  * @param path The path to the file to check
  * @return True if the file exists, false otherwise
  */
-bool HttpResponse::_file_exists(const std::string &path) const {
+bool HttpResponse::_fileExists(const std::string &path) const {
   Logger     &logger = Logger::getInstance();
 
   struct stat buffer;  // stat struct to store the file info
   if (stat(path.c_str(), &buffer) == -1) {
-    logger.log("_file_exists -> File doesn't exist (" + path + ")");
+    logger.log("_fileExists -> File doesn't exist (" + path + ")");
     return false;
   }
   if (buffer.st_mode & S_IFDIR) {
-    logger.log("_file_exists -> File is a directory (" + path + ")");
+    logger.log("_fileExists -> File is a directory (" + path + ")");
     return false;
   }
   if (buffer.st_mode & S_IFREG) {
-    logger.log("_file_exists -> File is a regular file (" + path + ")");
+    logger.log("_fileExists -> File is a regular file (" + path + ")");
     return true;
   }
-  logger.log("_file_exists -> File is something else (" + path + ")");
+  logger.log("_fileExists -> File is something else (" + path + ")");
   logger.error("WARNING: logic probably not implemented yet");
   return false;
 }
@@ -236,7 +236,7 @@ bool HttpResponse::_file_exists(const std::string &path) const {
  * @param path The path to the file to check
  * @return The content type of the file
  */
-std::string HttpResponse::_get_content_type(const std::string &path) const {
+std::string HttpResponse::_getContentType(const std::string &path) const {
   /**************************************************/
   /* The map of file extensions to content types    */
   /**************************************************/
