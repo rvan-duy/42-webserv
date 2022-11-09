@@ -11,14 +11,14 @@ HttpMessage::~HttpMessage() {}
 /*
  * Getter for the HTTP version of the message
  */
-HttpMessage::HttpVersion HttpMessage::get_version() const {
+HttpMessage::HttpVersion HttpMessage::getVersion() const {
   return _version;
 }
 
 /*
  * Getter for the HTTP version of the message as a string
  */
-std::string HttpMessage::get_version_to_str() const {
+std::string HttpMessage::getVersionToStr() const {
   switch (_version) {
     case HttpMessage::HTTP_1_1:
       return "HTTP/1.1";
@@ -34,7 +34,7 @@ std::string HttpMessage::get_version_to_str() const {
 /*
  * Getter for the headers of the message
  */
-std::map<std::string, std::string> HttpMessage::get_headers() const {
+std::map<std::string, std::string> HttpMessage::getHeaders() const {
   return _headers;
 }
 
@@ -43,14 +43,14 @@ std::map<std::string, std::string> HttpMessage::get_headers() const {
  * @param key the key of the header
  * @return the value of the header
  */
-std::string HttpMessage::get_header(const std::string &key) const {
+std::string HttpMessage::getHeader(const std::string &key) const {
   return _headers.at(key);
 }
 
 /*
  * Getter for the body of the message
  */
-std::string HttpMessage::get_body() const {
+std::string HttpMessage::getBody() const {
   return _body;
 }
 
@@ -63,7 +63,7 @@ std::string HttpMessage::get_body() const {
  * @param version the version string
  * @return the version enum
  */
-HttpMessage::HttpVersion HttpMessage::_parse_version(const std::string &version) {
+HttpMessage::HttpVersion HttpMessage::_parseVersion(const std::string &version) {
   std::map<std::string, HttpVersion> version_map;
 
   version_map["HTTP/1.1"] = HTTP_1_1;
