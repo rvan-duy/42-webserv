@@ -1,10 +1,15 @@
 #include <Logger.hpp>
 
+// Singleton instance
+// This is the instance that getInstance retrieves
 Logger* Logger::_logger = NULL;
 /**
  * Constructors / destructors
 */
 Logger::Logger() {
+	if (!LOG_ENABLED) {
+		return ;
+	}
 	std::string filePath(LOG_DEST);
 	filePath.append("log.log");
 	_file.open(filePath.c_str(), std::ios::out | std::ios::app);
@@ -24,42 +29,78 @@ Logger::~Logger() {
 }
 
 /**
- * Logging functions
+ * Logging levels
 */
 void Logger::log(std::string const& message) {
-	// To stdout
-	std::string stdOutMessage("\033[1;32m[INFO]:   \033[0m");
-	stdOutMessage.append(message);
-	std::cout << stdOutMessage << std::endl;
-	if (!isFileOpen()) {
-		return ;
-	}
-	// To file
-	std::string logMessage("[INFO]:   ");
-	logMessage.append(message);
-	_file << logMessage << std::endl;
+	logToConsole("\033[1;32m[INFO]:   \033[0m", INFO, message);
+	logToFile("[INFO]:   ", message);
 }
 
 void Logger::error(std::string const& message) {
-	// To stdout
-	std::string stdOutMessage("\033[1;31m[ERROR]  \033[0m");
-	stdOutMessage.append(message);
-	std::cerr << stdOutMessage << std::endl;
-	if (!isFileOpen()) {
-		return ;
-	}
-	// To file
-	std::string logMessage("[ERROR]    ");
-	logMessage.append(message);
-	_file << logMessage << std::endl;
+	logToConsole("\033[1;31m[ERROR]: \033[0m", ERROR, message);
+	logToFile("[ERROR]:   ", message);
 }
 
+// Logs restart message to logfile
 void Logger::restart(void) {
-	if (!isFileOpen()) {
+	logToFile("[RESTART]", "");
+}
+
+/**
+ * Logging & logging helper functions
+*/
+// Formatted as: DD  HH:MM:SS
+std::string Logger::getTimeStamp() const {
+	std::string	timeStamp = "[";
+	time_t now = time(NULL);
+	std::string timeToString = ctime(&now);
+	timeToString = timeToString.substr(8, 11);
+	timeStamp.append(timeToString);
+	timeStamp.append("]: ");
+	return timeStamp;
+}
+
+std::string	Logger::getPid() const {
+	char pidString[10];
+	pid_t	currentPid = getpid();
+	if (currentPid == _parentPid) {
+		sprintf(pidString, "         ");
+		return std::string(pidString);
+	}
+	sprintf(pidString, "[%d]: ", currentPid);
+	return std::string(pidString);
+}
+
+void Logger::logToFile(std::string const& levelMsg, std::string const& message) {
+	if (!isFileOpen() || LOG_ENABLED == 0) {
 		return ;
 	}
-	std::string logMessage("[RESTART]\n");
-	_file << logMessage << std::endl;
+	std::string fullMsg = getTimeStamp();
+	fullMsg.append(getPid());
+	fullMsg.append(levelMsg);
+	fullMsg.append(message);
+	_file << fullMsg << std::endl;
+}
+
+void Logger::logToConsole(std::string const& levelMsg, ELogLevel level, std::string const& message) {
+	if (LOG_ENABLED == 0) {
+		return ;
+	}
+	std::string fullMsg = getTimeStamp();
+	fullMsg.append(getPid());
+	fullMsg.append(levelMsg);
+	fullMsg.append(message);
+
+	// Print to stdout or stderr based on level
+	switch (level)
+	{
+	case INFO:
+		std::cout << fullMsg << std::endl;
+		break;
+	default:
+		std::cerr << fullMsg << std::endl;
+		break;
+	}
 }
 
 /**

@@ -4,8 +4,18 @@
 #include <iostream>
 #include <fstream>
 #include <errno.h>
+#include <unistd.h>
 
 #define LOG_DEST "logs/"
+
+enum ELogLevel {
+	INFO,
+	ERROR
+};
+
+#ifndef LOG_ENABLED
+# define LOG_ENABLED 3
+#endif
 
 /**
  * Singleton logger
@@ -14,6 +24,10 @@
  * Usage:
  * 		Logger& logger = Logger::getInstance();
  * 		logger.log("example log");
+ * 
+ * 		OR
+ * 
+ * 		Logger::getInstance().log("Example");
 */
 class Logger {
 	public:
@@ -34,6 +48,14 @@ class Logger {
 	private:
 		// Logging file
 		std::ofstream	_file;
+		pid_t			_parentPid;
+
+		std::string	getTimeStamp() const;
+		std::string getPid() const;
+
+		void logToConsole(std::string const& levelMsg, ELogLevel level, std::string const& message);
+		void logToFile(std::string const& levelMsg, std::string const& message);
+
 		// Gets if file is open
 		bool	isFileOpen() const;
 
