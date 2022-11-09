@@ -4,7 +4,7 @@ int main() {
   std::vector<Server> servers;      // vector of servers
   Multiplexer         multiplexer;  // the multiplexer object that is responsible for handling all the servers
 
-  // servers = parseConfigFile("config.txt"); // fills the servers vector with the servers from the config file
+  // int i = parseConfigFile( &servers, argv[1]); // fills the servers vector with the servers from the config file
   // ^ this shouldn't be throwing exceptions, since the config file is checked for errors before the program is started
 
   Server my_server = Server();  // create a server object

@@ -70,7 +70,7 @@ void Multiplexer::waitForEvents(const int timeout) {
               _removeClient(_clients[i].fd);                       // Remove the client from the multiplexer
             } else {                                               // If the data is not empty, the client has sent data
               logger.log("Received data from client: \n" + data);  // Log the data
-              _handleData(data);                                   // Handle the data
+              logger.error("TODO: Handle data");                   // TODO: Handle data
               _removeClient(_clients[i].fd);                       // Remove the client from the multiplexer
             }
           }
@@ -93,21 +93,6 @@ void Multiplexer::waitForEvents(const int timeout) {
 }
 
 /*
- * TODO: handle data
- */
-void Multiplexer::_handleData(const std::string &data) {
-  Logger &logger = Logger::getInstance();
-  logger.log("Handling data: " + data);
-
-  // Steps:
-  // 1. Parse the data into a Request object
-  // 2. Check for which server the data is intended (how is a server identified?)
-  // 2.1 Each server has its own variables...
-  // 3. 
-
-}
-
-/*
  * Check if a fd is a server
  * @param fd The file descriptor to check
  * @return True if the fd is a server, false if not
@@ -119,6 +104,11 @@ bool Multiplexer::_isServer(const int fd) const {
   return false;
 }
 
+/*
+ * Get a server from a fd
+ * @param fd The file descriptor to get the server from
+ * @return The server
+ */
 Server Multiplexer::_getServer(const int fd) const {
   for (std::vector<Server>::const_iterator it = _servers.begin(); it != _servers.end(); ++it) {
     if (it->getFd() == fd) return *it;

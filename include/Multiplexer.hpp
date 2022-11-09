@@ -34,7 +34,6 @@ class Multiplexer {
 
   // Methods
   int         _pollSockets(const int timeout);
-  void        _handleData(const std::string &data);
   bool        _isServer(const int fd) const;
   Server      _getServer(const int fd) const;
   void        _addClient(const int socket);
