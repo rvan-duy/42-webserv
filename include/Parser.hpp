@@ -7,9 +7,12 @@
 #include <map>
 #include <Logger.hpp>
 
+/* Circle inclusion, so doesn't compile without this parser definition */
 class Parser;
+/* Parser member function typedef */
 typedef void	(Parser::*ParserFunc)(Server *dest, std::vector<std::string> dataLine);
 
+/* Key - parser function pair */
 typedef struct s_comp
 {
     std::string	key;
@@ -17,6 +20,7 @@ typedef struct s_comp
 }	t_comp;
 
 typedef std::vector<std::string> t_dataLine;
+
 /*
 	Example datablock:
 	server {
@@ -54,13 +58,17 @@ class Parser {
 		int							parseDataBlock(std::vector<DataBlock> *pDest);
 		int							makeAst();
 
-		t_comp	*generateParserFuncTable();
 		void	parseAst(std::vector<Server>* pServers);
-		void	parsePort(Server *dest, t_dataLine line);
 		Server	convertBlockToServer(DataBlock block);
 
+		/* AST parsing functions */
+		void	parsePort(Server *dest, t_dataLine line);
+		void	parseMaxBodySize(Server *dest, t_dataLine line);
+		void	parseErrorPage(Server *dest, t_dataLine line);
+		void	parseHost(Server *dest, t_dataLine line);
+		void	parseServerName(Server *dest, t_dataLine line);
 		/* table with key value pairs for parsing AST */
-		static t_comp	parserFuncTable[];
+		static t_comp parserFuncTable[];
 
 		std::vector<Token>				_tokens;
 		AbstractSyntaxTree				_tree;

@@ -24,8 +24,8 @@ int		Parser::parseTokens(std::vector<Server>* pServers) {
  * Looks ahead in tokens to see what kind of parsing is needed
  * Different parsing method is used for open curl or semicolon
  * 
- * !!! Returns WORD in case no special char is found
- * 	This is because both a WORD and no special char ends up in errors
+ * !!! Returns WORD in case of EOF
+ * 	This is because both a WORD and EOF end up in errors
 */
 Token::ETokenType	Parser::lookAhead(std::vector<Token>::iterator it, std::vector<Token>::iterator const& end) {
 	while (it != end && it->isType(Token::WORD)) {
@@ -109,19 +109,90 @@ int	Parser::makeAst() {
 
 t_comp Parser::parserFuncTable[3] = {
 	{"listen", &Parser::parsePort},
-	{"serverName", &Parser::parsePort},
-	{"errorPage", &Parser::parsePort},
+	{"serverName", &Parser::parseServerName},
+	{"errorPage", &Parser::parseErrorPage},
+	{"maxBodySize", &Parser::parseMaxBodySize},
+	{"return", &Parser::parseHost},
 };
 
+void	Parser::parseServerName(Server *dest, t_dataLine line) {
+	if (!dest || line.size() < 2) {
+		return ;
+	}
+	std::vector<std::string> serverName(line.size() - 1);
+	std::vector<std::string>::iterator it = line.begin();
+	it++;
+	while (it != line.end()) {
+		serverName.push_back(*it);
+		it++;
+	}
+	dest->setServerName(serverName);
+}
+
+void	Parser::parseErrorPage(Server *dest, t_dataLine line) {
+	if (!dest || line.size() != 3) {
+		return ;
+	}
+	std::string statusCode;
+
+	statusCode = line.at(1);
+	for (size_t i = 0; i < statusCode.length(); i++) {
+		if (!isdigit(statusCode[i])) {
+			return ;
+		}
+	}
+	dest->setErrorPage(std::stoi(statusCode), line.at(2));
+}
+
+void	Parser::parseHost(Server *dest, t_dataLine line) {
+	if (!dest || line.size() != 3) {
+		return ;
+	}
+	std::string statusCode;
+
+	statusCode = line.at(1);
+	for (size_t i = 0; i < statusCode.length(); i++) {
+		if (!isdigit(statusCode[i])) {
+			return ;
+		}
+	}
+	dest->setHost(std::stoi(statusCode), line.at(2));
+}
+
 void	Parser::parsePort(Server *dest, t_dataLine line) {
-	// Loop through parserfunctable
+	if (!dest || line.size() != 2) {
+		return ;
+	}
+	std::string	port;
+
+	port = line.at(1);
+	for (size_t i = 0; i < port.length(); i++) {
+		if (!isdigit(port[i])) {
+			return ;
+		}
+	}
+	dest->setPort(std::stoi(line.at(1)));
+}
+
+void	Parser::parseMaxBodySize(Server *dest, t_dataLine line) {
+	if (!dest || line.size() != 2) {
+		return ;
+	}
+	std::string maxBodySize;
+
+	maxBodySize = line.at(1);
+	for (size_t i = 0; i < maxBodySize.length(); i++) {
+		if (!isdigit(maxBodySize[i])) {
+			return ;
+		}
+	}
+	dest->setMaxBody(std::stoi(line.at(1)));
 }
 
 /* Converts datablock into server class */
 Server	Parser::convertBlockToServer(DataBlock block) {
-
-	Server	server;
 	std::vector<t_dataLine >::iterator it = block._dataLines.begin();
+	Server	server;
 
 
 	return server;
@@ -129,7 +200,7 @@ Server	Parser::convertBlockToServer(DataBlock block) {
 
 void	Parser::parseAst(std::vector<Server>* pServers) {
 	// TODO: replace with iterator
-	for (int i = 0; i < _tree._blocks.size(); i++) {
+	for (size_t i = 0; i < _tree._blocks.size(); i++) {
 		/* If datablock.name == "server" */
 		if (_tree._blocks.at(i)._name.size() == 1 &&
 			_tree._blocks.at(i)._name[0] == "server") {
