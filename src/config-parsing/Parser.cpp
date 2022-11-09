@@ -14,6 +14,7 @@ int		Parser::parseTokens(std::vector<Server>* pServers) {
 		return 1;
 	}
 	parseAst(pServers);
+	Server test = pServers->at(0);
 	return 0;
 }
 
@@ -107,7 +108,7 @@ int	Parser::makeAst() {
 /* Parsing abstract syntax tree		 	          */
 /**************************************************/
 
-t_comp Parser::parserFuncTable[3] = {
+t_comp Parser::parserFuncTable[PARSER_FUNC_N] = {
 	{"listen", &Parser::parsePort},
 	{"serverName", &Parser::parseServerName},
 	{"errorPage", &Parser::parseErrorPage},
@@ -119,7 +120,7 @@ void	Parser::parseServerName(Server *dest, t_dataLine line) {
 	if (!dest || line.size() < 2) {
 		return ;
 	}
-	std::vector<std::string> serverName(line.size() - 1);
+	std::vector<std::string> serverName;
 	std::vector<std::string>::iterator it = line.begin();
 	it++;
 	while (it != line.end()) {
@@ -193,8 +194,16 @@ void	Parser::parseMaxBodySize(Server *dest, t_dataLine line) {
 Server	Parser::convertBlockToServer(DataBlock block) {
 	std::vector<t_dataLine >::iterator it = block._dataLines.begin();
 	Server	server;
+	for (size_t i = 0; i < block._dataLines.size(); i++) {
+		for (size_t j = 0; j < PARSER_FUNC_N; j++) {
+			if (block._dataLines[i].at(0) == parserFuncTable[j].key) {
+				(this->*(parserFuncTable[j].func))(&server, block._dataLines[i]);
+			}
+		}
+	}
+	for (size_t i = 0; i < block._blocks.size(); i++) {
 
-
+	}
 	return server;
 }
 
@@ -205,7 +214,7 @@ void	Parser::parseAst(std::vector<Server>* pServers) {
 		if (_tree._blocks.at(i)._name.size() == 1 &&
 			_tree._blocks.at(i)._name[0] == "server") {
 				/* Convert datablock into server class */
-				convertBlockToServer(_tree._blocks.at(i));
+				pServers->push_back(convertBlockToServer(_tree._blocks.at(i)));
 			}
 	}
 }

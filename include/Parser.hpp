@@ -7,6 +7,8 @@
 #include <map>
 #include <Logger.hpp>
 
+#define PARSER_FUNC_N 5
+
 /* Circle inclusion, so doesn't compile without this parser definition */
 class Parser;
 /* Parser member function typedef */
@@ -68,7 +70,7 @@ class Parser {
 		void	parseHost(Server *dest, t_dataLine line);
 		void	parseServerName(Server *dest, t_dataLine line);
 		/* table with key value pairs for parsing AST */
-		static t_comp parserFuncTable[];
+		static t_comp parserFuncTable[PARSER_FUNC_N];
 
 		std::vector<Token>				_tokens;
 		AbstractSyntaxTree				_tree;

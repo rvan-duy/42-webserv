@@ -30,6 +30,13 @@ You must provide some configuration files and default basic files to test and de
 
 #define MAX_PORT 65535
 
+/* Default values */
+#define DEFAULT_ERROR_STATUS 666
+#define DEFAULT_ERROR_PATH "defaultErrorPage"
+
+#define DEFAULT_HOST_STATUS 777
+#define DEFAULT_HOST_PATH "default host path"
+
 enum EHttpMethods {
 	GET,
 	POST,
@@ -57,29 +64,27 @@ class Server {
 
 		// To check if variables have been set
 		bool	hasServerName() const;
-		bool	hasHost() const;
 		bool	hasPort() const;
 		bool	hasMaxBody() const;
-		bool	hasErrorPage() const;
 		bool	hasRoutes() const;
 
 		//  Getters
 		std::vector<std::string>	getServerName() const;
-		PageData					&getHost() const;
-		PageData					&getErrorPage() const;
+		PageData					getHost() const;
+		PageData					getErrorPage() const;
 		int 						getMaxBody() const;
 		int							getPort() const;
 
 		// Setters
-		int		setHost(int const& statusCode, std::string const& filePath);
-		int		setErrorPage(int const& statusCode, std::string const& filePath);
+		int		setHost(int const statusCode, std::string const filePath);
+		int		setErrorPage(int const statusCode, std::string const filePath);
 		void	setServerName(std::vector<std::string> value);
 		int		setPort(int const& value);
 		int		setMaxBody(double const& value);
 
 	private:
-		PageData*					_pDefaultErrorPage;
-		PageData*					_pHost;
+		PageData					_defaultErrorPage;
+		PageData					_host;
 		int							_port;
 		int				 			_maxBodySize;
 		std::vector<std::string>	_serverName;
