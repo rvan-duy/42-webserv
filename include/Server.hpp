@@ -120,6 +120,9 @@ class Server {
   int  setMaxBody(double const& value);
   void addRoute(Route const& route);
 
+  // Oswins stuff
+  void  processRequest(std::string& msg, int fd);
+
  private:
   /* Config variables */
   PageData                 _defaultErrorPage;
@@ -128,6 +131,7 @@ class Server {
   int                      _maxBodySize;
   std::vector<std::string> _serverName;
   std::vector<Route>       _routes;
+  std::map<int, HttpRequest*>   _requests;
 
   int                      _fd;                // file descriptor for socket
   int                      _domain;            // domain of socket (IPv4 or IPv6)
