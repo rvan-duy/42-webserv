@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <General.hpp>
+
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
 #include <Logger.hpp>
@@ -66,7 +68,6 @@ You must provide some configuration files and default basic files to test and de
 #define DEFAULT_HOST_STATUS 777
 #define DEFAULT_HOST_PATH "default host path"
 
-enum EHttpMethods { GET, POST, DELETE };
 
 struct Route {
   std::string               route;

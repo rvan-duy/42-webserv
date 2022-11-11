@@ -1,32 +1,42 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
+#include <General.hpp>
+
 #include "HttpMessage.hpp"
 #include "HttpResponse.hpp"
 #include "Server.hpp"
 #include <string>
 
-// HTTP REQUEST BASE
+std::string  extractArgument(const std::string& msg, int n);
+EHttpMethods _parseMethod(const std::string &method);
 
+// HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
+  HttpRequest(const std::string& msg);
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
-  enum HttpMethod { GET, POST, DELETE };
+  // enum HttpMethod { GET, POST, DELETE, NONE };
+
+  void  extractInitialResponsLine(const std::string& msg);
+  void  extractHeaders(const std::string& msg);
+  void  extractBody(const std::string& msg);
+
 
   // Abstract
   virtual void executeRequest() = 0;
   virtual HttpResponse constructResponse(Server& server, std::string& index) = 0;
 
   // Getters
-  HttpMethod  getMethod() const;
-  std::string getUri() const;
-  bool        getChunked() const;
+  EHttpMethods  getMethod() const;
+  std::string   getUri() const;
+  bool          getChunked() const;
 
  private:
-  HttpMethod                         _method;
+  EHttpMethods                       _method;
   std::string                        _uri;
   bool                               _chunked;
 };

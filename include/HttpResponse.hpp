@@ -24,12 +24,14 @@ class HttpResponse : public HttpMessage {
   int         getStatusCode() const;
   std::string getStatusMessage() const;
 
+  // Setters
+  void        _setResponse(const std::string &path, const int status_code, const std::string &status_message,
+                            const HttpVersion version);
+
  private:
   int         _statusCode;     // status code of response
   std::string _statusMessage;  // status message of response
 
-  void        _setResponse(const std::string &path, const int status_code, const std::string &status_message,
-                            const HttpVersion version);
   std::string _getContentType(const std::string &path) const;
 };
 
