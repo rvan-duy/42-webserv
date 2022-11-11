@@ -145,6 +145,10 @@ int Server::getMaxBody() const {
   return _maxBodySize;
 }
 
+std::vector<Route>      Server::getRoutes() const {
+  return _routes;
+}
+
 /**************************************************/
 /* Setters                                        */
 /**************************************************/
