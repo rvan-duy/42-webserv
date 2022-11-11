@@ -1,22 +1,36 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <Logger.hpp>
-#include <HttpRequest.hpp>
-#include <HttpResponse.hpp>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <sys/ioctl.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include <HttpRequest.hpp>
+#include <HttpResponse.hpp>
+#include <Logger.hpp>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <cstring>
 #include <sstream>
+#include <string>
+#include <vector>
+
+/****************************************************************************************************/
+/* The Server Class (formerly known as Socket)                                                      */
+/* - A socket is a mechanism that provides programs access to the network, it allows messages to be */
+/*   sent and received between programs.                                                            */
+/* - A socket is a combination of an IP address and a port number.                                  */
+/* - A socket is a file descriptor, and is used to read and write data to the network.              */
+/****************************************************************************************************/
+/* A few steps are involved with sockets                                                            */
+/* 1. Create a socket                                                                               */
+/* 2. Bind the socket to an address and port number (also known as identifying the socket,          */
+/*      giving it a name..)                                                                         */
+/* 3. Wait for an incoming connection                                                               */
+/* 4. Send and receive messages                                                                     */
+/* 5. Close socket                                                                                  */
+/****************************************************************************************************/
 
 /*
 In the configuration file, you should be able to:
@@ -52,79 +66,74 @@ You must provide some configuration files and default basic files to test and de
 #define DEFAULT_HOST_STATUS 777
 #define DEFAULT_HOST_PATH "default host path"
 
-enum EHttpMethods {
-	GET,
-	POST,
-	DELETE
-};
+enum EHttpMethods { GET, POST, DELETE };
 
 struct Route {
-	std::string					route;
-	std::vector<EHttpMethods>	allowedMethods;
-	std::string					httpRedirection;
-	std::string					searchDirectory;
-	std::string					defaultFile;
-	std::string					cgiParam;
-	bool						autoIndex;
+  std::string               route;
+  std::vector<EHttpMethods> allowedMethods;
+  std::string               httpRedirection;
+  std::string               searchDirectory;
+  std::string               defaultFile;
+  std::string               cgiParam;
+  bool                      autoIndex;
 };
 
 struct PageData {
-	int			statusCode;
-	std::string filePath;
+  int         statusCode;
+  std::string filePath;
 };
 
 class Server {
-	public:
-		Server();
-		~Server();
+ public:
+  Server();
+  ~Server();
 
-		// Methods
-		void prepare(const int backlog = 10);
-		void sendResponse(const HttpResponse& response) const;
-		void addClient(const int fd);
-		void removeClient(const int fd);
+  // Methods
+  void prepare(const int backlog = 10);
+  void sendResponse(const HttpResponse& response) const;
+  void addClient(const int fd);
+  void removeClient(const int fd);
 
-		// LEGACY METHODS
-		void accept_connection();
-		void wait_for_connections();
+  // LEGACY METHODS
+  void accept_connection();
+  void wait_for_connections();
 
-		// To check if variables have been set
-		bool	hasServerName() const;
-		bool	hasPort() const;
-		bool	hasMaxBody() const;
-		bool	hasRoutes() const;
+  // To check if variables have been set
+  bool hasServerName() const;
+  bool hasPort() const;
+  bool hasMaxBody() const;
+  bool hasRoutes() const;
 
-		//  Getters
-		std::vector<std::string>	getServerName() const;
-		PageData					getHost() const;
-		PageData					getErrorPage() const;
-		int 						getMaxBody() const;
-		int							getPort() const;
-		int							getFd() const;
+  //  Getters
+  std::vector<std::string> getServerName() const;
+  PageData                 getHost() const;
+  PageData                 getErrorPage() const;
+  int                      getMaxBody() const;
+  int                      getPort() const;
+  int                      getFd() const;
 
-		// Setters
-		int 	setHost(int const& statusCode, std::string const& filePath);
-		int 	setErrorPage(int const& statusCode, std::string const& filePath);
-		void 	setServerName(std::vector<std::string> const& value);
-		int		setPort(int const& value);
-		int		setMaxBody(double const& value);
-		void	addRoute(Route const& route);
+  // Setters
+  int  setHost(int const& statusCode, std::string const& filePath);
+  int  setErrorPage(int const& statusCode, std::string const& filePath);
+  void setServerName(std::vector<std::string> const& value);
+  int  setPort(int const& value);
+  int  setMaxBody(double const& value);
+  void addRoute(Route const& route);
 
-	private:
-		/* Config variables */
-		PageData					_defaultErrorPage;
-		PageData					_host;
-		int							_port;
-		int				 			_maxBodySize;
-		std::vector<std::string>	_serverName;
-		std::vector<Route>			_routes;
+ private:
+  /* Config variables */
+  PageData                 _defaultErrorPage;
+  PageData                 _host;
+  int                      _port;
+  int                      _maxBodySize;
+  std::vector<std::string> _serverName;
+  std::vector<Route>       _routes;
 
-
-		int                      _fd;                // file descriptor for socket
-		int                      _domain;            // domain of socket (IPv4 or IPv6)
-		int                      _type;              // type of socket (TCP or UDP)
-		char                     _buffer[1000000];   // buffer for reading data from socket
-		int                      _accepted;          // file descriptor for accepted connection, -1 if no connection
-		struct sockaddr_in6      _servaddr;          // server address
-		std::vector<int>         _connectedClients;  // list of connected clients
+  int                      _fd;                // file descriptor for socket
+  int                      _domain;            // domain of socket (IPv4 or IPv6)
+  int                      _type;              // type of socket (TCP or UDP)
+  char                     _buffer[1000000];   // buffer for reading data from socket
+  int                      _accepted;          // file descriptor for accepted connection, -1 if no connection
+  struct sockaddr_in6      _servaddr;          // server address
+  std::vector<int>         _connectedClients;  // list of connected clients
 };
