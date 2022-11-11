@@ -121,8 +121,9 @@ class Server {
   int  setMaxBody(double const& value);
   void addRoute(Route const& route);
 
-  // Oswins stuff
-  void  processRequest(std::string& msg, int fd);
+  // Request generation
+  HttpRequest *createRequest(std::string& msg);
+  void  buildRequest(std::string& msg, int fd);
 
  private:
   /* Config variables */

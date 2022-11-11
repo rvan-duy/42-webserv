@@ -3,6 +3,7 @@
 
 #include "HttpMessage.hpp"
 #include "HttpResponse.hpp"
+#include "Server.hpp"
 #include <string>
 
 // HTTP REQUEST BASE
@@ -10,13 +11,14 @@
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
-// maybe equal overload?
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
+  enum HttpMethod { GET, POST, DELETE };
+
   // Abstract
-  void executeRequest() = 0;
-  HttpResponse& constructResponse() = 0;
+  virtual void executeRequest() = 0;
+  virtual HttpResponse constructResponse(Server& server, std::string& index) = 0;
 
   // Getters
   HttpMethod  getMethod() const;
@@ -34,14 +36,13 @@ class HttpRequest : public HttpMessage {
 class	GetRequest : public HttpRequest
 {
 public:
-	GetRequest();
+	GetRequest(std::string& msg);
 	GetRequest(const GetRequest& ref);
-	GetRequest& operator=(const GetRequest& ref);
 	~GetRequest();
 
 	// Concrete
   void executeRequest();
-  HttpResponse& constructResponse();
+  HttpResponse constructResponse(Server& server, std::string& index);
 };
 
 // DELETE
@@ -49,14 +50,13 @@ public:
 class	DeleteRequest : public HttpRequest
 {
 public:
-	DeleteRequest();
+	DeleteRequest(std::string& msg);
 	DeleteRequest(const DeleteRequest& ref);
-	DeleteRequest& operator=(const DeleteRequest& ref);
 	~DeleteRequest();
 
 	// Concrete
   void executeRequest();
-  HttpResponse& constructResponse();
+  HttpResponse constructResponse(Server& server, std::string& index);
 };
 
 // POST
@@ -64,14 +64,13 @@ public:
 class	PostRequest : public HttpRequest
 {
 public:
-	PostRequest();
+	PostRequest(std::string& msg);
 	PostRequest(const PostRequest& ref);
-	PostRequest& operator=(const PostRequest& ref);
 	~PostRequest();
 
 	// Concrete
   void executeRequest();
-  HttpResponse& constructResponse();
+  HttpResponse constructResponse(Server& server, std::string& index);
 };
 
 #endif  // HTTP_REQUEST_HPP

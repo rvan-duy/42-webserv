@@ -1,24 +1,15 @@
-#include <PostRequest.hpp>
+#include "HttpRequest.hpp"
 
-#include <string>
-#include <iostream>
+PostRequest::PostRequest(std::string& msg) : HttpRequest(msg) {}
 
-PostRequest::PostRequest()
-{
+PostRequest::PostRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 
+PostRequest::~PostRequest() {}
+
+void PostRequest::executeRequest() {
+  return ;
 }
 
-PostRequest::PostRequest(const PostRequest& ref)
-{
-
-}
-
-PostRequest&	PostRequest::operator=(const PostRequest& ref)
-{
-
-}
-
-PostRequest::~PostRequest()
-{
-
+HttpResponse PostRequest::constructResponse(Server& server, std::string& index) {
+  return HttpResponse();
 }

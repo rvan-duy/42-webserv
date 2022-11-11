@@ -1,24 +1,39 @@
-#include <GetRequest.hpp>
+#include "HttpRequest.hpp"
 
-#include <string>
-#include <iostream>
+GetRequest::GetRequest(std::string& msg) : HttpRequest(msg) {}
 
-GetRequest::GetRequest()
-{
+GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 
+GetRequest::~GetRequest() {}
+
+void GetRequest::executeRequest() {
+  return ;
 }
 
-GetRequest::GetRequest(const GetRequest& ref)
-{
+HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
+  Logger &logger = Logger::getInstance();
+  logger.log("Response type: GET");
 
-}
+  response HttpResponse();
 
-GetRequest&	GetRequest::operator=(const GetRequest& ref)
-{
+  std::string path = server.root + getUri();
+  logger.log("Path: " + path);
 
-}
+  if (!_fileExists(path)) {
+    logger.log("File doesn't exist");
 
-GetRequest::~GetRequest()
-{
+    const std::string index_path = path + index;
+    logger.log("Looking for index path: " + index_path);
+    if (!_fileExists(index_path)) {
+      logger.log("Index file doesn't exist");
 
+      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      return;
+    } else {
+      logger.log("Index file exists");
+      path = index_path;
+    }
+  }
+  response._setResponse(path, 200, "OK", getVersion());
+  return response;
 }

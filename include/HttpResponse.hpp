@@ -17,7 +17,7 @@ class HttpResponse : public HttpMessage {
   ~HttpResponse();
 
   // Methods
-  void        createResponse(const HttpRequest &request, const std::string &root, const std::string &index);
+  // void        createResponse(const HttpRequest &request, const std::string &root, const std::string &index);
   std::string toStr() const;
 
   // Getters
@@ -30,8 +30,9 @@ class HttpResponse : public HttpMessage {
 
   void        _setResponse(const std::string &path, const int status_code, const std::string &status_message,
                             const HttpVersion version);
-  bool        _fileExists(const std::string &path) const;
   std::string _getContentType(const std::string &path) const;
 };
+
+bool        _fileExists(const std::string &path);
 
 #endif  // HTTP_RESPONSE_HPP

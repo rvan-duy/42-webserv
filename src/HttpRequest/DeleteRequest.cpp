@@ -1,24 +1,15 @@
-#include <DeleteRequest.hpp>
+#include "HttpRequest.hpp"
 
-#include <string>
-#include <iostream>
+DeleteRequest::DeleteRequest(std::string& msg) : HttpRequest(msg) {}
 
-DeleteRequest::DeleteRequest()
-{
+DeleteRequest::DeleteRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 
+DeleteRequest::~DeleteRequest() {}
+
+void DeleteRequest::executeRequest() {
+  return ;
 }
 
-DeleteRequest::DeleteRequest(const DeleteRequest& ref)
-{
-
-}
-
-DeleteRequest&	DeleteRequest::operator=(const DeleteRequest& ref)
-{
-
-}
-
-DeleteRequest::~DeleteRequest()
-{
-
+HttpResponse DeleteRequest::constructResponse(Server& server, std::string& index) {
+  return HttpResponse();
 }
