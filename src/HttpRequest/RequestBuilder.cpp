@@ -7,13 +7,13 @@ HttpRequest *Server::createRequest(std::string& msg)
   switch (_parseMethod(extractArgument(msg, 1))) 
   {
     case GET:
-        return new GetRequest(target);
+        return new GetRequest(msg);
     case POST:
-        return new PostRequest(target);
+        return new PostRequest(msg);
     case DELETE:
-        return new DeleteRequest(target);
+        return new DeleteRequest(msg);
     default:
-        return new HttpRequest(target);
+        return NULL;
   }
   return NULL;
 }

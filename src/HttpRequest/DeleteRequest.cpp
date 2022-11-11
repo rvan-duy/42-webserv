@@ -2,7 +2,7 @@
 
 DeleteRequest::DeleteRequest(std::string& msg) : HttpRequest(msg) {}
 
-DeleteRequest::DeleteRequest(const GetRequest& ref) : HttpRequest(ref)  {}
+DeleteRequest::DeleteRequest(const DeleteRequest& ref) : HttpRequest(ref)  {}
 
 DeleteRequest::~DeleteRequest() {}
 

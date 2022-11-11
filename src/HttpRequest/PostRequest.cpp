@@ -2,7 +2,7 @@
 
 PostRequest::PostRequest(std::string& msg) : HttpRequest(msg) {}
 
-PostRequest::PostRequest(const GetRequest& ref) : HttpRequest(ref)  {}
+PostRequest::PostRequest(const PostRequest& ref) : HttpRequest(ref)  {}
 
 PostRequest::~PostRequest() {}
 

@@ -14,9 +14,9 @@ HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
   Logger &logger = Logger::getInstance();
   logger.log("Response type: GET");
 
-  response HttpResponse();
+  HttpResponse response;
 
-  std::string path = server.root + getUri();
+  std::string path = "root" + getUri();  // future get root from server class
   logger.log("Path: " + path);
 
   if (!_fileExists(path)) {
@@ -28,7 +28,7 @@ HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
       logger.log("Index file doesn't exist");
 
       response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
-      return;
+      return response;
     } else {
       logger.log("Index file exists");
       path = index_path;

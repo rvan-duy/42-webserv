@@ -62,7 +62,7 @@ void  HttpRequest::extractInitialResponsLine(const std::string& msg) {
 
   _method = _parseMethod(extractArgument(msg, 1));
   _uri = extractArgument(msg, 2);
-  _version = _parse_version(extractArgument(msg, 3));
+  _version = _parseVersion(extractArgument(msg, 3));
 
   logger.log("HttpRequest:\n\t\tmethod:\t\t" + extractArgument(msg, 1) + "\n\t\tversion:\t" + extractArgument(msg, 3) + "\n\t\turi:\t\t" + _uri);
 }
@@ -99,7 +99,7 @@ void  HttpRequest::extractBody(const std::string& msg) {
 /*
  * Getter for the request method
  */
-HttpRequest::HttpMethod HttpRequest::getMethod() const {
+EHttpMethods HttpRequest::getMethod() const {
   return _method;
 }
 
@@ -119,9 +119,9 @@ bool  HttpRequest::getChunked() const {
  * @param method the method string
  * @return the method enum
  */
-HttpRequest::HttpMethod HttpRequest::_parseMethod(const std::string &method) {
+EHttpMethods _parseMethod(const std::string &method) {
   Logger &logger = Logger::getInstance();
-  std::map<std::string, HttpMethod> method_map;
+  std::map<std::string, EHttpMethods> method_map;
 
   method_map["GET"]    = GET;
   method_map["POST"]   = POST;
@@ -130,8 +130,8 @@ HttpRequest::HttpMethod HttpRequest::_parseMethod(const std::string &method) {
   try {
     return method_map.at(method);
   } catch (std::exception& e) {
-    _status_code = 400;
+    // _status_code = 400;
     logger.error("bad request: method unsupported ( " + method + " )");
-    return HttpRequest::NONE;
+    return NONE;
   }
 }
