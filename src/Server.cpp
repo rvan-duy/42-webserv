@@ -118,7 +118,7 @@ void Server::removeClient(const int socket) {
 }
 
 /**************************************************/
-/* Getters and setters                            */
+/* Getters                                        */
 /**************************************************/
 
 int Server::getFd() const {
@@ -144,6 +144,14 @@ int Server::getPort() const {
 int Server::getMaxBody() const {
   return _maxBodySize;
 }
+
+std::vector<Route>      Server::getRoutes() const {
+  return _routes;
+}
+
+/**************************************************/
+/* Setters                                        */
+/**************************************************/
 
 int		Server::setMaxBody(double const& value) {
 	// TODO: check if 0 is possible
@@ -206,7 +214,7 @@ void Server::addRoute(Route const &route) {
  * To check if variables are set
  */
 bool Server::hasServerName() const {
-  return (_serverName.size() == 0);
+  return (_serverName.size() != 0);
 }
 
 bool Server::hasPort() const {

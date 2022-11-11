@@ -8,10 +8,8 @@ SCENARIO("Constructing a new server class") {
 		Server	testServer;
 		THEN("All has X functions should return false") {
 			REQUIRE_FALSE(testServer.hasServerName());
-			REQUIRE_FALSE(testServer.hasHost());
 			REQUIRE_FALSE(testServer.hasPort());
 			REQUIRE_FALSE(testServer.hasMaxBody());
-			REQUIRE_FALSE(testServer.hasErrorPage());
 		}
 
 		THEN("Server name can be set correctly") {
@@ -25,7 +23,6 @@ SCENARIO("Constructing a new server class") {
 		THEN("Host can be set correctly") {
 			testServer.setHost(300, "bla");
 			PageData host = testServer.getHost();
-			REQUIRE(testServer.hasHost());
 			REQUIRE(host.statusCode == 300);
 			REQUIRE(host.filePath == "bla");
 		}
@@ -33,7 +30,6 @@ SCENARIO("Constructing a new server class") {
 		THEN("Error page can be set correctly") {
 			testServer.setErrorPage(300, "bla");
 			PageData host = testServer.getErrorPage();
-			REQUIRE(testServer.hasErrorPage());
 			REQUIRE(host.statusCode == 300);
 			REQUIRE(host.filePath == "bla");
 		}
