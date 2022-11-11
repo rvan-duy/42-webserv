@@ -14,7 +14,6 @@ int		Parser::parseTokens(std::vector<Server>* pServers) {
 		return 1;
 	}
 	parseAst(pServers);
-	Server test = pServers->at(0);
 	return 0;
 }
 
@@ -103,7 +102,6 @@ int	Parser::makeAst() {
 	return 0;
 }
 
-
 /**************************************************/
 /* Parsing abstract syntax tree			          */
 /**************************************************/
@@ -111,7 +109,7 @@ int	Parser::makeAst() {
 void	Parser::parseDataLines(Server *pServer, std::vector<t_dataLine> const& lines) {
 	for (size_t i = 0; i < lines.size(); i++) {
 		for (size_t j = 0; j < PARSER_FUNC_N; j++) {
-			if (lines[i].at(0) == lineParsingFuncs[j].key) {
+			if (lines[i].size() != 0 && lines[i].at(0) == lineParsingFuncs[j].key) {
 				(this->*(lineParsingFuncs[j].func))(pServer, lines[i]);
 			}
 		}

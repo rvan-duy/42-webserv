@@ -2,10 +2,8 @@
 #define MULTIPLEXER_HPP
 
 #include <poll.h>
-
 #include <iterator>
 #include <vector>
-
 #include "Server.hpp"
 
 /****************************************************************************************/
