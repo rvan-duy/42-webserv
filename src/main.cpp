@@ -20,7 +20,6 @@ int	parseConfigFile(std::string const& filePath) {
 		logger.error("Error parsing tokens from configfile");
 		return 1;
 	}
-  int i = servers.at(0).hasServerName();
 	logger.log("Tokens successfully parsed");
 	cFile.close();
 	return 0;
@@ -32,7 +31,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  parseConfigFile(argv[1]);
+  // parseConfigFile(argv[1]);
 
   std::vector<Server> servers;      // vector of servers
   Multiplexer         multiplexer;  // the multiplexer object that is responsible for handling all the servers
@@ -47,7 +46,6 @@ int main(int argc, char **argv) {
   my_server.setErrorPage(404, "404");
   servers.push_back(my_server);
   /* END OF TEMPORARY CODE */
-
   try {
     // Iterate through all servers and add them to the multiplexer
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
@@ -58,4 +56,5 @@ int main(int argc, char **argv) {
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
   }
+  return 0;
 }
