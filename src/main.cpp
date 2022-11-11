@@ -13,13 +13,14 @@ int	parseConfigFile(std::string const& filePath) {
 	}
 	logger.log("Opened config file");
 
-  	std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
+  std::vector<Token> tokens = Lexer::tokenizeFile(cFile);
 	std::vector<Server> servers;
 	Parser	parser(tokens);
 	if (parser.parseTokens(&servers)) {
 		logger.error("Error parsing tokens from configfile");
 		return 1;
 	}
+  int i = servers.at(0).hasServerName();
 	logger.log("Tokens successfully parsed");
 	cFile.close();
 	return 0;

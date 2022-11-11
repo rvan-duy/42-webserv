@@ -14,7 +14,6 @@ int		Parser::parseTokens(std::vector<Server>* pServers) {
 		return 1;
 	}
 	parseAst(pServers);
-	Server test = pServers->at(0);
 	return 0;
 }
 
@@ -102,7 +101,6 @@ int	Parser::makeAst() {
 	}
 	return 0;
 }
-
 
 /**************************************************/
 /* Parsing abstract syntax tree			          */
