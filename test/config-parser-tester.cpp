@@ -38,7 +38,7 @@ static int initConfigTest(std::string baseUrl, int i) {
 	std::vector<Token> tokens = Lexer::tokenizeFile(file);
 	file.close();
 	Parser	parser(tokens);
-	return parser.parseTokens();
+	return parser.parseTokens(&servers);
 }
 
 static void	destructConfig() {
@@ -158,64 +158,61 @@ SCENARIO("Bad config files") {
 }
 
 SCENARIO("Test config files") {
-	std::string	fileDest("testconfigs/parser_");
+	std::string	fileDest("testconfigs/good_");
 	int configTest = 0;
-	// parser_0
-	WHEN(getFileDest(fileDest, configTest)) {
-		int ret = initConfigTest(fileDest, configTest);
-		REQUIRE(ret == 0);
-		REQUIRE(servers.size() == 1);
-		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
-		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
-		REQUIRE_FALSE(servers[0].hasRoutes());
-		destructConfig();
-	}
-	configTest++;
-
-	// parser_1
+	// good_0
 	WHEN(getFileDest(fileDest, configTest)) {
 		int ret = initConfigTest(fileDest, configTest);
 		REQUIRE(ret == 0);
 		REQUIRE(servers.size() == 2);
-		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
-		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
-		REQUIRE_FALSE(servers[0].hasRoutes());
 
-		REQUIRE_FALSE(servers[1].hasServerName());
-		REQUIRE_FALSE(servers[1].hasHost());
-		REQUIRE_FALSE(servers[1].hasPort());
-		REQUIRE_FALSE(servers[1].hasMaxBody());
-		REQUIRE_FALSE(servers[1].hasErrorPage());
-		REQUIRE_FALSE(servers[1].hasRoutes());
+		THEN("Port should be set for first server") {
+			REQUIRE(servers[0].hasPort());
+			REQUIRE(servers[0].getPort() == 80);
+		}
+
+		THEN("Server name should be set for first server") {
+			REQUIRE(servers[0].hasServerName());
+			std::vector<std::string> serverName = servers[0].getServerName();
+			REQUIRE(serverName.size() == 2);
+			REQUIRE(serverName.at(0) == "localhost");
+			REQUIRE(serverName.at(1) == "www.localhost");
+		}
+		
+		THEN("Max body shouldnt be set for first server") {
+			REQUIRE_FALSE(servers[0].hasMaxBody());
+		}
+
+		THEN("Error page should be set for first server") {
+			PageData	data = servers[0].getErrorPage();
+			REQUIRE(data.statusCode == 404);
+			REQUIRE(data.filePath == "/error.html");
+		}
+
+		THEN("Host should be set for first server") {
+			PageData	data = servers[0].getHost();
+			REQUIRE(data.statusCode == 302);
+			REQUIRE(data.filePath == "http://localhost:8200$uri");
+		}
+
+		THEN("First server should have four routes") {
+			std::vector<Route> routes = servers[0].getRoutes();
+			REQUIRE(routes.size() == 4);
+		}
+		
+		THEN("Port should be set for second server") {
+			REQUIRE(servers[1].hasPort());
+			REQUIRE(servers[1].getPort() == 100);
+		}
+
+		THEN("max body should be set for second server") {
+			REQUIRE(servers[1].hasMaxBody());
+			REQUIRE(servers[1].getPort() == 100);
+		}
+
 		destructConfig();
 	}
 	configTest++;
 
-	// parser_2
-	WHEN(getFileDest(fileDest, configTest)) {
-		int ret = initConfigTest(fileDest, configTest);
-		REQUIRE(ret == 0);
-		REQUIRE(servers.size() == 2);
-		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
-		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
-		REQUIRE_FALSE(servers[0].hasRoutes());
-
-		REQUIRE_FALSE(servers[1].hasServerName());
-		REQUIRE_FALSE(servers[1].hasHost());
-		REQUIRE_FALSE(servers[1].hasPort());
-		REQUIRE_FALSE(servers[1].hasMaxBody());
-		REQUIRE_FALSE(servers[1].hasErrorPage());
-		REQUIRE_FALSE(servers[1].hasRoutes());
-		destructConfig();
-	}
-	configTest++;
 }
+
