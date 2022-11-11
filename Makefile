@@ -30,11 +30,11 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 MAIN				:=	main.cpp
 export SRCS			:=	Server.cpp \
 						HttpMessage.cpp \
-						HttpRequest/GetRequest.cpp \
-						HttpRequest/PostRequest.cpp \
-						HttpRequest/DeleteRequest.cpp \
-						HttpRequest/HttpRequest.cpp \
-						HttpRequest/RequestBuilder.cpp \
+						GetRequest.cpp \
+						PostRequest.cpp \
+						DeleteRequest.cpp \
+						HttpRequest.cpp \
+						RequestBuilder.cpp \
 						Lexer.cpp \
 						Token.cpp \
 						Parser.cpp \
