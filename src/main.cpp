@@ -1,5 +1,6 @@
 #include "Multiplexer.hpp"
 #include <Parser.hpp>
+#include <CGI.hpp>
 #include <Lexer.hpp>
 
 int	parseConfigFile(std::string const& filePath) {
@@ -25,12 +26,31 @@ int	parseConfigFile(std::string const& filePath) {
 	return 0;
 }
 
+void    testCgi() {
+  	char *const env[] = {
+		"USER=rcappend"
+		"SECURITYSESSIONID=186a7"
+		"XPC_FLAGS=0x0"
+		"__CF_USER_TEXT_ENCODING=0x12EBB:0x0:0x0"
+		"ORIGINAL_XDG_CURRENT_DESKTOP=undefined"
+		"TERM_PROGRAM=vscode"
+		"TERM_PROGRAM_VERSION=1.73.0"
+		"LANG=en_US.UTF-8"
+	};
+	CGI testCgi("/test/cgi/", env);
+
+	std::string dest;
+  testCgi.executeFile(&dest, "test/cgi/helloworld.py", "yes");
+	std::cout << dest << std::endl;
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
     return 1;
   }
 
+  testCgi();
   // parseConfigFile(argv[1]);
 
   std::vector<Server> servers;      // vector of servers
