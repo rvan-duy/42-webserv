@@ -103,7 +103,6 @@ int	Parser::makeAst() {
 	return 0;
 }
 
-
 /**************************************************/
 /* Parsing abstract syntax tree			          */
 /**************************************************/
@@ -261,7 +260,7 @@ void	Parser::parseRoot(void *dest, t_dataLine line) {
 		return ;
 	}
 	Route *route = static_cast<Route *>(dest);
-	route->searchDirectory = line.at(2);
+	route->rootDirectory = line.at(2);
 }
 
 void	Parser::parseIndex(void *dest, t_dataLine line) {

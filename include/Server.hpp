@@ -66,13 +66,16 @@ You must provide some configuration files and default basic files to test and de
 #define DEFAULT_HOST_STATUS 777
 #define DEFAULT_HOST_PATH "default host path"
 
+#define DEFAULT_PORT 80
+/* End of default values */
+
 enum EHttpMethods { GET, POST, DELETE };
 
 struct Route {
   std::string               route;
+  std::string               rootDirectory;
   std::vector<EHttpMethods> allowedMethods;
   std::string               httpRedirection;
-  std::string               searchDirectory;
   std::string               defaultFile;
   std::string               cgiParam;
   bool                      autoIndex;
@@ -100,7 +103,6 @@ class Server {
 
   // To check if variables have been set
   bool hasServerName() const;
-  bool hasPort() const;
   bool hasMaxBody() const;
   bool hasRoutes() const;
 

@@ -5,7 +5,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _accepted(-1) {
+Server::Server() : _port(DEFAULT_PORT), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _accepted(-1) {
   memset(&_servaddr, 0, sizeof(_servaddr));
   memset(&_buffer, 0, sizeof(_buffer));
   memset(&_defaultErrorPage, 0, sizeof(_defaultErrorPage));
@@ -206,11 +206,7 @@ void Server::addRoute(Route const &route) {
  * To check if variables are set
  */
 bool Server::hasServerName() const {
-  return (_serverName.size() == 0);
-}
-
-bool Server::hasPort() const {
-  return (_port != -1);
+  return (_serverName.size() != 0);
 }
 
 bool Server::hasMaxBody() const {

@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // parseConfigFile( &servers, argv[1] );
+  parseConfigFile(argv[1]);
 
   std::vector<Server> servers;      // vector of servers
   Multiplexer         multiplexer;  // the multiplexer object that is responsible for handling all the servers

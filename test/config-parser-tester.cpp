@@ -38,7 +38,7 @@ static int initConfigTest(std::string baseUrl, int i) {
 	std::vector<Token> tokens = Lexer::tokenizeFile(file);
 	file.close();
 	Parser	parser(tokens);
-	return parser.parseTokens();
+	return parser.parseTokens(&servers);
 }
 
 static void	destructConfig() {
@@ -166,10 +166,7 @@ SCENARIO("Test config files") {
 		REQUIRE(ret == 0);
 		REQUIRE(servers.size() == 1);
 		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
 		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
 		REQUIRE_FALSE(servers[0].hasRoutes());
 		destructConfig();
 	}
@@ -181,17 +178,10 @@ SCENARIO("Test config files") {
 		REQUIRE(ret == 0);
 		REQUIRE(servers.size() == 2);
 		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
 		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
 		REQUIRE_FALSE(servers[0].hasRoutes());
-
 		REQUIRE_FALSE(servers[1].hasServerName());
-		REQUIRE_FALSE(servers[1].hasHost());
-		REQUIRE_FALSE(servers[1].hasPort());
 		REQUIRE_FALSE(servers[1].hasMaxBody());
-		REQUIRE_FALSE(servers[1].hasErrorPage());
 		REQUIRE_FALSE(servers[1].hasRoutes());
 		destructConfig();
 	}
@@ -203,17 +193,10 @@ SCENARIO("Test config files") {
 		REQUIRE(ret == 0);
 		REQUIRE(servers.size() == 2);
 		REQUIRE_FALSE(servers[0].hasServerName());
-		REQUIRE_FALSE(servers[0].hasHost());
-		REQUIRE_FALSE(servers[0].hasPort());
 		REQUIRE_FALSE(servers[0].hasMaxBody());
-		REQUIRE_FALSE(servers[0].hasErrorPage());
 		REQUIRE_FALSE(servers[0].hasRoutes());
-
 		REQUIRE_FALSE(servers[1].hasServerName());
-		REQUIRE_FALSE(servers[1].hasHost());
-		REQUIRE_FALSE(servers[1].hasPort());
 		REQUIRE_FALSE(servers[1].hasMaxBody());
-		REQUIRE_FALSE(servers[1].hasErrorPage());
 		REQUIRE_FALSE(servers[1].hasRoutes());
 		destructConfig();
 	}
