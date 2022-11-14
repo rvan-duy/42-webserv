@@ -19,5 +19,7 @@ HttpRequest *Server::createRequest(std::string& msg)
 }
 
 void  Server::buildRequest(std::string& msg, int fd) {
+  Logger &logger = Logger::getInstance();
   _requests[fd] = createRequest(msg);
+  logger.error("errormessage");
 }

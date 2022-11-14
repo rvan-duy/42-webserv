@@ -20,28 +20,9 @@ HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj) {
 HttpRequest::~HttpRequest() {}
 
 /*
- *  Helper functions
+ *  Transforms a string to a double string map item.
+ *  Then adds it to the map.
  */
-std::string  extractArgument(const std::string& msg, int n) {
-  std::string tmp;
-  size_t  start;
-
-  start = 0;
-  while (n)
-  {
-    while (msg[start] == ' ')
-      start++;
-    if (n == 1)
-    {
-      std::string tmpo = msg.substr(start, msg.find_first_of(std::string("\r\n "), start) - start);
-      return(tmpo);
-    }
-    start = msg.find(' ', start);
-    n--;
-  }
-  return tmp;
-}
-
 static void addHeader(std::map<std::string, std::string>& headers, const std::string& msg, size_t start) {
   std::string key;
   std::string value;
@@ -97,21 +78,41 @@ void  HttpRequest::extractBody(const std::string& msg) {
 }
 
 /*
- * Getter for the request method
+ * Getters
  */
 EHttpMethods HttpRequest::getMethod() const {
   return _method;
 }
 
-/*
- * Getter for the request URI
- */
 std::string HttpRequest::getUri() const {
   return _uri;
 }
 
 bool  HttpRequest::getChunked() const {
   return _chunked;
+}
+
+/*
+ *  Extract a certain argument from the HttpMessage
+ */
+std::string  extractArgument(const std::string& msg, int n) {
+  std::string tmp;
+  size_t  start;
+
+  start = 0;
+  while (n)
+  {
+    while (msg[start] == ' ')
+      start++;
+    if (n == 1)
+    {
+      std::string tmpo = msg.substr(start, msg.find_first_of(std::string("\r\n "), start) - start);
+      return(tmpo);
+    }
+    start = msg.find(' ', start);
+    n--;
+  }
+  return tmp;
 }
 
 /*
@@ -134,4 +135,40 @@ EHttpMethods _parseMethod(const std::string &method) {
     logger.error("bad request: method unsupported ( " + method + " )");
     return NONE;
   }
+}
+
+/* This needs to include all the response statuses used in executeRequest */
+std::string _parseResponseStatus(const int &status) {
+  std::map<int, std::string> responseMap;
+
+  response_map[403]   = "Forbidden";
+  response_map[404]   = "Not found";
+  response_map[405]   = "Method not alowed";
+  response_map[409]   = "Conflict";
+
+  return responseMap.at(status);
+}
+
+// **
+// still can have conflicts with /file location and uri being /filename this will be looked in as file even though 
+// it should be under / only..
+// coudl maybe fix by adding a / after location routes when it is a directory.. ?
+bool  isMethodAllowed(Server& server, std::string uri, EHttpMethod method)
+{
+  std::vector<Route> routes = server.getRoutes();
+  int   maxlen = 0;
+  bool  isAllowed = true;
+
+  for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
+  {
+    if (0 == uri.find(*it.route)) // **
+    {
+      if (maxlen < it->route.len())
+      {
+        isAllowed = it->allowedMethods.at(method);
+        maxlen = it->route.len();
+      }
+    }
+  }
+  return isAllowed;
 }

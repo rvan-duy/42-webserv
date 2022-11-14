@@ -6,8 +6,8 @@ GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 
 GetRequest::~GetRequest() {}
 
-void GetRequest::executeRequest() {
-  return ;
+int GetRequest::executeRequest() {
+  return 0;
 }
 
 HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
@@ -27,7 +27,7 @@ HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
     if (!_fileExists(index_path)) {
       logger.log("Index file doesn't exist");
 
-      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      response._setResponse("root/404/index.html", 404, "Not Found", getVersion()); // very hardcoded lol
       return response;
     } else {
       logger.log("Index file exists");

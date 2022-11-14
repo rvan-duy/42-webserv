@@ -71,7 +71,7 @@ You must provide some configuration files and default basic files to test and de
 
 struct Route {
   std::string               route;
-  std::vector<EHttpMethods> allowedMethods;
+  std::map<EHttpMethods, bool> allowedMethods;
   std::string               httpRedirection;
   std::string               searchDirectory;
   std::string               defaultFile;

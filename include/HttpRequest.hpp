@@ -10,6 +10,8 @@
 
 std::string  extractArgument(const std::string& msg, int n);
 EHttpMethods _parseMethod(const std::string &method);
+std::string _parseResponseStatus(const int &status);
+bool  isMethodAllowed(Server& server, std::string uri, EHttpMethod method);
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
@@ -27,7 +29,7 @@ class HttpRequest : public HttpMessage {
 
 
   // Abstract
-  virtual void executeRequest() = 0;
+  virtual int executeRequest(Server& server) = 0;
   virtual HttpResponse constructResponse(Server& server, std::string& index) = 0;
 
   // Getters
@@ -51,7 +53,7 @@ public:
 	~GetRequest();
 
 	// Concrete
-  void executeRequest();
+  int executeRequest(Server& server);
   HttpResponse constructResponse(Server& server, std::string& index);
 };
 
@@ -65,7 +67,7 @@ public:
 	~DeleteRequest();
 
 	// Concrete
-  void executeRequest();
+  int executeRequest(Server& server);
   HttpResponse constructResponse(Server& server, std::string& index);
 };
 
@@ -79,7 +81,7 @@ public:
 	~PostRequest();
 
 	// Concrete
-  void executeRequest();
+  int executeRequest(Server& server);
   HttpResponse constructResponse(Server& server, std::string& index);
 };
 
