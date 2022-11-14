@@ -158,7 +158,7 @@ SCENARIO("Bad config files") {
 }
 
 SCENARIO("Test config files") {
-	std::string	fileDest("testconfigs/parser_");
+	std::string	fileDest("testconfigs/good_");
 	int configTest = 0;
 	// parser_0
 	WHEN(getFileDest(fileDest, configTest)) {
@@ -201,4 +201,6 @@ SCENARIO("Test config files") {
 		destructConfig();
 	}
 	configTest++;
+
 }
+

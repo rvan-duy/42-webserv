@@ -108,6 +108,7 @@ class Server {
 
   //  Getters
   std::vector<std::string> getServerName() const;
+  std::vector<Route>       getRoutes() const;
   PageData                 getHost() const;
   PageData                 getErrorPage() const;
   int                      getMaxBody() const;
