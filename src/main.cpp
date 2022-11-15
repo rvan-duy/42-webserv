@@ -28,7 +28,7 @@ int	parseConfigFile(std::string const& filePath) {
 int main(int argc, char **argv) {
   if (argc != 2) {
     std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
-    return 1;
+    // return 1; TMP
   }
 
   // parseConfigFile(argv[1]);
@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
   my_server.setErrorPage(404, "404");
   servers.push_back(my_server);
   /* END OF TEMPORARY CODE */
+
   try {
     // Iterate through all servers and add them to the multiplexer
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
