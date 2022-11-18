@@ -60,6 +60,7 @@ static int waitForChildProcess(pid_t const &pid)
 		std::cout << WEXITSTATUS(status) << std::endl;
 		return WEXITSTATUS(status);
 	}
+	return 0;
 }
 
 /* Waits for input from child process and puts it in pDest */
