@@ -29,22 +29,7 @@ int parseConfigFile(std::string const &filePath)
   return 0;
 }
 
-void testCgi(char **env)
-{
-  CGI testCgi("test/cgi/", env);
-
-  std::string dest("");
-  try
-  {
-    testCgi.executeFile(&dest, "helloworld.py", "yes");
-  }
-  catch (std::exception const &e)
-  {
-    std::cout << e.what() << std::endl;
-  }
-}
-
-int main(int argc, char **argv, char **env)
+int main(int argc, char **argv)
 {
   if (argc != 2)
   {
@@ -52,8 +37,6 @@ int main(int argc, char **argv, char **env)
     return 1;
   }
 
-  testCgi(env);
-  return 0;
   // parseConfigFile(argv[1]);
 
   std::vector<Server> servers; // vector of servers
