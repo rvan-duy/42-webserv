@@ -46,6 +46,7 @@ void testCgi()
   try
   {
     testCgi.executeFile(&dest, "test/cgi/helloworld.py", "yes");
+    std::cout << dest << std::endl;
   }
   catch (std::exception const &e)
   {

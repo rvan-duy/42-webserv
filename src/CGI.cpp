@@ -23,6 +23,7 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 		const_cast<char *>(PATH_TO_PYTHON),
 		const_cast<char *>(fullPath.c_str()),
 		const_cast<char *>(body.c_str())};
+
 	close(fd[READ]);
 	if (dup2(fd[WRITE], STDOUT_FILENO) == -1)
 	{
@@ -96,8 +97,7 @@ int CGI::executeFile(std::string *pDest, std::string const &filePath, std::strin
 	int fd[2];
 	pid_t pid;
 
-	Logger::getInstance().log("[STARTING] CGI ");
-
+	logger.log("[STARTING] CGI ");
 	/* Open pipe */
 	if (pipe(fd) == -1)
 	{

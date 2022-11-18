@@ -6,7 +6,7 @@ Logger *Logger::_logger = NULL;
 /**
  * Constructors / destructors
  */
-Logger::Logger()
+Logger::Logger() : _parentPid(getpid())
 {
 	if (!LOG_ENABLED)
 	{
@@ -50,6 +50,12 @@ void Logger::error(std::string const &message)
 	logToFile("[ERROR]:  ", message);
 }
 
+void Logger::debug(std::string const &message)
+{
+	logToConsole("\033[1;35m[DEBUG]: \033[0m", INFO, message);
+	logToFile("[DEBUG]:  ", message);
+}
+
 // Logs restart message to logfile
 void Logger::restart(void)
 {
@@ -73,14 +79,14 @@ std::string Logger::getTimeStamp() const
 
 std::string Logger::getPid() const
 {
-	char pidString[10];
+	char pidString[11];
 	pid_t currentPid = getpid();
 	if (currentPid == _parentPid)
 	{
-		sprintf(pidString, "         ");
+		sprintf(pidString, "[ MAIN ]: ");
 		return std::string(pidString);
 	}
-	sprintf(pidString, "[%d]: ", currentPid);
+	sprintf(pidString, "[%d ]: ", currentPid);
 	return std::string(pidString);
 }
 
