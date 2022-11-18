@@ -23,9 +23,6 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 		const_cast<char *>(PATH_TO_PYTHON),
 		const_cast<char *>(fullPath.c_str()),
 		const_cast<char *>(body.c_str())};
-	logger.debug(PATH_TO_PYTHON);
-	logger.debug(fullPath.c_str());
-	logger.debug(body.c_str());
 
 	close(fd[READ]);
 	if (dup2(fd[WRITE], STDOUT_FILENO) == -1)
@@ -55,7 +52,6 @@ static int waitForChildProcess(pid_t const &pid)
 	while (waitpid(pid, &status, 0) != -1)
 	{
 	}
-	Logger::getInstance().debug("Waiting over");
 	if (WIFEXITED(status))
 	{
 		return WEXITSTATUS(status);
@@ -98,7 +94,6 @@ int CGI::checkFileAccess(std::string const &filePath) const
 {
 	std::string fullPath = _rootDir + filePath;
 
-	Logger::getInstance().debug(fullPath);
 	if (access(fullPath.c_str(), X_OK))
 	{
 		Logger::getInstance().error("[PREPARING] CGI: No execution access to file");
