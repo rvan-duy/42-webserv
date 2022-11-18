@@ -23,6 +23,9 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 		const_cast<char *>(PATH_TO_PYTHON),
 		const_cast<char *>(fullPath.c_str()),
 		const_cast<char *>(body.c_str())};
+	logger.debug(PATH_TO_PYTHON);
+	logger.debug(fullPath.c_str());
+	logger.debug(body.c_str());
 
 	close(fd[READ]);
 	if (dup2(fd[WRITE], STDOUT_FILENO) == -1)
@@ -52,18 +55,15 @@ static int waitForChildProcess(pid_t const &pid)
 	while (waitpid(pid, &status, 0) != -1)
 	{
 	}
-
+	Logger::getInstance().debug("Waiting over");
 	if (WIFEXITED(status))
 	{
-		// TODO: Replace to_string with c98 function??
-		Logger::getInstance().error("[EXECUTING] CGI: child process exited with: " + std::to_string(WEXITSTATUS(status)));
 		return WEXITSTATUS(status);
 	}
-	return 0;
 }
 
 /* Waits for input from child process and puts it in pDest */
-static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd[2])
+static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd)
 {
 	if (waitForChildProcess(pid) != 0)
 	{
@@ -73,20 +73,37 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd[2])
 	std::string output("");
 	std::string buffer[BUFFER_SIZE + 1];
 	int bytesRead;
+
 	do
 	{
-		bytesRead = read(fd[READ], &buffer, BUFFER_SIZE);
+		bytesRead = read(fd, &buffer, BUFFER_SIZE);
 		if (bytesRead == -1)
 		{
 			Logger::getInstance().error("[EXECUTING] CGI: read: " + std::string(strerror(errno)));
 			return 1;
 		}
-		output += bytesRead;
-	} while (bytesRead > 0);
+		if (bytesRead > 0)
+		{
+			output += buffer->c_str();
+			buffer->clear();
+		}
 
+	} while (bytesRead > 0);
+	close(fd);
 	*pDest = output;
-	close(fd[WRITE]);
-	close(fd[READ]);
+	return 0;
+}
+
+int CGI::checkFileAccess(std::string const &filePath) const
+{
+	std::string fullPath = _rootDir + filePath;
+
+	Logger::getInstance().debug(fullPath);
+	if (access(fullPath.c_str(), X_OK))
+	{
+		Logger::getInstance().error("[PREPARING] CGI: No execution access to file");
+		return 1;
+	}
 	return 0;
 }
 
@@ -98,6 +115,12 @@ int CGI::executeFile(std::string *pDest, std::string const &filePath, std::strin
 	pid_t pid;
 
 	logger.log("[STARTING] CGI ");
+
+	if (checkFileAccess(filePath))
+	{
+		return 1;
+	}
+
 	/* Open pipe */
 	if (pipe(fd) == -1)
 	{
@@ -121,7 +144,8 @@ int CGI::executeFile(std::string *pDest, std::string const &filePath, std::strin
 	}
 	else
 	{
-		if (readFromChildProcess(pDest, pid, fd))
+		close(fd[WRITE]);
+		if (readFromChildProcess(pDest, pid, fd[READ]))
 		{
 			throw std::runtime_error("[EXECUTING] CGI: " + std::string(strerror(errno)));
 		}

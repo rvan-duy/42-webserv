@@ -29,34 +29,23 @@ int parseConfigFile(std::string const &filePath)
   return 0;
 }
 
-void testCgi()
+void testCgi(char **env)
 {
-  char *const env[] = {
-      "USER=rcappend"
-      "SECURITYSESSIONID=186a7"
-      "XPC_FLAGS=0x0"
-      "__CF_USER_TEXT_ENCODING=0x12EBB:0x0:0x0"
-      "ORIGINAL_XDG_CURRENT_DESKTOP=undefined"
-      "TERM_PROGRAM=vscode"
-      "TERM_PROGRAM_VERSION=1.73.0"
-      "LANG=en_US.UTF-8"};
-  CGI testCgi("/test/cgi/", env);
+  CGI testCgi("test/cgi/", env);
 
   std::string dest;
   try
   {
-    testCgi.executeFile(&dest, "test/cgi/helloworld.py", "yes");
+    testCgi.executeFile(&dest, "helloworld.py", "yes");
     std::cout << dest << std::endl;
   }
   catch (std::exception const &e)
   {
     // TODO: do something
   }
-
-  std::cout << dest << std::endl;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char **argv, char **env)
 {
   if (argc != 2)
   {
@@ -64,7 +53,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  testCgi();
+  testCgi(env);
   // parseConfigFile(argv[1]);
 
   std::vector<Server> servers; // vector of servers

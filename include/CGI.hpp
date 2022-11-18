@@ -14,18 +14,20 @@
 #define WRITE 1
 #define BUFFER_SIZE 1024
 
-#define PATH_TO_PYTHON "/usr/bin/python"
+#define PATH_TO_PYTHON "/usr/bin/python3"
 
-class CGI {
-	public:
-		CGI(std::string const& rootDir, char *const *env);
-		~CGI();
+class CGI
+{
+public:
+	CGI(std::string const &rootDir, char *const *env);
+	~CGI();
 
-		int	executeFile(std::string *pDest, std::string const& filePath, std::string const& body) const;
+	int executeFile(std::string *pDest, std::string const &filePath, std::string const &body) const;
 
-	private:
-		std::string _rootDir;
-		char *const *_env;
+private:
+	std::string _rootDir;
+	char *const *_env;
 
-		int	forkCgiFile(int fd[2], std::string const& filePath, std::string const& body) const;
+	int forkCgiFile(int fd[2], std::string const &filePath, std::string const &body) const;
+	int checkFileAccess(std::string const &filePath) const;
 };
