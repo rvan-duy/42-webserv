@@ -33,15 +33,14 @@ void testCgi(char **env)
 {
   CGI testCgi("test/cgi/", env);
 
-  std::string dest;
+  std::string dest("");
   try
   {
     testCgi.executeFile(&dest, "helloworld.py", "yes");
-    std::cout << dest << std::endl;
   }
   catch (std::exception const &e)
   {
-    // TODO: do something
+    std::cout << e.what() << std::endl;
   }
 }
 
@@ -54,6 +53,7 @@ int main(int argc, char **argv, char **env)
   }
 
   testCgi(env);
+  return 0;
   // parseConfigFile(argv[1]);
 
   std::vector<Server> servers; // vector of servers

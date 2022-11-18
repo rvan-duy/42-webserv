@@ -22,7 +22,8 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 	char *argv[] = {
 		const_cast<char *>(PATH_TO_PYTHON),
 		const_cast<char *>(fullPath.c_str()),
-		const_cast<char *>(body.c_str())};
+		const_cast<char *>(body.c_str()),
+		NULL};
 
 	close(fd[READ]);
 	if (dup2(fd[WRITE], STDOUT_FILENO) == -1)
@@ -47,13 +48,16 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 
 static int waitForChildProcess(pid_t const &pid)
 {
-	int status;
+	int status = 0;
 
-	while (waitpid(pid, &status, 0) != -1)
+	if (waitpid(pid, &status, 0) < 0)
 	{
+		Logger::getInstance().error("[EXECUTING] waitpid: " + std::string(strerror(errno)));
+		return 1;
 	}
 	if (WIFEXITED(status))
 	{
+		std::cout << WEXITSTATUS(status) << std::endl;
 		return WEXITSTATUS(status);
 	}
 }
@@ -80,6 +84,7 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd)
 		}
 		if (bytesRead > 0)
 		{
+			std::cout << buffer << std::endl;
 			output += buffer->c_str();
 			buffer->clear();
 		}
@@ -142,7 +147,7 @@ int CGI::executeFile(std::string *pDest, std::string const &filePath, std::strin
 		close(fd[WRITE]);
 		if (readFromChildProcess(pDest, pid, fd[READ]))
 		{
-			throw std::runtime_error("[EXECUTING] CGI: " + std::string(strerror(errno)));
+			return 1;
 		}
 	}
 	return 0;
