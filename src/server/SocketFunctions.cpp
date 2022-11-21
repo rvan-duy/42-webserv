@@ -9,8 +9,7 @@ void Server::prepare(const int backlog)
     Logger &logger = Logger::getInstance();
     int on = 1; // used for setsockopt() and ioctl() calls
     
-/*+ _serverName[0]*/ // this was included in log statement bust caused segf
-    logger.log("[PREPARING] Server: Preparing :" + std::to_string(_port));
+    logger.log("[PREPARING] Server: Preparing " + _serverName[0] + ":" + std::to_string(_port));
 
     /**************************************************/
     /* Create an socket to receive incoming           */
@@ -20,7 +19,7 @@ void Server::prepare(const int backlog)
     _fd = socket(_domain, _type, 0);
     if (_fd == -1)
     {
-        logger.error("[PREPARING] Server: Failed to create socket: " + std::string(strerror(errno)));
+        // logger.error("[PREPARING] Server: Failed to create socket: " + std::string(strerror(errno)));   // double trouble?
         throw std::runtime_error("[PREPARING] Server: Socket creation failed: " + std::string(strerror(errno)));
     }
 
