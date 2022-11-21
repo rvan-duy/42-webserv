@@ -131,6 +131,9 @@ public:
   HttpRequest *createRequest(std::string &msg);
   void buildRequest(std::string &msg, int fd);
 
+// pirates (privates ;)
+  std::map<int, HttpRequest *> _requests;
+  std::vector<int> _connectedClients; // list of connected clients
 private:
   /* Config variables */
   PageData _defaultErrorPage;
@@ -139,7 +142,6 @@ private:
   int _maxBodySize;
   std::vector<std::string> _serverName;
   std::vector<Route> _routes;
-  std::map<int, HttpRequest *> _requests;
 
   int _fd;                            // file descriptor for socket
   int _domain;                        // domain of socket (IPv4 or IPv6)
@@ -147,5 +149,4 @@ private:
   char _buffer[1000000];              // buffer for reading data from socket
   int _accepted;                      // file descriptor for accepted connection, -1 if no connection
   struct sockaddr_in6 _servaddr;      // server address
-  std::vector<int> _connectedClients; // list of connected clients
 };
