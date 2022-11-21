@@ -14,7 +14,10 @@ int Parser::parseTokens(std::vector<Server> *pServers)
 	{
 		return 1;
 	}
-	parseAst(pServers);
+	if (parseAst(pServers))
+	{
+		return 1;
+	}
 	return 0;
 }
 
@@ -128,7 +131,7 @@ int Parser::makeAst()
 /**************************************************/
 
 /* Parses all datalines in server block */
-void Parser::parseServerDataLines(Server *pServer, std::vector<t_dataLine> const &lines)
+int Parser::parseServerDataLines(Server *pServer, std::vector<t_dataLine> const &lines)
 {
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -136,14 +139,18 @@ void Parser::parseServerDataLines(Server *pServer, std::vector<t_dataLine> const
 		{
 			if (lines[i].size() != 0 && lines[i].at(0) == lineParsingFuncs[j].key)
 			{
-				(this->*(lineParsingFuncs[j].func))(pServer, lines[i]);
+				if ((this->*(lineParsingFuncs[j].func))(pServer, lines[i]))
+				{
+					return 1;
+				}
 			}
 		}
 	}
+	return 0;
 }
 
 /* Parses location blocks in server */
-void Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &lines)
+int Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &lines)
 {
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -151,10 +158,14 @@ void Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &l
 		{
 			if (lines[i].size() != 0 && lines[i].at(0) == blockParsingFuncs[j].key)
 			{
-				(this->*(blockParsingFuncs[j].func))(pRoute, lines[i]);
+				if ((this->*(blockParsingFuncs[j].func))(pRoute, lines[i]))
+				{
+					return 1;
+				}
 			}
 		}
 	}
+	return 0;
 }
 
 static Route initNewRoute(std::string routeName)
@@ -168,7 +179,7 @@ static Route initNewRoute(std::string routeName)
 	return route;
 }
 
-void Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks)
+int Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
 	{
@@ -177,32 +188,47 @@ void Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &bloc
 			continue;
 		}
 		Route route = initNewRoute(blocks[i].name.at(1));
-		parseLocationBlocks(&route, blocks[i].dataLines);
+		if (parseLocationBlocks(&route, blocks[i].dataLines))
+		{
+			return 1;
+		}
 		pServer->addRoute(route);
 	}
+	return 0;
 }
 
 /* Converts datablock into server class */
-Server Parser::convertBlockToServer(DataBlock block)
+int Parser::convertBlockToServer(Server *pServer, DataBlock block)
 {
-	Server server;
-
-	parseServerDataLines(&server, block.dataLines);
-	parseDataBlocks(&server, block.blocks);
-	return server;
+	if (parseServerDataLines(pServer, block.dataLines))
+	{
+		return 1;
+	}
+	if (parseDataBlocks(pServer, block.blocks))
+	{
+		return 1;
+	}
+	return 0;
 }
 
 /* Loops over datablocks to find blocks that start with "server", then converts them*/
-void Parser::parseAst(std::vector<Server> *pServers)
+int Parser::parseAst(std::vector<Server> *pServers)
 {
+	Server server;
 	for (size_t i = 0; i < _tree.blocks.size(); i++)
 	{
 		/* If datablock.name == "server" */
 		if (_tree.blocks.at(i).name.size() == 1 &&
 			_tree.blocks.at(i).name[0] == "server")
 		{
+			server = Server();
+			if (convertBlockToServer(&server, _tree.blocks.at(i)))
+			{
+				return 1;
+			}
 			/* Convert datablock into server class */
-			pServers->push_back(convertBlockToServer(_tree.blocks.at(i)));
+			pServers->push_back(server);
 		}
 	}
+	return 0;
 }

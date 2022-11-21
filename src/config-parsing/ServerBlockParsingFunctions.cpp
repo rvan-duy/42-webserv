@@ -4,7 +4,7 @@
 /* Parsing abstract syntax tree lines	          */
 /**************************************************/
 
-t_comp Parser::lineParsingFuncs[PARSER_FUNC_N] = {
+t_parseFuncPair Parser::lineParsingFuncs[PARSER_FUNC_N] = {
     {"listen", &Parser::parsePort},
     {"serverName", &Parser::parseServerName},
     {"errorPage", &Parser::parseErrorPage},

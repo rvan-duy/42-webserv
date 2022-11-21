@@ -4,7 +4,7 @@
 /* Parsing abstract syntax tree blocks	          */
 /**************************************************/
 
-t_comp Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
+t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
     {"root", &Parser::parseRoot},
     {"index", &Parser::parsePort},
     {"autoIndex", &Parser::parsePort},
@@ -26,7 +26,7 @@ int Parser::parseMethods(void *dest, t_dataLine line)
     {
         if (line.at(i) == "GET")
         {
-            if (route->allowedMethods[GET] = true)
+            if (route->allowedMethods[GET] == true)
             {
                 return 1;
             }
@@ -34,7 +34,7 @@ int Parser::parseMethods(void *dest, t_dataLine line)
         }
         else if (line.at(i) == "POST")
         {
-            if (route->allowedMethods[POST] = true)
+            if (route->allowedMethods[POST] == true)
             {
                 return 1;
             }
@@ -42,7 +42,7 @@ int Parser::parseMethods(void *dest, t_dataLine line)
         }
         else if (line.at(i) == "DELETE")
         {
-            if (route->allowedMethods[DELETE] = true)
+            if (route->allowedMethods[DELETE] == true)
             {
                 return 1;
             }
@@ -69,7 +69,7 @@ int Parser::parseRoot(void *dest, t_dataLine line)
         Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
         return 1;
     }
-    route->rootDirectory = line.at(2);
+    route->rootDirectory = line.at(1);
     return 0;
 }
 
