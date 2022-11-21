@@ -40,7 +40,9 @@ export SRCS			:=	Server.cpp \
 						Parser.cpp \
 						HttpResponse.cpp \
 						Logger.cpp \
-						Multiplexer.cpp
+						Multiplexer.cpp \
+						CGI.cpp \
+						initWebserv.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp
