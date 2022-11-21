@@ -10,7 +10,6 @@ Parser::~Parser() {}
 
 int Parser::parseTokens(std::vector<Server> *pServers)
 {
-	/* First transform tokens into abstract syntax tree*/
 	if (makeAst())
 	{
 		return 1;
@@ -128,7 +127,8 @@ int Parser::makeAst()
 /* Parsing abstract syntax tree			          */
 /**************************************************/
 
-void Parser::parseDataLines(Server *pServer, std::vector<t_dataLine> const &lines)
+/* Parses all datalines in server block */
+void Parser::parseServerDataLines(Server *pServer, std::vector<t_dataLine> const &lines)
 {
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -142,6 +142,32 @@ void Parser::parseDataLines(Server *pServer, std::vector<t_dataLine> const &line
 	}
 }
 
+/* Parses location blocks in server */
+void Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &lines)
+{
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		for (size_t j = 0; j < PARSER_FUNC_N; j++)
+		{
+			if (lines[i].size() != 0 && lines[i].at(0) == blockParsingFuncs[j].key)
+			{
+				(this->*(blockParsingFuncs[j].func))(pRoute, lines[i]);
+			}
+		}
+	}
+}
+
+static Route initNewRoute(std::string routeName)
+{
+	Route route = Route();
+
+	route.allowedMethods[GET] = true;
+	route.allowedMethods[POST] = true;
+	route.allowedMethods[DELETE] = true;
+	route.route = routeName;
+	return route;
+}
+
 void Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
@@ -150,14 +176,8 @@ void Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &bloc
 		{
 			continue;
 		}
-		Route route = Route();
-
-		// Set route
-		route.route = blocks[i].name.at(1);
-		// Loop over lines in curly braces
-		for (size_t j = 0; j < BLOCK_FUNC_N; j++)
-		{
-		}
+		Route route = initNewRoute(blocks[i].name.at(1));
+		parseLocationBlocks(&route, blocks[i].dataLines);
 		pServer->addRoute(route);
 	}
 }
@@ -167,14 +187,14 @@ Server Parser::convertBlockToServer(DataBlock block)
 {
 	Server server;
 
-	parseDataLines(&server, block.dataLines);
+	parseServerDataLines(&server, block.dataLines);
 	parseDataBlocks(&server, block.blocks);
 	return server;
 }
 
+/* Loops over datablocks to find blocks that start with "server", then converts them*/
 void Parser::parseAst(std::vector<Server> *pServers)
 {
-	// TODO: replace with iterator
 	for (size_t i = 0; i < _tree.blocks.size(); i++)
 	{
 		/* If datablock.name == "server" */
@@ -185,176 +205,4 @@ void Parser::parseAst(std::vector<Server> *pServers)
 			pServers->push_back(convertBlockToServer(_tree.blocks.at(i)));
 		}
 	}
-}
-
-/**************************************************/
-/* Parsing abstract syntax tree lines	          */
-/**************************************************/
-
-t_comp Parser::lineParsingFuncs[PARSER_FUNC_N] = {
-	{"listen", &Parser::parsePort},
-	{"serverName", &Parser::parseServerName},
-	{"errorPage", &Parser::parseErrorPage},
-	{"maxBodySize", &Parser::parseMaxBodySize},
-	{"return", &Parser::parseHost},
-};
-
-void Parser::parseServerName(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() < 2)
-	{
-		return;
-	}
-	Server *server = static_cast<Server *>(dest);
-	std::vector<std::string> serverName;
-	std::vector<std::string>::iterator it = line.begin();
-	it++;
-	while (it != line.end())
-	{
-		serverName.push_back(*it);
-		it++;
-	}
-	server->setServerName(serverName);
-}
-
-void Parser::parseErrorPage(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 3)
-	{
-		return;
-	}
-	Server *server = static_cast<Server *>(dest);
-	std::string statusCode;
-
-	statusCode = line.at(1);
-	for (size_t i = 0; i < statusCode.length(); i++)
-	{
-		if (!isdigit(statusCode[i]))
-		{
-			return;
-		}
-	}
-	server->setErrorPage(std::stoi(statusCode), line.at(2));
-}
-
-void Parser::parseHost(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 3)
-	{
-		return;
-	}
-	Server *server = static_cast<Server *>(dest);
-	std::string statusCode;
-
-	statusCode = line.at(1);
-	for (size_t i = 0; i < statusCode.length(); i++)
-	{
-		if (!isdigit(statusCode[i]))
-		{
-			return;
-		}
-	}
-	server->setHost(std::stoi(statusCode), line.at(2));
-}
-
-void Parser::parsePort(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	Server *server = static_cast<Server *>(dest);
-	std::string port;
-
-	port = line.at(1);
-	for (size_t i = 0; i < port.length(); i++)
-	{
-		if (!isdigit(port[i]))
-		{
-			return;
-		}
-	}
-	server->setPort(std::stoi(line.at(1)));
-}
-
-void Parser::parseMaxBodySize(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	Server *server = static_cast<Server *>(dest);
-	std::string maxBodySize;
-
-	maxBodySize = line.at(1);
-	for (size_t i = 0; i < maxBodySize.length(); i++)
-	{
-		if (!isdigit(maxBodySize[i]))
-		{
-			return;
-		}
-	}
-	server->setMaxBody(std::stoi(line.at(1)));
-}
-
-/**************************************************/
-/* Parsing abstract syntax tree blocks	          */
-/**************************************************/
-
-t_comp Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
-	{"root", &Parser::parseRoot},
-	{"index", &Parser::parsePort},
-	{"autoIndex", &Parser::parsePort},
-	{"cgi_param", &Parser::parseCgiParam},
-};
-
-void Parser::parseRoot(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	Route *route = static_cast<Route *>(dest);
-	route->searchDirectory = line.at(2);
-}
-
-void Parser::parseIndex(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	// Route *route = static_cast<Route *>(dest);
-	// TODO
-}
-
-void Parser::parseAutoIndex(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	Route *route = static_cast<Route *>(dest);
-	if (line.at(2) == "on")
-	{
-		route->autoIndex = true;
-	}
-	else if (line.at(2) == "off")
-	{
-		route->autoIndex = false;
-	}
-	else
-	{
-		// TODO
-	}
-}
-
-void Parser::parseCgiParam(void *dest, t_dataLine line)
-{
-	if (!dest || line.size() != 2)
-	{
-		return;
-	}
-	Route *route = static_cast<Route *>(dest);
-	route->cgiParam = line.at(2);
 }

@@ -1,10 +1,12 @@
 #include "Multiplexer.hpp"
 #include <Webserver.hpp>
+#include <CGI.hpp>
 
 int startWebserver(std::vector<Server> servers)
 {
   Multiplexer multiplexer;
-try {
+  try
+  {
     // Iterate through all servers and add them to the multiplexer
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
@@ -21,7 +23,7 @@ try {
   return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char **argv, char **env)
 {
   std::vector<Server> servers;
   /*  Input check */
