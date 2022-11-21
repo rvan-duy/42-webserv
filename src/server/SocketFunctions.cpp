@@ -8,8 +8,9 @@ void Server::prepare(const int backlog)
 {
     Logger &logger = Logger::getInstance();
     int on = 1; // used for setsockopt() and ioctl() calls
-
-    logger.log("[PREPARING] Server: Preparing " + _serverName[0] + ":" + std::to_string(_port));
+    
+/*+ _serverName[0]*/ // this was included in log statement bust caused segf
+    logger.log("[PREPARING] Server: Preparing :" + std::to_string(_port));
 
     /**************************************************/
     /* Create an socket to receive incoming           */

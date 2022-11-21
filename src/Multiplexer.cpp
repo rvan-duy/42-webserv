@@ -1,6 +1,7 @@
 #include "Multiplexer.hpp"
 
 #include "Logger.hpp"
+#include <algorithm>
 
 Multiplexer::Multiplexer() : _endServer(false) {
   memset(&_buffer, 0, sizeof(_buffer));
@@ -50,54 +51,37 @@ void Multiplexer::waitForEvents(const int timeout) {
       int eventType = _getEvent(_clients[i]);               // Logging is done inside the _getEvent() method
       int client_fd = _clients[i].fd;
 
-      /**************************************************/
-      /* Main switch to handle the different events     */
-      /**************************************************/
       switch (eventType) {
-        /**************************************************/
-        /* No event                                       */
-        /**************************************************/
         case 0: {
           break;
         }
 
-        /**************************************************/
-        /* Read event                                     */
-        /**************************************************/
         case POLLIN: {
-          
-          if (_isServer(client_fd)) {                 // If the socket is a server
-            _addClient(client_fd);                    // Accept it as a client
-          } else {                                         // If not, this means it is a client
-            std::string data = _readData(client_fd);  // Read the data
-            if (data.empty()) {                            // If the data is empty, the client has disconnected
-              _removeClient(client_fd);               // Remove the client from the multiplexer
-            } else {                                       // If the data is not empty, the client has sent data
-              // which server do we want to add it too?
-              // thisServer.BuildRequest
-
+          if (_isServer(client_fd)) {
+            _addClient(client_fd);
+          } else {
+            std::string data = _readData(client_fd);
+            if (data.empty()) {
+              _removeClient(client_fd);
+            } else {
               _getServerForClient(client_fd).buildRequest(data, client_fd);
-              // add this one to the fds to poll list!
+              // here it should maybe update the pollfd to wait for POLLOUT?
 
               logger.log("[POLLING] Multiplexer: Received data from client: \n" + data);  // Log the data
-              
-              // it just sends back the data it received for testing purposes
-              send(client_fd, data.c_str(), data.size(), 0);
-              
-              _removeClient(client_fd);  // Remove the client from the multiplexer
             }
           }
           break;
         }
 
         case POLLOUT: {
+          std::string tmp_index("index.html");
           Server  client_server = _getServerForClient(client_fd);
-          HttpResponse client_response = client_server._requests[client_fd]->constructResponse(client_server, /* index path?*/ );
-          // client_response.send();  // i do not know if this actually works that way..
+          HttpResponse client_response = client_server._requests[client_fd]->constructResponse(client_server, tmp_index); // index.html shouldnt be hardcoded..
+          send(client_fd, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
+          _removeClient(client_fd);
         }
 
         // case POLLOUT, POLLERR, POLLHUP?
-        // POLLOUT == Built and send response
 
         /**************************************************/
         /* Default event                                  */
