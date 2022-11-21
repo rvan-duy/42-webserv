@@ -4,7 +4,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET), _type(SOCK_STREAM), _accepted(-1), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
+Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _accepted(-1), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
 {
     memset(&_servaddr, 0, sizeof(_servaddr));
     memset(&_buffer, 0, sizeof(_buffer));

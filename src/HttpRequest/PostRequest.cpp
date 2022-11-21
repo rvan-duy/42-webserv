@@ -15,6 +15,7 @@ int PostRequest::executeRequest(Server& server) {
 
 HttpResponse PostRequest::constructResponse(Server& server, std::string& index) {
   int responseStatus = executeRequest(server);
+  (void)index;
   if (!responseStatus)
     return HttpResponse(HTTP_1_1, 204, "OK");
   return HttpResponse(HTTP_1_1, responseStatus, _parseResponseStatus(responseStatus));

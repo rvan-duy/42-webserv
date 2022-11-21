@@ -7,13 +7,14 @@ GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 GetRequest::~GetRequest() {}
 
 int GetRequest::executeRequest(Server& server) {
+  (void)server;
   return 0;
 }
 
 HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
   Logger &logger = Logger::getInstance();
   logger.log("Response type: GET");
-
+  (void)server;
   HttpResponse response;
 
   std::string path = "root" + getUri();  // future get root from server class

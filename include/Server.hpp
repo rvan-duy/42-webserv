@@ -136,8 +136,6 @@ public:
   std::vector<int> _connectedClients; // list of connected clients
 private:
   /* Config variables */
-  PageData _defaultErrorPage;
-  PageData _host;
   int _port;
   int _maxBodySize;
   std::vector<std::string> _serverName;
@@ -147,6 +145,8 @@ private:
   int _domain;                        // domain of socket (IPv4 or IPv6)
   int _type;                          // type of socket (TCP or UDP)
   char _buffer[1000000];              // buffer for reading data from socket
+  PageData _defaultErrorPage;
   int _accepted;                      // file descriptor for accepted connection, -1 if no connection
+  PageData _host;
   struct sockaddr_in6 _servaddr;      // server address
 };

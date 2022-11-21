@@ -177,6 +177,7 @@ std::string Multiplexer::_readData(const int socket) {
 
   logger.debug("[POLLING] Multiplexer: Reading data from socket " + std::to_string(socket));
   int bytesRead = read(socket, _buffer, sizeof(_buffer));
+  // _buffer[bytesRead] = 0;
   if (bytesRead == -1) {
     logger.error("[POLLING] Multiplexer: Failed to read data from socket " + std::to_string(socket));
     _endServer = true;
@@ -187,6 +188,7 @@ std::string Multiplexer::_readData(const int socket) {
     return "";
   }
   logger.log("[POLLING] Multiplexer: Read " + std::to_string(bytesRead) + " bytes from socket " + std::to_string(socket));
+  // std::cout << std::string(_buffer, bytesRead) << std::endl;
   return std::string(_buffer, bytesRead);
 }
 

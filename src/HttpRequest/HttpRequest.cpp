@@ -156,7 +156,7 @@ std::string _parseResponseStatus(const int &status) {
 bool  isMethodAllowed(Server& server, std::string uri, EHttpMethods method)
 {
   std::vector<Route> routes = server.getRoutes();
-  int   maxlen = 0;
+  unsigned long   maxlen = 0;
   bool  isAllowed = true;
 
   for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
