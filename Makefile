@@ -34,6 +34,8 @@ export SRCS			:=	Server.cpp \
 						Lexer.cpp \
 						Token.cpp \
 						Parser.cpp \
+						BlockParsingFunctions.cpp \
+						ServerLineParsingFunctions.cpp \
 						HttpResponse.cpp \
 						Logger.cpp \
 						Multiplexer.cpp \
