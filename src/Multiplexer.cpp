@@ -175,7 +175,7 @@ void Multiplexer::_removeClient(const int socket) {
 std::string Multiplexer::_readData(const int socket) {
   Logger &logger = Logger::getInstance();
 
-  logger.log("[POLLING] Multiplexer: Reading data from socket " + std::to_string(socket));
+  logger.debug("[POLLING] Multiplexer: Reading data from socket " + std::to_string(socket));
   int bytesRead = read(socket, _buffer, sizeof(_buffer));
   if (bytesRead == -1) {
     logger.error("[POLLING] Multiplexer: Failed to read data from socket " + std::to_string(socket));
