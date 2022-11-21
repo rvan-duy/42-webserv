@@ -14,7 +14,7 @@ class HttpResponse : public HttpMessage {
  public:
   HttpResponse();
   HttpResponse(const HttpResponse &obj);
-  HttpResponse(const HttpVersion version, const int statusCode, std::string statusMessage);
+  HttpResponse(HttpVersion version, int statusCode, std::string statusMessage);
   ~HttpResponse();
 
   // Methods

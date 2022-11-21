@@ -139,21 +139,21 @@ EHttpMethods _parseMethod(const std::string &method) {
 
 /* This needs to include all the response statuses used in executeRequest */
 std::string _parseResponseStatus(const int &status) {
-  std::map<int, std::string> responseMap;
+  std::map<int, std::string> response_map;
 
   response_map[403]   = "Forbidden";
   response_map[404]   = "Not found";
   response_map[405]   = "Method not alowed";
   response_map[409]   = "Conflict";
 
-  return responseMap.at(status);
+  return response_map.at(status);
 }
 
 // **
 // still can have conflicts with /file location and uri being /filename this will be looked in as file even though 
 // it should be under / only..
 // coudl maybe fix by adding a / after location routes when it is a directory.. ?
-bool  isMethodAllowed(Server& server, std::string uri, EHttpMethod method)
+bool  isMethodAllowed(Server& server, std::string uri, EHttpMethods method)
 {
   std::vector<Route> routes = server.getRoutes();
   int   maxlen = 0;
@@ -161,12 +161,12 @@ bool  isMethodAllowed(Server& server, std::string uri, EHttpMethod method)
 
   for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
   {
-    if (0 == uri.find(*it.route)) // **
+    if (0 == uri.find(it->route)) // **
     {
-      if (maxlen < it->route.len())
+      if (maxlen < it->route.size())
       {
         isAllowed = it->allowedMethods.at(method);
-        maxlen = it->route.len();
+        maxlen = it->route.size();
       }
     }
   }

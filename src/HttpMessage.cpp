@@ -2,6 +2,8 @@
 
 HttpMessage::HttpMessage() {}
 
+HttpMessage::HttpMessage(HttpVersion& version) : _version(version) {}
+
 HttpMessage::~HttpMessage() {}
 
 /**************************************************/

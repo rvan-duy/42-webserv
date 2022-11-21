@@ -6,7 +6,7 @@ GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref)  {}
 
 GetRequest::~GetRequest() {}
 
-int GetRequest::executeRequest() {
+int GetRequest::executeRequest(Server& server) {
   return 0;
 }
 

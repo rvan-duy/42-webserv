@@ -9,8 +9,8 @@ HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
   _statusMessage = obj._statusMessage;
 }
 
-HttpResponse::HttpResponse(const HttpVersion version, const int statusCode, std::string statusMessage)
-    : _version(version) _statusCode(statusCode) _statusMessage(statusMessage) {}
+HttpResponse::HttpResponse(HttpVersion version, int statusCode, std::string statusMessage)
+    : HttpMessage(version), _statusCode(statusCode), _statusMessage(statusMessage) {}
 
 HttpResponse::~HttpResponse() {}
 

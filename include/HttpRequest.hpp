@@ -11,7 +11,7 @@
 std::string  extractArgument(const std::string& msg, int n);
 EHttpMethods _parseMethod(const std::string &method);
 std::string _parseResponseStatus(const int &status);
-bool  isMethodAllowed(Server& server, std::string uri, EHttpMethod method);
+bool  isMethodAllowed(Server& server, std::string uri, EHttpMethods method);
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
@@ -37,7 +37,7 @@ class HttpRequest : public HttpMessage {
   std::string   getUri() const;
   bool          getChunked() const;
 
- private:
+ protected:
   EHttpMethods                       _method;
   std::string                        _uri;
   bool                               _chunked;
