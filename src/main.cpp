@@ -25,6 +25,7 @@ int startWebserver(std::vector<Server> servers)
 
 int main(int argc, char **argv, char **env)
 {
+  (void)env;
   std::vector<Server> servers;
   /*  Input check */
   if (argc != 2)
