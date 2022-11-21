@@ -33,8 +33,6 @@ int main(int argc, char **argv)
     return 1;
   }
   if (initWebserver(&servers, argv[1]))
-  {
     return 1;
-  }
   return startWebserver(servers);
 }
