@@ -8,13 +8,14 @@
 
 #define LOG_DEST "logs/"
 
-enum ELogLevel {
+enum ELogLevel
+{
 	INFO,
 	ERROR
 };
 
 #ifndef LOG_ENABLED
-# define LOG_ENABLED 3
+#define LOG_ENABLED 3
 #endif
 
 /**
@@ -24,41 +25,43 @@ enum ELogLevel {
  * Usage:
  * 		Logger& logger = Logger::getInstance();
  * 		logger.log("example log");
- * 
+ *
  * 		OR
- * 
+ *
  * 		Logger::getInstance().log("Example");
-*/
-class Logger {
-	public:
-		// Retrieves the logger instance
-		static Logger	&getInstance();
+ */
+class Logger
+{
+public:
+	// Retrieves the logger instance
+	static Logger &getInstance();
 
-		void log(std::string const& message);
-		void error(std::string const& message);
-	
-	protected:
-		// Constructors are protected since they shouldn't be called by any other class or file
-		Logger();
-		~Logger();
+	void log(std::string const &message);
+	void error(std::string const &message);
+	void debug(std::string const &message);
 
-		// Singleton, this is the actual instance of the logger
-		static Logger* _logger;
+protected:
+	// Constructors are protected since they shouldn't be called by any other class or file
+	Logger();
+	~Logger();
 
-	private:
-		// Logging file
-		std::ofstream	_file;
-		pid_t			_parentPid;
+	// Singleton, this is the actual instance of the logger
+	static Logger *_logger;
 
-		std::string	getTimeStamp() const;
-		std::string getPid() const;
+private:
+	// Logging file
+	std::ofstream _file;
+	pid_t _parentPid;
 
-		void logToConsole(std::string const& levelMsg, ELogLevel level, std::string const& message);
-		void logToFile(std::string const& levelMsg, std::string const& message);
+	std::string getTimeStamp() const;
+	std::string getPid() const;
 
-		// Gets if file is open
-		bool	isFileOpen() const;
+	void logToConsole(std::string const &levelMsg, ELogLevel level, std::string const &message);
+	void logToFile(std::string const &levelMsg, std::string const &message);
 
-		// Prints restart message to log
-		void	restart();
+	// Gets if file is open
+	bool isFileOpen() const;
+
+	// Prints restart message to log
+	void restart();
 };
