@@ -17,6 +17,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <climits>
 
 /****************************************************************************************************/
 /* The Server Class (formerly known as Socket)                                                      */
@@ -78,6 +79,7 @@ struct Route {
   std::string               defaultFile;
   std::string               cgiParam;
   bool                      autoIndex;
+  std::string               rootDirectory;
 };
 
 struct PageData {

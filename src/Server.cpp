@@ -419,20 +419,11 @@ void Server::wait_for_connections()
     /**************************************************/
 
     {
-<<<<<<< HEAD
       std::string msg(buffer);
       std::string tmp_index("index.html");
 
       buildRequest(msg, new_fd);
       HttpResponse response(_requests[new_fd]->constructResponse(*this, tmp_index));// TODO: make root(done!) configurable, not hardcoded, same for index
-=======
-      HttpRequest request;
-      HttpResponse response;
-
-      request.parse(buffer);
-      response.createResponse(request, "root",
-                              "index.html"); // TODO: make root configurable, not hardcoded, same for index
->>>>>>> main
 
       std::string response_str = response.toStr();
 

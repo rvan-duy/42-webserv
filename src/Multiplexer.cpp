@@ -48,6 +48,7 @@ void Multiplexer::waitForEvents(const int timeout) {
     const int NUMBER_OF_SOCKETS_TO_CHECK = _clients.size();
     for (int i = 0; i < NUMBER_OF_SOCKETS_TO_CHECK; i++) {  // Loop through all sockets inside the multiplexer
       int eventType = _getEvent(_clients[i]);               // Logging is done inside the _getEvent() method
+      int client_fd = _clients[i].fd;
 
       /**************************************************/
       /* Main switch to handle the different events     */
@@ -64,25 +65,39 @@ void Multiplexer::waitForEvents(const int timeout) {
         /* Read event                                     */
         /**************************************************/
         case POLLIN: {
-          if (_isServer(_clients[i].fd)) {                 // If the socket is a server
-            _addClient(_clients[i].fd);                    // Accept it as a client
+          
+          if (_isServer(client_fd)) {                 // If the socket is a server
+            _addClient(client_fd);                    // Accept it as a client
           } else {                                         // If not, this means it is a client
-            std::string data = _readData(_clients[i].fd);  // Read the data
+            std::string data = _readData(client_fd);  // Read the data
             if (data.empty()) {                            // If the data is empty, the client has disconnected
-              _removeClient(_clients[i].fd);               // Remove the client from the multiplexer
+              _removeClient(client_fd);               // Remove the client from the multiplexer
             } else {                                       // If the data is not empty, the client has sent data
+              // which server do we want to add it too?
+              // thisServer.BuildRequest
+
+              _getServerForClient(client_fd).buildRequest(data, client_fd);
+              // add this one to the fds to poll list!
+
               logger.log("[POLLING] Multiplexer: Received data from client: \n" + data);  // Log the data
               
               // it just sends back the data it received for testing purposes
-              send(_clients[i].fd, data.c_str(), data.size(), 0);
+              send(client_fd, data.c_str(), data.size(), 0);
               
-              _removeClient(_clients[i].fd);  // Remove the client from the multiplexer
+              _removeClient(client_fd);  // Remove the client from the multiplexer
             }
           }
           break;
         }
 
+        case POLLOUT: {
+          Server  client_server = _getServerForClient(client_fd);
+          HttpResponse client_response = client_server._requests[client_fd]->constructResponse(client_server, /* index path?*/ );
+          // client_response.send();  // i do not know if this actually works that way..
+        }
+
         // case POLLOUT, POLLERR, POLLHUP?
+        // POLLOUT == Built and send response
 
         /**************************************************/
         /* Default event                                  */
@@ -236,4 +251,13 @@ int Multiplexer::_pollSockets(const int timeout) {
       logger.log("[POLLING] Multiplexer: " + std::to_string(_clients.size()) + " sockets are ready");
       return 0;
   }
+}
+
+Server& Multiplexer::_getServerForClient(int fd) {
+  std::vector<Server>::iterator it;
+  for (it = _servers.begin(); it != _servers.end(); it++) {
+    if (std::find(it->_connectedClients.begin(), it->_connectedClients.end(), fd) != it->_connectedClients.end())
+      return (*it);
+  }
+  return (*it);
 }

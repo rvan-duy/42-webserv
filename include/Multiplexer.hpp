@@ -38,6 +38,7 @@ class Multiplexer {
   void        _removeClient(const int socket);
   std::string _readData(const int socket);
   int         _getEvent(const pollfd &fd);
+  Server&     _getServerForClient(int fd);
 };
 
 #endif  // MULTIPLEXER_HPP
