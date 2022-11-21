@@ -72,7 +72,10 @@ void Multiplexer::waitForEvents(const int timeout) {
               _removeClient(_clients[i].fd);               // Remove the client from the multiplexer
             } else {                                       // If the data is not empty, the client has sent data
               logger.log("[POLLING] Multiplexer: Received data from client: \n" + data);  // Log the data
-              logger.error("[POLLING] Multiplexer: TODO: Handle data");                   // TODO: Handle data
+              
+              // it just sends back the data it received for testing purposes
+              send(_clients[i].fd, data.c_str(), data.size(), 0);
+              
               _removeClient(_clients[i].fd);  // Remove the client from the multiplexer
             }
           }
