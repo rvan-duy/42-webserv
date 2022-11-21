@@ -4,9 +4,7 @@
 int startWebserver(std::vector<Server> servers)
 {
   Multiplexer multiplexer;
-
-  try
-  {
+try {
     // Iterate through all servers and add them to the multiplexer
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
