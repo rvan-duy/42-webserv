@@ -79,7 +79,7 @@ int Parser::parseIndex(void *dest, t_dataLine line)
     {
         return 1;
     }
-    Route *route = static_cast<Route *>(dest);
+    // Route *route = static_cast<Route *>(dest);
     // TODO
     return 0;
 }
