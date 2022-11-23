@@ -227,7 +227,7 @@ int Server::setPort(int const &value)
   }
   else if (value <= 0)
   {
-    Logger::getInstance().error("Port higher than MAX_PORT");
+    Logger::getInstance().error("Port < 0 not allowed");
     return 1;
   }
   _port = value;

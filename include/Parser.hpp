@@ -8,7 +8,7 @@
 #include <Logger.hpp>
 
 #define PARSER_FUNC_N 5
-#define BLOCK_FUNC_N 4
+#define BLOCK_FUNC_N 5
 
 /* Circle inclusion, so doesn't compile without this parser definition */
 class Parser;
@@ -16,11 +16,11 @@ class Parser;
 typedef int (Parser::*ParserFunc)(void *dest, std::vector<std::string> dataLine);
 
 /* Key - parser function pair */
-typedef struct s_comp
+typedef struct s_parseFuncPair
 {
 	std::string key;
 	ParserFunc func;
-} t_comp;
+} t_parseFuncPair;
 
 typedef std::vector<std::string> t_dataLine;
 
@@ -64,10 +64,11 @@ private:
 	int parseDataBlock(std::vector<DataBlock> *pDest);
 	int makeAst();
 
-	void parseAst(std::vector<Server> *pServers);
-	void parseDataLines(Server *pServer, std::vector<t_dataLine> const &lines);
-	void parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks);
-	Server convertBlockToServer(DataBlock block);
+	int parseAst(std::vector<Server> *pServers);
+	int parseServerDataLines(Server *pServer, std::vector<t_dataLine> const &lines);
+	int parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks);
+	int parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &lines);
+	int convertBlockToServer(Server *pServer, DataBlock block);
 
 	/* AST line parsing functions */
 	int parsePort(void *dest, t_dataLine line);
@@ -80,9 +81,10 @@ private:
 	int parseIndex(void *dest, t_dataLine line);
 	int parseAutoIndex(void *dest, t_dataLine line);
 	int parseCgiParam(void *dest, t_dataLine line);
+	int parseMethods(void *dest, t_dataLine line);
 	/* table with key value pairs for parsing AST */
-	static t_comp lineParsingFuncs[PARSER_FUNC_N];
-	static t_comp blockParsingFuncs[BLOCK_FUNC_N];
+	static t_parseFuncPair lineParsingFuncs[PARSER_FUNC_N];
+	static t_parseFuncPair blockParsingFuncs[BLOCK_FUNC_N];
 
 	std::vector<Token> _tokens;
 	AbstractSyntaxTree _tree;

@@ -100,9 +100,9 @@ int CGI::checkFileAccess(std::string const &filePath) const
 {
 	std::string fullPath = _rootDir + filePath;
 
-	if (access(fullPath.c_str(), X_OK))
+	if (access(fullPath.c_str(), R_OK))
 	{
-		Logger::getInstance().error("[PREPARING] CGI: No execution access to file");
+		Logger::getInstance().error("[PREPARING] CGI: access: " + std::string(strerror(errno)));
 		return 1;
 	}
 	return 0;
