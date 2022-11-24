@@ -52,8 +52,9 @@ void Multiplexer::waitForEvents(const int timeout) {
             if (_readData(CLIENT_SOCKET, rawRequest) == 0) {
               _removeClient(CLIENT_SOCKET);
             } else {
-              // - Parse the request into an request object
-              // - Add the request to the request queue
+              HttpRequest request;
+              request.parse(rawRequest);
+              _requestMap[CLIENT_SOCKET] = request;
               _clients[i].revents = POLLOUT;
             }
           }
@@ -61,10 +62,11 @@ void Multiplexer::waitForEvents(const int timeout) {
         }
 
         case POLLOUT: {
-          // - Get the request from the request queue
-          // - Make a response object from the request
+          HttpRequest request = _requestMap[CLIENT_SOCKET];
+          // - Make a response object from the request and the corresponding server
           // - Send the response
-          // - Remove the request from the request queue
+          send(CLIENT_SOCKET, "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!", 52, 0);
+          _requestMap.erase(CLIENT_SOCKET);
           _removeClient(CLIENT_SOCKET);
           break;
         }
@@ -85,11 +87,11 @@ void Multiplexer::waitForEvents(const int timeout) {
  * @param data The data to send
  * @return The number of bytes send
  */
-int Multiplexer::_sendData(const int clientSocket, const std::string &data) const {
+int Multiplexer::_sendData(const int socket, const std::string &data) const {
   Logger &logger = Logger::getInstance();
 
   logger.log("[WRITING] Multiplexer: Writing data to client: \n" + data);
-  return write(clientSocket, data.c_str(), data.length());
+  return write(socket, data.c_str(), data.length());
 }
 
 /*
@@ -176,22 +178,22 @@ void Multiplexer::_removeClient(const int socket) {
  * @param result The string to store the data in
  * @return The number of bytes read
  */
-int Multiplexer::_readData(const int clientSocket, std::string &result) const {
+int Multiplexer::_readData(const int socket, std::string &result) const {
   Logger   &logger      = Logger::getInstance();
   const int BUFFER_SIZE = 1000000;  // 1MB buffer, is this enough?
   char      buffer[BUFFER_SIZE];
   bzero(buffer, BUFFER_SIZE);
 
-  logger.log("[READING] Multiplexer: Reading data from socket " + std::to_string(clientSocket));
-  int bytesReceived = read(clientSocket, buffer, BUFFER_SIZE);
+  logger.log("[READING] Multiplexer: Reading data from socket " + std::to_string(socket));
+  int bytesReceived = read(socket, buffer, BUFFER_SIZE);
   if (bytesReceived == -1) {
-    logger.error("[READING] Multiplexer: Failed to read data from socket " + std::to_string(clientSocket) + ": " +
+    logger.error("[READING] Multiplexer: Failed to read data from socket " + std::to_string(socket) + ": " +
                  std::string(strerror(errno)));
     return -1;
   }
   result = std::string(buffer, bytesReceived);
   logger.log("[READING] Multiplexer: Read " + std::to_string(bytesReceived) + " bytes from socket " +
-             std::to_string(clientSocket));
+             std::to_string(socket));
   return bytesReceived;
 }
 
