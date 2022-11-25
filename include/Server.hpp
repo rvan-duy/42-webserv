@@ -109,6 +109,7 @@ public:
   int getMaxBody() const;
   int getPort() const;
   int getFd() const;
+  std::vector<int>& getConnectedClients();
   HttpRequest *getRequestByDiscriptor(int fd);
 
   // Setters
@@ -123,13 +124,12 @@ public:
   HttpRequest *createRequest(std::string &msg);
   void buildRequest(std::string &msg, int fd);
 
-// pirates (privates ;)
-  std::vector<int> _connectedClients; // list of connected clients
 private:
   /* Config variables */
   int _port;
   int _maxBodySize;
   std::vector<std::string> _serverName;
+  std::vector<int> _connectedClients; // list of connected clients
   std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
 

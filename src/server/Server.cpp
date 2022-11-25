@@ -57,6 +57,11 @@ std::vector<Route> Server::getRoutes() const
     return _routes;
 }
 
+  std::vector<int>& Server::getConnectedClients()
+{
+    return _connectedClients;
+}
+
 HttpRequest *Server::getRequestByDiscriptor(int fd)
 {
     return _requests[fd];

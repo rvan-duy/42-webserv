@@ -261,9 +261,11 @@ int Multiplexer::_pollSockets(const int timeout) {
 
 Server& Multiplexer::_getServerForClient(int fd) {
   std::vector<Server>::iterator it;
+  std::vector<int>  connectedClients;
   for (it = _servers.begin(); it != _servers.end(); it++) {
-    if (std::find(it->_connectedClients.begin(), it->_connectedClients.end(), fd) != it->_connectedClients.end())
-      return (*it);
+    if (std::find(it->getConnectedClients().begin(),
+      it->getConnectedClients().end(), fd) != it->getConnectedClients().end())
+        return (*it);
   }
   return (*it);
 }
