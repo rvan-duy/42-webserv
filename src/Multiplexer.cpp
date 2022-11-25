@@ -54,6 +54,7 @@ void Multiplexer::waitForEvents(const int timeout) {
             } else {
               HttpRequest request;
               request.parse(rawRequest);
+              // - Check if request->serverName is a valid server that we have
               _requestMap[CLIENT_SOCKET] = request;
               _clients[i].revents = POLLOUT;
             }
