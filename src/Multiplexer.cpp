@@ -65,7 +65,7 @@ void Multiplexer::waitForEvents(const int timeout) {
         case POLLOUT: {
           std::string tmp_index("index.html");
           Server  client_server = _getServerForClient(CLIENT_SOCKET);
-          HttpRequest *client_request = client_server._requests[CLIENT_SOCKET];
+          HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
           if (client_request)
           {
             HttpResponse client_response = client_request->constructResponse(client_server, tmp_index); // index.html shouldnt be hardcoded..
@@ -73,6 +73,7 @@ void Multiplexer::waitForEvents(const int timeout) {
           }
           delete client_request;
           _removeClient(CLIENT_SOCKET);
+          break;
         }
 
         // case POLLOUT, POLLERR, POLLHUP?
