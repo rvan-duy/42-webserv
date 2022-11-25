@@ -26,6 +26,18 @@ void Multiplexer::addServer(const Server &server, const short events) {
              std::to_string(_clients.size()));
 }
 
+void  pollfd_debug_helper(pollfd *arr, int len)
+{
+  Logger &logger = Logger::getInstance();
+  
+  for (int i = 0; i < len; i++)
+  {
+    logger.debug("socket : " + std::to_string(arr[i].fd));
+    logger.debug("event : " + std::to_string(arr[i].events));
+    logger.debug("revents : " + std::to_string(arr[i].revents));
+  }
+}
+
 /*
  * Wait for events on the clients
  * @param timeout Timeout in milliseconds, -1 for infinite
@@ -33,18 +45,19 @@ void Multiplexer::addServer(const Server &server, const short events) {
 void Multiplexer::waitForEvents(const int timeout) {
   Logger &logger = Logger::getInstance();
   static int quiter;
+  std::vector<int> markForRemoval;
 
   logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " + std::to_string(timeout) +
              " milliseconds");
   do {
     if (_pollSockets(timeout) == -1) break;
-
     logger.log("[POLLING] Multiplexer: Poll returned successfully, checking for events on sockets");
     const int NUMBER_OF_SOCKETS_TO_CHECK = _clients.size();
     for (int i = 0; i < NUMBER_OF_SOCKETS_TO_CHECK; i++) {
       const int EVENT_TYPE    = _getEvent(_clients[i]);
       const int CLIENT_SOCKET = _clients[i].fd;
 
+      logger.debug("[event]" + std::to_string(EVENT_TYPE));
       switch (EVENT_TYPE) {
         case POLLIN: {
           if (_isServer(CLIENT_SOCKET)) {
@@ -52,7 +65,7 @@ void Multiplexer::waitForEvents(const int timeout) {
           } else {
             std::string rawRequest;
             if (_readData(CLIENT_SOCKET, rawRequest) == 0) {
-              _removeClient(CLIENT_SOCKET);
+              markForRemoval.push_back(CLIENT_SOCKET);
             } else {
               _getServerForClient(CLIENT_SOCKET).buildRequest(rawRequest, CLIENT_SOCKET);
               // - Check if request->serverName is a valid server that we have
@@ -72,7 +85,7 @@ void Multiplexer::waitForEvents(const int timeout) {
             send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
           }
           delete client_request;
-          _removeClient(CLIENT_SOCKET);
+          markForRemoval.push_back(CLIENT_SOCKET);
           break;
         }
 
@@ -84,8 +97,11 @@ void Multiplexer::waitForEvents(const int timeout) {
         }
       }
     }
+    for (size_t i = 0; i < markForRemoval.size(); i++)
+      _removeClient(markForRemoval[i]);
+    markForRemoval.clear();
   quiter++;
-  if (quiter == 21)
+  if (quiter == 8)
     _endServer = true;
   } while (_endServer == false);
 }
@@ -229,6 +245,9 @@ int Multiplexer::_getEvent(const pollfd &fd) {
   } else if (fd.revents & POLLHUP) {
     logger.log("[POLLING] Multiplexer: POLLHUP event on socket " + std::to_string(fd.fd));
     return POLLHUP;
+  } else if (fd.revents & POLLNVAL) {
+    logger.log("[POLLING] Multiplexer: POLLNVAL event on socket " + std::to_string(fd.fd));
+    return POLLNVAL;
   } else {
     logger.log("[POLLING] Multiplexer: Unknown event on socket " + std::to_string(fd.fd));
     return -1;
@@ -243,6 +262,8 @@ int Multiplexer::_getEvent(const pollfd &fd) {
 int Multiplexer::_pollSockets(const int timeout) {
   Logger &logger = Logger::getInstance();
   pollfd *fds    = &_clients[0];
+
+  pollfd_debug_helper(fds, _clients.size());
 
   logger.log("[POLLING] Multiplexer: Polling for events on " + std::to_string(_clients.size()) + " sockets...");
   int pollResult = poll(fds, _clients.size(), timeout);
