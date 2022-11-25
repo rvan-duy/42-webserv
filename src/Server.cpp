@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 #include "Logger.hpp"
+#include <climits>
 
 /*
  * Constructor for Server class
