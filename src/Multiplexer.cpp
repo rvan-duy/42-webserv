@@ -32,6 +32,7 @@ void Multiplexer::addServer(const Server &server, const short events) {
  */
 void Multiplexer::waitForEvents(const int timeout) {
   Logger &logger = Logger::getInstance();
+  static int quiter;
 
   logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " + std::to_string(timeout) +
              " milliseconds");
@@ -53,7 +54,6 @@ void Multiplexer::waitForEvents(const int timeout) {
             if (_readData(CLIENT_SOCKET, rawRequest) == 0) {
               _removeClient(CLIENT_SOCKET);
             } else {
-              std::cout << rawRequest << std::endl;
               _getServerForClient(CLIENT_SOCKET).buildRequest(rawRequest, CLIENT_SOCKET);
               // - Check if request->serverName is a valid server that we have
               _clients[i].revents = POLLOUT;
@@ -65,8 +65,13 @@ void Multiplexer::waitForEvents(const int timeout) {
         case POLLOUT: {
           std::string tmp_index("index.html");
           Server  client_server = _getServerForClient(CLIENT_SOCKET);
-          HttpResponse client_response = client_server._requests[CLIENT_SOCKET]->constructResponse(client_server, tmp_index); // index.html shouldnt be hardcoded..
-          send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
+          HttpRequest *client_request = client_server._requests[CLIENT_SOCKET];
+          if (client_request)
+          {
+            HttpResponse client_response = client_request->constructResponse(client_server, tmp_index); // index.html shouldnt be hardcoded..
+            send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
+          }
+          delete client_request;
           _removeClient(CLIENT_SOCKET);
         }
 
@@ -78,7 +83,9 @@ void Multiplexer::waitForEvents(const int timeout) {
         }
       }
     }
-
+  quiter++;
+  if (quiter == 21)
+    _endServer = true;
   } while (_endServer == false);
 }
 
