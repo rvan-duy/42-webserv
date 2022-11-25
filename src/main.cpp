@@ -35,5 +35,5 @@ int main(int argc, char **argv, char **env)
   }
   if (initWebserver(&servers, argv[1]))
     return 1;
-  // return startWebserver(servers);
+  return startWebserver(servers);
 }
