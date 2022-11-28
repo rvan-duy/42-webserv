@@ -168,17 +168,6 @@ int Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &li
 	return 0;
 }
 
-static Route initNewRoute(std::string routeName)
-{
-	Route route = Route();
-
-	route.allowedMethods[GET] = true;
-	route.allowedMethods[POST] = true;
-	route.allowedMethods[DELETE] = true;
-	route.route = routeName;
-	return route;
-}
-
 int Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
@@ -187,7 +176,13 @@ int Parser::parseDataBlocks(Server *pServer, std::vector<DataBlock> const &block
 		{
 			continue;
 		}
-		Route route = initNewRoute(blocks[i].name.at(1));
+		/* If last character isn't '/' -> error */
+		if (blocks[i].name.at(1).find_last_of('/') != blocks[i].name.at(1).size())
+		{
+			Logger::getInstance().error("Route path has to be directory");
+			return 1;
+		}
+		Route route = Route(blocks[i].name.at(1));
 		if (parseLocationBlocks(&route, blocks[i].dataLines))
 		{
 			return 1;

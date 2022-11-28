@@ -9,6 +9,7 @@
 
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
+#include <CGI.hpp>
 #include <Logger.hpp>
 #include <cstdlib>
 #include <cstring>
@@ -58,21 +59,41 @@ during evaluation.
 #define MAX_PORT 65535
 
 /* Default values */
-#define DEFAULT_ERROR_STATUS 666
-#define DEFAULT_ERROR_PATH "defaultErrorPage"
+#define DEFAULT_ERROR_STATUS 404
+#define DEFAULT_ERROR_PATH "error.html"
 
-#define DEFAULT_HOST_STATUS 777
-#define DEFAULT_HOST_PATH "default host path"
+#define DEFAULT_HOST_STATUS 420
+#define DEFAULT_HOST_PATH "index.html"
+
+#define DEFAULT_MAX_BODY 1000000
+#define DEFAULT_PORT 80
+
+#define ROOT_FOLDER "root/"
+/* End of default values */
 
 struct Route
 {
+  Route(std::string const &name) : route(name), rootDirectory(ROOT_FOLDER), defaultFile("index.html"), autoIndex(false)
+  {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
+    allowedMethods[DELETE] = true;
+  }
+  // Default route constructor
+  Route() : route("/"), rootDirectory(ROOT_FOLDER), cgiRoot(ROOT_FOLDER), defaultFile("index.html"), httpRedirection("")
+  {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
+    allowedMethods[DELETE] = true;
+  }
+  // Vector for bonus
   std::string route;
-  std::map<EHttpMethods, bool> allowedMethods;
-  std::string httpRedirection;
-  std::string searchDirectory;
-  std::string defaultFile;
-  std::string cgiParam;
   std::string rootDirectory;
+  std::string cgiRoot;
+  std::string defaultFile;
+  std::map<EHttpMethods, bool> allowedMethods;
+  std::vector<std::string> indexFiles;
+  std::string httpRedirection;
   bool autoIndex;
 };
 
@@ -98,7 +119,6 @@ public:
 
   // To check if variables have been set
   bool hasServerName() const;
-  bool hasMaxBody() const;
   bool hasRoutes() const;
 
   //  Getters
@@ -109,7 +129,7 @@ public:
   int getMaxBody() const;
   int getPort() const;
   int getFd() const;
-  std::vector<int>& getConnectedClients();
+  std::vector<int> &getConnectedClients();
   HttpRequest *getRequestByDiscriptor(int fd);
 
   // Setters
@@ -133,12 +153,12 @@ private:
   std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
 
-  int _fd;                            // file descriptor for socket
-  int _domain;                        // domain of socket (IPv4 or IPv6)
-  int _type;                          // type of socket (TCP or UDP)
-  char _buffer[1000000];              // buffer for reading data from socket
+  int _fd;               // file descriptor for socket
+  int _domain;           // domain of socket (IPv4 or IPv6)
+  int _type;             // type of socket (TCP or UDP)
+  char _buffer[1000000]; // buffer for reading data from socket
   PageData _defaultErrorPage;
-  int _accepted;                      // file descriptor for accepted connection, -1 if no connection
+  int _accepted; // file descriptor for accepted connection, -1 if no connection
   PageData _host;
-  struct sockaddr_in6 _servaddr;      // server address
+  struct sockaddr_in6 _servaddr; // server address
 };
