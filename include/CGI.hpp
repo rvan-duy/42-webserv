@@ -20,7 +20,7 @@
 class CGI
 {
 public:
-	CGI(char *const *env) = 0;
+	CGI(char *const *env);
 	~CGI();
 
 	int executeFile(std::string *pDest, std::string const &rootDir, std::string const &filePath, std::string const &body) const;

@@ -14,8 +14,9 @@
 /* - The multiplexer class is used to multiplex the file descriptors of the sockets.    */
 /****************************************************************************************/
 
-class Multiplexer {
- public:
+class Multiplexer
+{
+public:
   Multiplexer();
   ~Multiplexer();
 
@@ -27,22 +28,23 @@ class Multiplexer {
   int getFd(const int index) const;
   int getNumberOfFds() const;
 
- private:
-  std::vector<pollfd>        _clients;    // vector of fds to poll
-  std::vector<Server>        _servers;    // vector of servers
+private:
+  std::vector<pollfd> _clients; // vector of fds to poll
+  std::vector<Server> _servers; // vector of servers
   // std::map<int, HttpRequest> _requestMap;   // map of socket fd to request
-  bool                       _endServer;  // flag to end server
+  bool _endServer; // flag to end server
 
   // Methods
-  Server&   _getServerForClient(int fd);
-  int    _pollSockets(const int timeout);
-  int    _sendData(const int socket, const std::string &data) const;
-  int    _readData(const int socket, std::string &data) const;
-  bool   _isServer(const int fd) const;
+  Server &_getServerForClient(int fd);
+  int _pollSockets(const int timeout);
+  int _sendData(const int socket, const std::string &data) const;
+  // int _readData(const int socket, std::string &data) const;
+  bool _isServer(const int fd) const;
   Server _getServer(const int fd) const;
-  void   _addClient(const int socket);
-  void   _removeClient(const int socket);
-  int    _getEvent(const pollfd &fd);
+  void _addClient(const int socket);
+  void _removeClient(const int socket);
+  int _getEvent(const pollfd &fd);
+  int _processRequest(int const &fd);
 };
 
-#endif  // MULTIPLEXER_HPP
+#endif // MULTIPLEXER_HPP
