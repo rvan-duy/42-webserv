@@ -66,9 +66,9 @@ void Multiplexer::waitForEvents(const int timeout) {
             if (_readData(CLIENT_SOCKET, rawRequest) == 0) {
               markForRemoval.push_back(CLIENT_SOCKET);
             } else {
-              _getServerForClient(CLIENT_SOCKET).buildRequest(rawRequest, CLIENT_SOCKET);
+              Server& tmp = _getServerForClient(CLIENT_SOCKET);
+              tmp.buildRequest(rawRequest, CLIENT_SOCKET);
               // - Check if request->serverName is a valid server that we have
-              _clients[i].revents = POLLOUT;
             }
           }
           break;
@@ -76,7 +76,7 @@ void Multiplexer::waitForEvents(const int timeout) {
 
         case POLLOUT: {
           std::string tmp_index("index.html");
-          Server  client_server = _getServerForClient(CLIENT_SOCKET);
+          Server&  client_server = _getServerForClient(CLIENT_SOCKET);
           HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
           if (client_request)
           {
@@ -103,9 +103,6 @@ void Multiplexer::waitForEvents(const int timeout) {
     for (size_t i = 0; i < markForRemoval.size(); i++)
       _removeClient(markForRemoval[i]);
     markForRemoval.clear();
-  quiter++;
-  if (quiter == 8)
-    _endServer = true;
   } while (_endServer == false);
 }
 

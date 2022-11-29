@@ -102,4 +102,5 @@ void Server::removeClient(const int socket)
             break;
         }
     }
+    _requests.erase(socket);
 }
