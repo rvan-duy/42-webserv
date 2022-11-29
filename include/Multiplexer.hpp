@@ -30,7 +30,6 @@ class Multiplexer {
  private:
   std::vector<pollfd>        _clients;    // vector of fds to poll
   std::vector<Server>        _servers;    // vector of servers
-  // std::map<int, HttpRequest> _requestMap;   // map of socket fd to request
   bool                       _endServer;  // flag to end server
 
   // Methods

@@ -57,7 +57,6 @@ void Multiplexer::waitForEvents(const int timeout) {
       const int EVENT_TYPE    = _getEvent(_clients[i]);
       const int CLIENT_SOCKET = _clients[i].fd;
 
-      logger.debug("[event]" + std::to_string(EVENT_TYPE));
       switch (EVENT_TYPE) {
         case POLLIN: {
           if (_isServer(CLIENT_SOCKET)) {
@@ -90,6 +89,10 @@ void Multiplexer::waitForEvents(const int timeout) {
         }
 
         // case POLLOUT, POLLERR, POLLHUP?
+        case POLLNVAL: {
+          logger.debug("POLLNVAL on discriptor : " + std::to_string(CLIENT_SOCKET));
+          break;
+        }
 
         default: {
           logger.log("[POLLING] Multiplexer: No events on socket");
@@ -263,7 +266,7 @@ int Multiplexer::_pollSockets(const int timeout) {
   Logger &logger = Logger::getInstance();
   pollfd *fds    = &_clients[0];
 
-  pollfd_debug_helper(fds, _clients.size());
+  // pollfd_debug_helper(fds, _clients.size());
 
   logger.log("[POLLING] Multiplexer: Polling for events on " + std::to_string(_clients.size()) + " sockets...");
   int pollResult = poll(fds, _clients.size(), timeout);
