@@ -38,13 +38,13 @@ private:
   Server &_getServerForClient(int fd);
   int _pollSockets(const int timeout);
   int _sendData(const int socket, const std::string &data) const;
-  // int _readData(const int socket, std::string &data) const;
   bool _isServer(const int fd) const;
   Server _getServer(const int fd) const;
   void _addClient(const int socket);
   void _removeClient(const int socket);
   int _getEvent(const pollfd &fd);
   int _processRequest(int const &fd);
+  void matchRequestToServer(HttpRequest const &request);
 };
 
 #endif // MULTIPLEXER_HPP

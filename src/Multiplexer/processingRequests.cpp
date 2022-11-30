@@ -31,7 +31,6 @@ static int readFromSocket(std::string *result, const int socket)
 /**
  * Returns all servers that are listening on port: fd
  */
-/*
 static std::vector<Server> getListeningServers(std::vector<Server> &allServers, int const &fd)
 {
     std::vector<Server> listeningServers;
@@ -45,7 +44,10 @@ static std::vector<Server> getListeningServers(std::vector<Server> &allServers, 
     }
     return listeningServers;
 }
-*/
+
+void Multiplexer::matchRequestToServer(HttpRequest const &request)
+{
+}
 
 int Multiplexer::_processRequest(int const &fd)
 {

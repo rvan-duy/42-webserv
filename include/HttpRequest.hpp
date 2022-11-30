@@ -22,15 +22,8 @@ class HttpRequest : public HttpMessage
 public:
   HttpRequest(HttpHeaderData const &data);
   HttpRequest();
-  HttpRequest(const std::string &msg);
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
-
-  // enum HttpMethod { GET, POST, DELETE, NONE };
-
-  void extractInitialResponsLine(const std::string &msg);
-  void extractHeaders(const std::string &msg);
-  void extractBody(const std::string &msg);
 
   // Abstract
   virtual int executeRequest(Server &server) = 0;
