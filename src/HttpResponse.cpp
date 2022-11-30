@@ -9,116 +9,20 @@ HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
   _statusMessage = obj._statusMessage;
 }
 
+HttpResponse::HttpResponse(HttpVersion version, int statusCode, std::string statusMessage)
+    : HttpMessage(version), _statusCode(statusCode), _statusMessage(statusMessage) {}
+
 HttpResponse::~HttpResponse() {}
 
 /*
- * Create the response
- * @param request Information from the request object
- * @param root Directory to serve files from
- * @param index Index file to serve
- */
-void HttpResponse::createResponse(const HttpRequest &request, const std::string &root, const std::string &index) {
-  Logger &logger = Logger::getInstance();
-
-  /**************************************************/
-  /* Respond based on the request method            */
-  /**************************************************/
-
-  logger.log("Creating response");
-  switch (request.getMethod()) {
-      /**************************************************/
-      /* Respond to a GET request                       */
-      /**************************************************/
-
-    case HttpRequest::GET: {
-      logger.log("Response type: GET");
-      std::string path = root + request.getUri();
-      logger.log("Path: " + path);
-
-      /**************************************************/
-      /* First check if the file exists                 */
-      /**************************************************/
-
-      if (!_fileExists(path)) {
-        /**************************************************/
-        /* If the file doesn't exist, look for an index   */
-        /* file in the directory                          */
-        /**************************************************/
-
-        logger.log("File doesn't exist");
-        const std::string index_path = path + index;
-        logger.log("Looking for index path: " + index_path);
-
-        /**************************************************/
-        /* If the index file doesn't exist, respond with  */
-        /* a 404 error                                    */
-        /**************************************************/
-
-        if (!_fileExists(index_path)) {
-          logger.log("Index file doesn't exist");
-          _setResponse("root/404/index.html", 404, "Not Found", request.getVersion());
-          return;
-        } else {
-          logger.log("Index file exists");
-          path = index_path;
-        }
-      }
-
-      /**************************************************/
-      /* Respond with the file                          */
-      /**************************************************/
-
-      _setResponse(path, 200, "OK", request.getVersion());
-
-      break;
-    }
-
-      /**************************************************/
-      /* Respond to a POST request                      */
-      /**************************************************/
-
-    case HttpRequest::POST: {
-      // todo
-      break;
-    }
-
-      /**************************************************/
-      /* Respond to a DELETE request                    */
-      /**************************************************/
-
-    case HttpRequest::DELETE: {
-      // todo
-      break;
-    }
-
-      /**************************************************/
-      /* Respond to unsupported method                  */
-      /**************************************************/
-    default: {
-      // todo prob throw 404?
-      break;
-    }
-  }
-}
-
-/*
- * Convert the response to a string
+ * Convert the response to a string // 2 keer dubbelop?
  * @return The response as a string
  */
 std::string HttpResponse::toStr() const {
   Logger &logger = Logger::getInstance();
 
-  /**************************************************/
-  /* Create the response string to store the        */
-  /* response in                                    */
-  /**************************************************/
-
   logger.log("< Started creating response string");
   std::string response_string;
-
-  /**************************************************/
-  /* Add the status line                            */
-  /**************************************************/
 
   {
     logger.log("1. Adding status line");
@@ -126,10 +30,6 @@ std::string HttpResponse::toStr() const {
     ss << getVersionToStr() << " " << _statusCode << " " << _statusMessage << "\r\n";
     response_string += ss.str();
   }
-
-  /**************************************************/
-  /* Add the headers                                */
-  /**************************************************/
 
   logger.log("2. Adding headers");
   {
@@ -141,10 +41,6 @@ std::string HttpResponse::toStr() const {
 
     response_string += "\r\n";  // Add an extra CRLF to separate headers from body
   }
-
-  /**************************************************/
-  /* Add the body                                   */
-  /**************************************************/
 
   logger.log("3. Adding body");
   if (_body.length() > 0) {
@@ -210,7 +106,7 @@ void HttpResponse::_setResponse(const std::string &path, const int status_code, 
  * @param path The path to the file to check
  * @return True if the file exists, false otherwise
  */
-bool HttpResponse::_fileExists(const std::string &path) const {
+bool _fileExists(const std::string &path) {
   Logger     &logger = Logger::getInstance();
 
   struct stat buffer;  // stat struct to store the file info

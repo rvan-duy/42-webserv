@@ -1,5 +1,7 @@
 #include "Multiplexer.hpp"
 
+#include <algorithm>
+
 #include "Logger.hpp"
 
 Multiplexer::Multiplexer() : _endServer(false) {}
@@ -30,13 +32,13 @@ void Multiplexer::addServer(const Server &server, const short events) {
  * @param timeout Timeout in milliseconds, -1 for infinite
  */
 void Multiplexer::waitForEvents(const int timeout) {
-  Logger &logger = Logger::getInstance();
+  Logger          &logger = Logger::getInstance();
+  std::vector<int> markForRemoval;
 
   logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " + std::to_string(timeout) +
              " milliseconds");
   do {
     if (_pollSockets(timeout) == -1) break;
-
     logger.log("[POLLING] Multiplexer: Poll returned successfully, checking for events on sockets");
     const int NUMBER_OF_SOCKETS_TO_CHECK = _clients.size();
     for (int i = 0; i < NUMBER_OF_SOCKETS_TO_CHECK; i++) {
@@ -50,25 +52,33 @@ void Multiplexer::waitForEvents(const int timeout) {
           } else {
             std::string rawRequest;
             if (_readData(CLIENT_SOCKET, rawRequest) == 0) {
-              _removeClient(CLIENT_SOCKET);
+              markForRemoval.push_back(CLIENT_SOCKET);
             } else {
-              HttpRequest request;
-              request.parse(rawRequest);
+              Server &tmp = _getServerForClient(CLIENT_SOCKET);
+              tmp.buildRequest(rawRequest, CLIENT_SOCKET);
               // - Check if request->serverName is a valid server that we have
-              _requestMap[CLIENT_SOCKET] = request;
-              _clients[i].revents = POLLOUT;
             }
           }
           break;
         }
 
         case POLLOUT: {
-          HttpRequest request = _requestMap[CLIENT_SOCKET];
-          // - Make a response object from the request and the corresponding server
-          // - Send the response
-          send(CLIENT_SOCKET, "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!", 52, 0);
-          _requestMap.erase(CLIENT_SOCKET);
-          _removeClient(CLIENT_SOCKET);
+          std::string  tmp_index("index.html");
+          Server      &client_server  = _getServerForClient(CLIENT_SOCKET);
+          HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
+          if (client_request) {
+            HttpResponse client_response =
+                client_request->constructResponse(client_server, tmp_index);  // index.html shouldnt be hardcoded..
+            send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
+          }
+          delete client_request;
+          markForRemoval.push_back(CLIENT_SOCKET);
+          break;
+        }
+
+        // case POLLOUT, POLLERR, POLLHUP?
+        case POLLNVAL: {
+          logger.debug("POLLNVAL on descriptor : " + std::to_string(CLIENT_SOCKET));
           break;
         }
 
@@ -78,7 +88,8 @@ void Multiplexer::waitForEvents(const int timeout) {
         }
       }
     }
-
+    for (size_t i = 0; i < markForRemoval.size(); i++) _removeClient(markForRemoval[i]);
+    markForRemoval.clear();
   } while (_endServer == false);
 }
 
@@ -221,6 +232,9 @@ int Multiplexer::_getEvent(const pollfd &fd) {
   } else if (fd.revents & POLLHUP) {
     logger.log("[POLLING] Multiplexer: POLLHUP event on socket " + std::to_string(fd.fd));
     return POLLHUP;
+  } else if (fd.revents & POLLNVAL) {
+    logger.log("[POLLING] Multiplexer: POLLNVAL event on socket " + std::to_string(fd.fd));
+    return POLLNVAL;
   } else {
     logger.log("[POLLING] Multiplexer: Unknown event on socket " + std::to_string(fd.fd));
     return -1;
@@ -249,4 +263,20 @@ int Multiplexer::_pollSockets(const int timeout) {
       logger.log("[POLLING] Multiplexer: " + std::to_string(_clients.size()) + " sockets are ready");
       return 0;
   }
+}
+
+/*
+ * Gets the server that a client is connected to
+ * @param socket The client socket
+ * @return A reference to the server the client is connected to
+ */
+Server &Multiplexer::_getServerForClient(const int fd) {
+  std::vector<Server>::iterator it;
+
+  for (it = _servers.begin(); it != _servers.end(); it++) {
+    if (std::find(it->getConnectedClients().begin(), it->getConnectedClients().end(), fd) !=
+        it->getConnectedClients().end())
+      return *it;
+  }
+  return *it;
 }

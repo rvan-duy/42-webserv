@@ -6,10 +6,12 @@
 
 class HttpMessage {
  public:
-  HttpMessage();
-  virtual ~HttpMessage();
 
   enum HttpVersion { HTTP_1_1, HTTP_2_0, HTTP_3_0 };
+
+  HttpMessage();
+  HttpMessage(HttpVersion& verion);
+  virtual ~HttpMessage();
 
   // Getters
   HttpVersion                        getVersion() const;

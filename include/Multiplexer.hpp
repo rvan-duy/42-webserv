@@ -4,8 +4,8 @@
 #include <poll.h>
 
 #include <iterator>
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "Server.hpp"
 
@@ -28,20 +28,20 @@ class Multiplexer {
   int getNumberOfFds() const;
 
  private:
-  std::vector<pollfd>        _clients;    // vector of fds to poll
-  std::vector<Server>        _servers;    // vector of servers
-  std::map<int, HttpRequest> _requestMap;   // map of socket fd to request
-  bool                       _endServer;  // flag to end server
+  std::vector<pollfd> _clients;    // vector of fds to poll
+  std::vector<Server> _servers;    // vector of servers
+  bool                _endServer;  // flag to end server
 
   // Methods
-  int    _pollSockets(const int timeout);
-  int    _sendData(const int socket, const std::string &data) const;
-  int    _readData(const int socket, std::string &data) const;
-  bool   _isServer(const int fd) const;
-  Server _getServer(const int fd) const;
-  void   _addClient(const int socket);
-  void   _removeClient(const int socket);
-  int    _getEvent(const pollfd &fd);
+  int     _pollSockets(const int timeout);
+  int     _sendData(const int socket, const std::string &data) const;
+  int     _readData(const int socket, std::string &data) const;
+  bool    _isServer(const int fd) const;
+  Server  _getServer(const int fd) const;
+  void    _addClient(const int socket);
+  void    _removeClient(const int socket);
+  int     _getEvent(const pollfd &fd);
+  Server &_getServerForClient(const int fd);
 };
 
 #endif  // MULTIPLEXER_HPP
