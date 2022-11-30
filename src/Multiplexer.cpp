@@ -78,7 +78,7 @@ void Multiplexer::waitForEvents(const int timeout) {
 
         // case POLLOUT, POLLERR, POLLHUP?
         case POLLNVAL: {
-          logger.debug("POLLNVAL on discriptor : " + std::to_string(CLIENT_SOCKET));
+          logger.debug("POLLNVAL on descriptor : " + std::to_string(CLIENT_SOCKET));
           break;
         }
 
