@@ -26,18 +26,6 @@ void Multiplexer::addServer(const Server &server, const short events) {
              std::to_string(_clients.size()));
 }
 
-void  pollfd_debug_helper(pollfd *arr, int len)
-{
-  Logger &logger = Logger::getInstance();
-  
-  for (int i = 0; i < len; i++)
-  {
-    logger.debug("socket : " + std::to_string(arr[i].fd));
-    logger.debug("event : " + std::to_string(arr[i].events));
-    logger.debug("revents : " + std::to_string(arr[i].revents));
-  }
-}
-
 /*
  * Wait for events on the clients
  * @param timeout Timeout in milliseconds, -1 for infinite
@@ -261,8 +249,6 @@ int Multiplexer::_getEvent(const pollfd &fd) {
 int Multiplexer::_pollSockets(const int timeout) {
   Logger &logger = Logger::getInstance();
   pollfd *fds    = &_clients[0];
-
-  // pollfd_debug_helper(fds, _clients.size());
 
   logger.log("[POLLING] Multiplexer: Polling for events on " + std::to_string(_clients.size()) + " sockets...");
   int pollResult = poll(fds, _clients.size(), timeout);
