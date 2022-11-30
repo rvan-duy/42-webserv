@@ -55,7 +55,12 @@ std::map<std::string, std::string> HttpMessage::getHeaders() const
  */
 std::string HttpMessage::getHeader(const std::string &key) const
 {
-  return _headers.at(key);
+  std::map<std::string, std::string>::const_iterator location = _headers.find(key);
+  if (location == _headers.end())
+  {
+    return NULL;
+  }
+  return location->second;
 }
 
 /*
