@@ -15,7 +15,7 @@ Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _typ
  */
 Server::~Server()
 {
-    close(_fd);
+    
 }
 
 /**************************************************/
