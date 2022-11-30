@@ -7,6 +7,7 @@
 void Multiplexer::waitForEvents(const int timeout)
 {
     Logger &logger = Logger::getInstance();
+    std::vector<int> markForRemoval;
     static int quiter;
 
     logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " + std::to_string(timeout) +
@@ -31,7 +32,9 @@ void Multiplexer::waitForEvents(const int timeout)
                     _addClient(CLIENT_SOCKET);
                 else
                 {
-                    _processRequest(CLIENT_SOCKET);
+                    if (_processRequest(CLIENT_SOCKET) == 2)
+                        // Not sure what this means
+                        markForRemoval.push_back(CLIENT_SOCKET);
                     _clients[i].revents = POLLOUT;
                 }
                 break;

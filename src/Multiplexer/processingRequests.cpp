@@ -56,9 +56,8 @@ int Multiplexer::_processRequest(int const &fd)
         return 1;
     else if (readStatus == 0)
     {
-        _removeClient(fd);
         // Return ok response?
-        return 0;
+        return 2;
     }
     request = RequestParser::parseHeader(rawRequest);
     if (request == NULL)

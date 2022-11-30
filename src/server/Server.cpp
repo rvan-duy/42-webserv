@@ -15,7 +15,7 @@ Server::Server() : _port(DEFAULT_PORT), _maxBodySize(DEFAULT_MAX_BODY), _fd(-1),
  */
 Server::~Server()
 {
-    close(_fd);
+    
 }
 
 /**************************************************/
