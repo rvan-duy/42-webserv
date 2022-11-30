@@ -44,7 +44,6 @@ void  pollfd_debug_helper(pollfd *arr, int len)
  */
 void Multiplexer::waitForEvents(const int timeout) {
   Logger &logger = Logger::getInstance();
-  static int quiter;
   std::vector<int> markForRemoval;
 
   logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " + std::to_string(timeout) +
