@@ -53,14 +53,19 @@ int Multiplexer::_processRequest(int const &fd)
 
     readStatus = readFromSocket(&rawRequest, fd);
     if (readStatus < 0)
-        return -1;
+        return 1;
     else if (readStatus == 0)
     {
         _removeClient(fd);
         // Return ok response?
         return 0;
     }
-    // request = generateRequest(rawRequest);
+    request = RequestParser::parseHeader(rawRequest);
+    if (request == NULL)
+    {
+        // Return bad request
+        return 1;
+    }
     // match request to server
     return 0;
 }

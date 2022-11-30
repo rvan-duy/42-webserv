@@ -3,19 +3,15 @@
 
 #include <iostream>
 #include <map>
-
-enum HttpVersion
-{
-  HTTP_1_1,
-  HTTP_2_0,
-  HTTP_3_0
-};
+#include <General.hpp>
 
 class HttpMessage
 {
 public:
   HttpMessage();
-  HttpMessage(HttpVersion &verion);
+  HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version, std::string const &body);
+  HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version);
+  HttpMessage(HttpVersion const &version);
   virtual ~HttpMessage();
 
   // Getters

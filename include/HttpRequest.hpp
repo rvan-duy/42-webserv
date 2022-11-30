@@ -4,9 +4,12 @@
 #include <General.hpp>
 
 #include "HttpMessage.hpp"
+#include <RequestParser.hpp>
 #include "HttpResponse.hpp"
 #include "Server.hpp"
 #include <string>
+
+struct HttpHeaderData;
 
 std::string extractArgument(const std::string &msg, int n);
 EHttpMethods _parseMethod(const std::string &method);
@@ -17,6 +20,7 @@ bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
 class HttpRequest : public HttpMessage
 {
 public:
+  HttpRequest(HttpHeaderData const &data);
   HttpRequest();
   HttpRequest(const std::string &msg);
   HttpRequest(const HttpRequest &obj);
@@ -48,7 +52,7 @@ protected:
 class GetRequest : public HttpRequest
 {
 public:
-  GetRequest(std::string &msg);
+  GetRequest(HttpHeaderData const &data);
   GetRequest(const GetRequest &ref);
   ~GetRequest();
 
@@ -62,7 +66,7 @@ public:
 class DeleteRequest : public HttpRequest
 {
 public:
-  DeleteRequest(std::string &msg);
+  DeleteRequest(HttpHeaderData const &data);
   DeleteRequest(const DeleteRequest &ref);
   ~DeleteRequest();
 
@@ -76,7 +80,7 @@ public:
 class PostRequest : public HttpRequest
 {
 public:
-  PostRequest(std::string &msg);
+  PostRequest(HttpHeaderData const &data);
   PostRequest(const PostRequest &ref);
   ~PostRequest();
 

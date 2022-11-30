@@ -2,7 +2,11 @@
 
 HttpMessage::HttpMessage() {}
 
-HttpMessage::HttpMessage(HttpVersion &version) : _version(version) {}
+HttpMessage::HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version, std::string const &body) : _version(version), _headers(headers), _body(body) {}
+
+HttpMessage::HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version) : _version(version), _headers(headers) {}
+
+HttpMessage::HttpMessage(HttpVersion const &version) : _version(version) {}
 
 HttpMessage::~HttpMessage() {}
 

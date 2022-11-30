@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-GetRequest::GetRequest(std::string &msg) : HttpRequest(msg) {}
+GetRequest::GetRequest(HttpHeaderData const &data) : HttpRequest(data) {}
 
 GetRequest::GetRequest(const GetRequest &ref) : HttpRequest(ref) {}
 

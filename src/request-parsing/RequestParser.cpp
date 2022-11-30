@@ -1,5 +1,21 @@
 #include <RequestParser.hpp>
 
+RequestParser::RequestParser() {}
+
+RequestParser::~RequestParser() {}
+
+static std::string stringTrim(std::string toTrim)
+{
+    size_t i = 0;
+    size_t j = toTrim.length();
+
+    while (toTrim[i] == ' ')
+        i++;
+    while (toTrim[j] == ' ')
+        j--;
+    return toTrim.substr(i, j);
+}
+
 /**
  * Start of parsing first line
  */
@@ -14,7 +30,7 @@ static int parseMethod(std::string method)
     return -1;
 }
 
-// TODO: check if string are correct
+// TODO: check if strings are correct
 static int parseHttpVersion(std::string httpVersion)
 {
     if (httpVersion == "HTTP/1.1")
@@ -26,7 +42,8 @@ static int parseHttpVersion(std::string httpVersion)
     return -1;
 }
 
-// TODO: add more delimiters
+// TODO: add more delimiters?
+/* Splits string based on "delimiter" */
 static std::vector<std::string> splitString(std::string const &str)
 {
     std::vector<std::string> splittedString;
@@ -47,6 +64,7 @@ static std::vector<std::string> splitString(std::string const &str)
     return splittedString;
 }
 
+/* All steps involved to parse first line of header */
 static int parseFirstLine(HttpHeaderData *dest, std::string const &line)
 {
     std::vector<std::string> splittedString = splitString(line);
@@ -66,7 +84,7 @@ static int parseFirstLine(HttpHeaderData *dest, std::string const &line)
     return 0;
 }
 
-static std::vector<std::string> getHeaderLines(std::string headerString)
+static std::vector<std::string> splitHeader(std::string headerString)
 {
     std::vector<std::string> headerLines;
     std::string currentLine;
@@ -86,28 +104,82 @@ static std::vector<std::string> getHeaderLines(std::string headerString)
     return headerLines;
 }
 
+/* Splits header based on \n\r */
+static int makeHeaderMap(std::map<std::string, std::string> *pHeadersMap, std::vector<std::string> headerLines)
+{
+    std::string currentLine;
+    size_t semiColLocation;
+    std::pair<std::string, std::string> pair("", "");
+
+    Logger &logger = Logger::getInstance();
+
+    for (size_t i = 1; i < headerLines.size(); i++)
+    {
+        currentLine = headerLines.at(i);
+        semiColLocation = currentLine.find(':');
+        if (semiColLocation == std::string::npos)
+            return 1;
+        pair.first = stringTrim(currentLine.substr(0, semiColLocation));
+        pair.second = stringTrim(currentLine.substr(semiColLocation + 1, currentLine.length() - semiColLocation));
+        logger.debug(pair.first);
+        logger.debug(pair.second);
+        pHeadersMap->insert(pair);
+    }
+    return 0;
+}
+
+static HttpRequest *createRequest(HttpHeaderData const &data)
+{
+    Logger &logger = Logger::getInstance();
+
+    switch (data.method)
+    {
+    case GET:
+        logger.log("Succesfully parsed get request!");
+        return new GetRequest(data);
+    case POST:
+        logger.log("Succesfully parsed post request!");
+        return new PostRequest(data);
+    case DELETE:
+        logger.log("Succesfully parsed delete request!");
+        return new DeleteRequest(data);
+    default:
+        Logger::getInstance().error("Incorrect type of request received");
+        return NULL;
+    }
+    return NULL;
+}
+
 /**
  * End of parsing first line
  */
 HttpRequest *RequestParser::parseHeader(std::string &rawRequest)
 {
     Logger &logger = Logger::getInstance();
+    /* Header split into separate strings */
     std::vector<std::string> headerLines;
+    /* Data used to initialize a request */
     HttpHeaderData headerData;
     size_t endOfHeader;
 
+    logger.log("Starting to parse request");
     endOfHeader = rawRequest.find("\r\n\r\n");
     if (endOfHeader == std::string::npos)
     {
-        logger.error("Incorrect end of header found");
+        logger.error("Incorrect end of header found -> returning NULL");
         return NULL;
     }
     headerData.body = rawRequest.substr(endOfHeader + 4, rawRequest.length() - endOfHeader);
-    headerLines = getHeaderLines(rawRequest.substr(0, endOfHeader));
+    headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2));
     if (parseFirstLine(&headerData, headerLines[0]))
     {
-        logger.error("Incorrect first line of request");
+        logger.error("Incorrect first line of request -> returning NULL");
         return NULL;
     }
-    return NULL;
+    if (makeHeaderMap(&headerData.headers, headerLines))
+    {
+        logger.error("Incorrect header added to request -> returning NULL");
+        return NULL;
+    }
+    return createRequest(headerData);
 }
