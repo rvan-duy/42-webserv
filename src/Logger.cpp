@@ -56,6 +56,27 @@ void Logger::debug(std::string const &message)
 	logToFile("[DEBUG]:  ", message);
 }
 
+/**
+ * Logging with Verbosity
+ */
+void Logger::log(std::string const &message, ELogVerbosity lvl)
+{
+	if (lvl <= VERBOSITY)
+		log(message);
+}
+
+void Logger::error(std::string const &message, ELogVerbosity lvl)
+{
+	if (lvl <= VERBOSITY)
+		log(message);
+}
+
+void Logger::debug(std::string const &message, ELogVerbosity lvl)
+{
+	if (lvl <= VERBOSITY)
+		log(message);
+}
+
 // Logs restart message to logfile
 void Logger::restart(void)
 {

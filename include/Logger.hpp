@@ -14,6 +14,15 @@ enum ELogLevel
 	ERROR
 };
 
+enum ELogVerbosity
+{
+	SILENT,
+	MEDIUM,
+	VERBOSE
+};
+
+#define VERBOSITY MEDIUM
+
 #ifndef LOG_ENABLED
 #define LOG_ENABLED 3
 #endif
@@ -39,6 +48,10 @@ public:
 	void log(std::string const &message);
 	void error(std::string const &message);
 	void debug(std::string const &message);
+
+	void log(std::string const &message, ELogVerbosity lvl);
+	void error(std::string const &message, ELogVerbosity lvl);
+	void debug(std::string const &message, ELogVerbosity lvl);
 
 protected:
 	// Constructors are protected since they shouldn't be called by any other class or file
