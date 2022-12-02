@@ -85,4 +85,18 @@ public:
   HttpResponse constructResponse(Server& server, std::string& index);
 };
 
+// BAD
+
+class	BadRequest : public HttpRequest
+{
+public:
+	BadRequest(std::string& msg);
+	BadRequest(const BadRequest& ref);
+	~BadRequest();
+
+	// Concrete
+  int executeRequest(Server& server);
+  HttpResponse constructResponse(Server& server, std::string& index);
+};
+
 #endif  // HTTP_REQUEST_HPP

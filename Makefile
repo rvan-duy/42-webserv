@@ -34,6 +34,7 @@ export SRCS			:=	Server.cpp \
 						GetRequest.cpp \
 						PostRequest.cpp \
 						DeleteRequest.cpp \
+						BadRequest.cpp \
 						HttpRequest.cpp \
 						RequestBuilder.cpp \
 						Lexer.cpp \
