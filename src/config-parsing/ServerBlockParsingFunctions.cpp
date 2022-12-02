@@ -136,6 +136,7 @@ int Parser::parsePortAndIp(void *dest, t_dataLine line)
     size_t semiCol = rawLine.find(':');
     if (semiCol != std::string::npos)
     {
+        /* Parse port, then cut it out from string */
         port = parsePort(rawLine.substr(semiCol + 1, rawLine.length() - semiCol + 1));
         if (port < 0)
         {
