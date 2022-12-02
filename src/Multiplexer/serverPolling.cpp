@@ -44,7 +44,7 @@ void Multiplexer::waitForEvents(const int timeout)
             {
                 std::string tmp_index("index.html");
                 Server client_server = _getServerForClient(CLIENT_SOCKET);
-                HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
+                HttpRequest *client_request = client_server.getRequestByDescriptor(CLIENT_SOCKET);
                 if (client_request)
                 {
                     HttpResponse client_response = client_request->constructResponse(client_server, tmp_index); // index.html shouldnt be hardcoded..

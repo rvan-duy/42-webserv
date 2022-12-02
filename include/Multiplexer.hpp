@@ -44,7 +44,7 @@ private:
   void _removeClient(const int socket);
   int _getEvent(const pollfd &fd);
   int _processRequest(int const &fd);
-  void matchRequestToServer(HttpRequest const &request);
+  void matchRequestToServer(HttpRequest *request, int const &fd);
 };
 
 #endif // MULTIPLEXER_HPP

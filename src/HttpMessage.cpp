@@ -8,7 +8,11 @@ HttpMessage::HttpMessage(std::map<std::string, std::string> const &headers, Http
 
 HttpMessage::HttpMessage(HttpVersion const &version) : _version(version) {}
 
-HttpMessage::~HttpMessage() {}
+HttpMessage::HttpMessage(HttpMessage const &other) : _version(other._version), _headers(other._headers), _body(other._body) {}
+
+HttpMessage::~HttpMessage()
+{
+}
 
 /**************************************************/
 /* Start of the getters                           */
@@ -57,9 +61,7 @@ std::string HttpMessage::getHeader(const std::string &key) const
 {
   std::map<std::string, std::string>::const_iterator location = _headers.find(key);
   if (location == _headers.end())
-  {
-    return NULL;
-  }
+    return "";
   return location->second;
 }
 

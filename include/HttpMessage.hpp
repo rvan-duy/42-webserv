@@ -12,6 +12,7 @@ public:
   HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version, std::string const &body);
   HttpMessage(std::map<std::string, std::string> const &headers, HttpVersion const &version);
   HttpMessage(HttpVersion const &version);
+  HttpMessage(HttpMessage const &other);
   virtual ~HttpMessage();
 
   // Getters

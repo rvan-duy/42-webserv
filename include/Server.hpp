@@ -66,6 +66,8 @@ during evaluation.
 #define DEFAULT_HOST_PATH "index.html"
 
 #define DEFAULT_MAX_BODY 1000000
+
+#define DEFAULT_IP_ADRESS "0.0.0.0"
 #define DEFAULT_PORT 80
 
 #define ROOT_FOLDER "root/"
@@ -127,28 +129,32 @@ public:
   PageData getHost() const;
   PageData getErrorPage() const;
   int getMaxBody() const;
+
   int getPort() const;
+  std::string getIpAdress() const;
   int getFd() const;
   std::vector<int> &getConnectedClients();
-  HttpRequest *getRequestByDiscriptor(int fd);
+  HttpRequest *getRequestByDescriptor(int fd);
+  HttpRequest *getNextRequest() const;
+  void removeNextRequest();
 
   // Setters
+  int setPort(int const &value);
+  int setIpAddress(std::string const &address);
   int setHost(int const &statusCode, std::string const &filePath);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::vector<std::string> const &value);
-  int setPort(int const &value);
   int setMaxBody(double const &value);
   void addRoute(Route const &route);
-
-  // Request generation
-  HttpRequest *createRequest(std::string &msg);
-  void buildRequest(std::string &msg, int fd);
+  void addRequest(HttpRequest *request);
 
 private:
   /* Config variables */
   int _port;
+  std::string _ipAddress;
   int _maxBodySize;
   std::vector<std::string> _serverName;
+  std::vector<HttpRequest *> _unhandledRequests;
   std::vector<int> _connectedClients; // list of connected clients
   std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;

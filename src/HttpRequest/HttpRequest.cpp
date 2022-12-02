@@ -12,6 +12,7 @@ HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj)
 {
   _method = obj._method;
   _uri = obj._uri;
+  _chunked = obj._chunked;
 }
 
 HttpRequest::~HttpRequest() {}

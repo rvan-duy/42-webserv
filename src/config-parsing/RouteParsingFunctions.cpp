@@ -6,8 +6,8 @@
 
 t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
     {"root", &Parser::parseRoot},
-    {"index", &Parser::parsePort},
-    {"autoIndex", &Parser::parsePort},
+    {"index", &Parser::parsePortAndIp},
+    {"autoIndex", &Parser::parseAutoIndex},
     {"cgi", &Parser::parseCgi},
     {"methods", &Parser::parseMethods},
 };
@@ -64,7 +64,7 @@ int Parser::parseRoot(void *dest, t_dataLine line)
         return 1;
     }
     Route *route = static_cast<Route *>(dest);
-    if (route->rootDirectory != "")
+    if (route->rootDirectory != ROOT_FOLDER)
     {
         Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
         return 1;

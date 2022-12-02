@@ -45,8 +45,23 @@ static std::vector<Server> getListeningServers(std::vector<Server> &allServers, 
     return listeningServers;
 }
 
-void Multiplexer::matchRequestToServer(HttpRequest const &request)
+void Multiplexer::matchRequestToServer(HttpRequest *request, int const &fd)
 {
+    std::vector<Server> listeningServers = getListeningServers(_servers, fd);
+    std::string host = request->getHeader("Host");
+    /* If no host is specified, go for default server */
+    if (host == "")
+    {
+        listeningServers.at(0).addRequest(request);
+        return;
+    }
+    for (int i = 0; i < listeningServers.size(); i++)
+    {
+        /* Loop over server names to find match */
+        std::vector<std::string>::iterator it = listeningServers.at(i).getServerName().begin();
+    }
+    /* If host can't be matched, go for default server */
+    listeningServers.at(0).addRequest(request);
 }
 
 int Multiplexer::_processRequest(int const &fd)

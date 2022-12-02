@@ -4,7 +4,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _port(DEFAULT_PORT), _maxBodySize(DEFAULT_MAX_BODY), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _accepted(-1), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
+Server::Server() : _port(DEFAULT_PORT), _ipAddress(DEFAULT_IP_ADRESS), _maxBodySize(DEFAULT_MAX_BODY), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _accepted(-1), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
 {
     memset(&_servaddr, 0, sizeof(_servaddr));
     memset(&_buffer, 0, sizeof(_buffer));
@@ -15,7 +15,6 @@ Server::Server() : _port(DEFAULT_PORT), _maxBodySize(DEFAULT_MAX_BODY), _fd(-1),
  */
 Server::~Server()
 {
-    
 }
 
 /**************************************************/
@@ -42,6 +41,11 @@ PageData Server::getErrorPage() const
     return _defaultErrorPage;
 }
 
+std::string Server::getIpAdress() const
+{
+    return _ipAddress;
+}
+
 int Server::getPort() const
 {
     return _port;
@@ -62,9 +66,20 @@ std::vector<int> &Server::getConnectedClients()
     return _connectedClients;
 }
 
-HttpRequest *Server::getRequestByDiscriptor(int fd)
+HttpRequest *Server::getRequestByDescriptor(int fd)
 {
     return _requests[fd];
+}
+
+HttpRequest *Server::getNextRequest() const
+{
+    return _unhandledRequests.at(0);
+}
+
+void Server::removeNextRequest()
+{
+    delete _unhandledRequests.at(0);
+    _unhandledRequests.erase(_unhandledRequests.begin());
 }
 
 /**************************************************/
@@ -126,10 +141,20 @@ int Server::setPort(int const &value)
     }
     else if (value <= 0)
     {
-        Logger::getInstance().error("Port higher than MAX_PORT");
+        Logger::getInstance().error("Port invalid");
         return 1;
     }
     _port = value;
+    return 0;
+}
+
+int Server::setIpAddress(std::string const &address)
+{
+    if (_ipAddress != DEFAULT_IP_ADRESS)
+    {
+        return 1;
+    }
+    _ipAddress = address;
     return 0;
 }
 
@@ -138,29 +163,7 @@ void Server::addRoute(Route const &route)
     _routes.push_back(route);
 }
 
-/**************************************************/
-/* End of getters and setters                     */
-/**************************************************/
-
-/*
- * To check if variables are set
- */
-// bool Server::hasServerName() const
-// {
-//     return (_serverName.size() != 0);
-// }
-
-// bool Server::hasPort() const
-// {
-//     return (_port != -1);
-// }
-
-// bool Server::hasMaxBody() const
-// {
-//     return (_maxBodySize != -1);
-// }
-
-// bool Server::hasRoutes() const
-// {
-//     return (_routes.size() != 0);
-// }
+void Server::addRequest(HttpRequest *request)
+{
+    _unhandledRequests.push_back(request);
+}
