@@ -18,3 +18,5 @@ enum HttpVersion
 class Server;
 class HttpRequest;
 class HttpResponse;
+
+bool isValidIpAdress(std::string const rawLine);

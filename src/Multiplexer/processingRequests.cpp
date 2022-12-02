@@ -31,7 +31,7 @@ static int readFromSocket(std::string *result, const int socket)
 /**
  * Returns all servers that are listening on port: fd
  */
-static std::vector<Server> getListeningServers(std::vector<Server> &allServers, int const &fd)
+static std::vector<Server> matchBasedOnPort(std::vector<Server> &allServers, int const &fd)
 {
     std::vector<Server> listeningServers;
 
@@ -45,9 +45,32 @@ static std::vector<Server> getListeningServers(std::vector<Server> &allServers, 
     return listeningServers;
 }
 
+/**
+ * Returns all servers that have host specified to: ipAdress
+ */
+static std::vector<Server> matchBasedOnIp(std::vector<Server> &allServers, std::string const &ipAdress)
+{
+    std::vector<Server> listeningServers;
+
+    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
+    {
+        if (it->getIpAdress() == ipAdress)
+        {
+            listeningServers.push_back(*it);
+        }
+    }
+    return listeningServers;
+}
+
+static Server matchBasedOnName(std::vector<Server> &servers, std::string const &serverName)
+{
+}
+
 void Multiplexer::matchRequestToServer(HttpRequest *request, int const &fd)
 {
-    std::vector<Server> listeningServers = getListeningServers(_servers, fd);
+    std::vector<Server> listeningServers = matchBasedOnPort(_servers, fd);
+    if (listeningServers.size() == 0)
+        throw "No valid servers";
     std::string host = request->getHeader("Host");
     /* If no host is specified, go for default server */
     if (host == "")
@@ -55,13 +78,13 @@ void Multiplexer::matchRequestToServer(HttpRequest *request, int const &fd)
         listeningServers.at(0).addRequest(request);
         return;
     }
-    for (int i = 0; i < listeningServers.size(); i++)
+    listeningServers = matchBasedOnIp(listeningServers, "hi");
+    if (listeningServers.size() == 1)
     {
-        /* Loop over server names to find match */
-        std::vector<std::string>::iterator it = listeningServers.at(i).getServerName().begin();
+        listeningServers.at(0).addRequest(request);
+        return;
     }
-    /* If host can't be matched, go for default server */
-    listeningServers.at(0).addRequest(request);
+    Server match = matchBasedOnName(listeningServers, host);
 }
 
 int Multiplexer::_processRequest(int const &fd)

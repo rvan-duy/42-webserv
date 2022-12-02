@@ -7,6 +7,7 @@
 #include <map>
 #include <Logger.hpp>
 #include <regex>
+#include <General.hpp>
 
 #define PARSER_FUNC_N 5
 #define BLOCK_FUNC_N 5
