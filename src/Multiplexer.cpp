@@ -17,7 +17,7 @@ void Multiplexer::addServer(const Server &server, const short events) {
   Logger &logger = Logger::getInstance();
 
   logger.log("[PREPARING] Multiplexer: Adding server to multiplexer: " + server.getServerName()[0] + ":" +
-             std::to_string(server.getPort()));
+             std::to_string(server.getPort()), SILENT);
 
   pollfd serverAsPollFD = {server.getFd(), events, 0};
   _servers.push_back(server);
