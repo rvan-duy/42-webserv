@@ -4,5 +4,6 @@
 #include <Parser.hpp>
 #include <Lexer.hpp>
 #include <fstream>
+#include <Socket.hpp>
 
-int initWebserver(std::vector<Server> *pServers, std::string const &filePath);
+int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath);

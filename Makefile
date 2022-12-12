@@ -1,7 +1,7 @@
 NAME				:=	webserv
 CC					:=	c++
 export LOG_ENABLED	:=	1
-CFLAGS				=	-Wall -Wextra -Werror -std=c++11 -pedantic -D LOG_ENABLED=$(LOG_ENABLED)
+CFLAGS				=	-Wall -Wextra -std=c++11 -pedantic -D LOG_ENABLED=$(LOG_ENABLED)
 ################################################################################
 # EXTRA FLAGS
 ifdef PROD
@@ -46,6 +46,7 @@ export SRCS			:=	Server.cpp \
 						Logger.cpp \
 						Multiplexer.cpp \
 						CGI.cpp \
+						Socket.cpp \
 						initWebserv.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))

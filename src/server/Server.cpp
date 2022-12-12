@@ -4,10 +4,8 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _type(SOCK_STREAM), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _accepted(-1), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
+Server::Server() : _port(-1), _maxBodySize(-1), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
 {
-    memset(&_servaddr, 0, sizeof(_servaddr));
-    memset(&_buffer, 0, sizeof(_buffer));
 }
 
 /*
@@ -15,17 +13,11 @@ Server::Server() : _port(-1), _maxBodySize(-1), _fd(-1), _domain(AF_INET6), _typ
  */
 Server::~Server()
 {
-    
 }
 
 /**************************************************/
 /* Getters                                        */
 /**************************************************/
-
-int Server::getFd() const
-{
-    return _fd;
-}
 
 std::vector<std::string> Server::getServerName() const
 {
@@ -55,11 +47,6 @@ int Server::getMaxBody() const
 std::vector<Route> Server::getRoutes() const
 {
     return _routes;
-}
-
-  std::vector<int>& Server::getConnectedClients()
-{
-    return _connectedClients;
 }
 
 HttpRequest *Server::getRequestByDiscriptor(int fd)
@@ -137,30 +124,3 @@ void Server::addRoute(Route const &route)
 {
     _routes.push_back(route);
 }
-
-/**************************************************/
-/* End of getters and setters                     */
-/**************************************************/
-
-/*
- * To check if variables are set
- */
-// bool Server::hasServerName() const
-// {
-//     return (_serverName.size() != 0);
-// }
-
-// bool Server::hasPort() const
-// {
-//     return (_port != -1);
-// }
-
-// bool Server::hasMaxBody() const
-// {
-//     return (_maxBodySize != -1);
-// }
-
-// bool Server::hasRoutes() const
-// {
-//     return (_routes.size() != 0);
-// }
