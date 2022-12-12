@@ -47,6 +47,7 @@ export SRCS			:=	Server.cpp \
 						Multiplexer.cpp \
 						CGI.cpp \
 						Socket.cpp \
+						RequestParser.cpp \
 						initWebserv.cpp
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))

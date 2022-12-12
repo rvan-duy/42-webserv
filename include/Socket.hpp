@@ -14,7 +14,6 @@ public:
     ~Socket();
 
     // Methods
-    // TODO: remove default value
     void prepare();
     void sendResponse(const HttpResponse &response) const;
     void addClient(const int fd);

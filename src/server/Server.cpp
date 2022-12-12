@@ -49,11 +49,6 @@ std::vector<Route> Server::getRoutes() const
     return _routes;
 }
 
-HttpRequest *Server::getRequestByDiscriptor(int fd)
-{
-    return _requests[fd];
-}
-
 /**************************************************/
 /* Setters                                        */
 /**************************************************/

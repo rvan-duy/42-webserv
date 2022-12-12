@@ -22,21 +22,43 @@
 #define MAX_PORT 65535
 
 /* Default values */
-#define DEFAULT_ERROR_STATUS 666
-#define DEFAULT_ERROR_PATH "defaultErrorPage"
+#define DEFAULT_ERROR_STATUS 404
+#define DEFAULT_ERROR_PATH "error.html"
 
-#define DEFAULT_HOST_STATUS 777
-#define DEFAULT_HOST_PATH "default host path"
+#define DEFAULT_HOST_STATUS 420
+#define DEFAULT_HOST_PATH "index.html"
+
+#define DEFAULT_MAX_BODY 1000000
+
+#define DEFAULT_IP_ADRESS "0.0.0.0"
+#define DEFAULT_PORT 80
+
+#define ROOT_FOLDER "root/"
+/* End of default values */
 
 struct Route
 {
+  Route(std::string const &name) : route(name), rootDirectory(ROOT_FOLDER), defaultFile("index.html"), autoIndex(false)
+  {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
+    allowedMethods[DELETE] = true;
+  }
+  // Default route constructor
+  Route() : route("/"), rootDirectory(ROOT_FOLDER), cgiRoot(ROOT_FOLDER), defaultFile("index.html"), httpRedirection("")
+  {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
+    allowedMethods[DELETE] = true;
+  }
+  // Vector for bonus
   std::string route;
-  std::map<EHttpMethods, bool> allowedMethods;
-  std::string httpRedirection;
-  std::string searchDirectory;
-  std::string defaultFile;
-  std::string cgiParam;
   std::string rootDirectory;
+  std::string cgiRoot;
+  std::string defaultFile;
+  std::map<EHttpMethods, bool> allowedMethods;
+  std::vector<std::string> indexFiles;
+  std::string httpRedirection;
   bool autoIndex;
 };
 
@@ -80,8 +102,9 @@ private:
   int _port;
   int _maxBodySize;
   std::vector<std::string> _serverName;
-  std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
   PageData _defaultErrorPage;
   PageData _host;
+  std::string _ipAddress;
+  std::vector<HttpRequest *> _unhandledRequests;
 };
