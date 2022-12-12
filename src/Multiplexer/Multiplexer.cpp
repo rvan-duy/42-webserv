@@ -33,6 +33,7 @@ int Multiplexer::evaluateClient(pollfd *client)
     {
     case POLLIN:
     {
+        /* Rutger: dit kan ik allemaal doen. Ik heb hier een beeld bij */
         if (_isSocket(clientFd))
             _addClient(clientFd); // TODO: Oswin: fix this shit
         else
@@ -48,6 +49,7 @@ int Multiplexer::evaluateClient(pollfd *client)
         break;
     }
 
+    /* Dit kunnen jullie aanpakken. */
     case POLLOUT:
     {
         // std::string tmp_index("index.html");
