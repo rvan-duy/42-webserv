@@ -4,7 +4,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _port(-1), _maxBodySize(-1), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
+Server::Server() : _ipAddress(DEFAULT_IP_ADRESS), _maxBodySize(DEFAULT_MAX_BODY), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
 {
 }
 
@@ -34,6 +34,11 @@ PageData Server::getErrorPage() const
     return _defaultErrorPage;
 }
 
+std::string Server::getIpAdress() const
+{
+    return _ipAddress;
+}
+
 int Server::getPort() const
 {
     return _port;
@@ -47,6 +52,22 @@ int Server::getMaxBody() const
 std::vector<Route> Server::getRoutes() const
 {
     return _routes;
+}
+
+HttpRequest *Server::getRequestByDescriptor(int fd)
+{
+    return _requests[fd];
+}
+
+HttpRequest *Server::getNextRequest() const
+{
+    return _unhandledRequests.at(0);
+}
+
+void Server::removeNextRequest()
+{
+    delete _unhandledRequests.at(0);
+    _unhandledRequests.erase(_unhandledRequests.begin());
 }
 
 /**************************************************/
@@ -108,14 +129,29 @@ int Server::setPort(int const &value)
     }
     else if (value <= 0)
     {
-        Logger::getInstance().error("Port higher than MAX_PORT");
+        Logger::getInstance().error("Port invalid");
         return 1;
     }
     _port = value;
     return 0;
 }
 
+int Server::setIpAddress(std::string const &address)
+{
+    if (_ipAddress != DEFAULT_IP_ADRESS)
+    {
+        return 1;
+    }
+    _ipAddress = address;
+    return 0;
+}
+
 void Server::addRoute(Route const &route)
 {
     _routes.push_back(route);
+}
+
+void Server::addRequest(HttpRequest *request)
+{
+    _unhandledRequests.push_back(request);
 }

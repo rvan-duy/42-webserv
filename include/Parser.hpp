@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 #include <Logger.hpp>
+#include <regex>
+#include <General.hpp>
 
 #define PARSER_FUNC_N 5
 #define BLOCK_FUNC_N 5
@@ -71,7 +73,7 @@ private:
 	int convertBlockToServer(Server *pServer, DataBlock block);
 
 	/* AST line parsing functions */
-	int parsePort(void *dest, t_dataLine line);
+	int parsePortAndIp(void *dest, t_dataLine line);
 	int parseMaxBodySize(void *dest, t_dataLine line);
 	int parseErrorPage(void *dest, t_dataLine line);
 	int parseHost(void *dest, t_dataLine line);
@@ -80,7 +82,7 @@ private:
 	int parseRoot(void *dest, t_dataLine line);
 	int parseIndex(void *dest, t_dataLine line);
 	int parseAutoIndex(void *dest, t_dataLine line);
-	int parseCgiParam(void *dest, t_dataLine line);
+	int parseCgi(void *dest, t_dataLine line);
 	int parseMethods(void *dest, t_dataLine line);
 	/* table with key value pairs for parsing AST */
 	static t_parseFuncPair lineParsingFuncs[PARSER_FUNC_N];

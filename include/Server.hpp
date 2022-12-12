@@ -9,6 +9,7 @@
 
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
+#include <CGI.hpp>
 #include <Logger.hpp>
 #include <cstdlib>
 #include <cstring>
@@ -24,6 +25,11 @@
 /* Default values */
 #define DEFAULT_ERROR_STATUS 404
 #define DEFAULT_ERROR_PATH "error.html"
+
+#define DEFAULT_HOST_STATUS 420
+#define DEFAULT_HOST_PATH "index.html"
+
+#define DEFAULT_MAX_BODY 1000000
 
 #define DEFAULT_HOST_STATUS 420
 #define DEFAULT_HOST_PATH "index.html"
@@ -82,29 +88,34 @@ public:
   PageData getHost() const;
   PageData getErrorPage() const;
   int getMaxBody() const;
+
   int getPort() const;
+  std::string getIpAdress() const;
   int getFd() const;
   std::vector<int> &getConnectedClients();
-  HttpRequest *getRequestByDiscriptor(int fd);
+  HttpRequest *getRequestByDescriptor(int fd);
+  HttpRequest *getNextRequest() const;
+  void removeNextRequest();
 
   // Setters
+  int setPort(int const &value);
+  int setIpAddress(std::string const &address);
   int setHost(int const &statusCode, std::string const &filePath);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::vector<std::string> const &value);
-  int setPort(int const &value);
   int setMaxBody(double const &value);
   void addRoute(Route const &route);
-
-  // Request generation
-  HttpRequest *createRequest(std::string &msg);
+  void addRequest(HttpRequest *request);
 
 private:
   int _port;
+  std::string _ipAddress;
   int _maxBodySize;
   std::vector<std::string> _serverName;
+  std::vector<HttpRequest *> _unhandledRequests;
+  std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
+
   PageData _defaultErrorPage;
   PageData _host;
-  std::string _ipAddress;
-  std::vector<HttpRequest *> _unhandledRequests;
 };

@@ -29,14 +29,12 @@ VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 # SOURCES / OBJECTS
 MAIN				:=	main.cpp
 export SRCS			:=	Server.cpp \
-						SocketFunctions.cpp \
 						HttpMessage.cpp \
 						GetRequest.cpp \
 						PostRequest.cpp \
 						DeleteRequest.cpp \
 						BadRequest.cpp \
 						HttpRequest.cpp \
-						RequestBuilder.cpp \
 						Lexer.cpp \
 						Token.cpp \
 						Parser.cpp \
@@ -48,7 +46,9 @@ export SRCS			:=	Server.cpp \
 						CGI.cpp \
 						Socket.cpp \
 						RequestParser.cpp \
-						initWebserv.cpp
+						initWebserv.cpp \
+						processingRequests.cpp \
+						utils.cpp 
 
 TEST_OBJS			:=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 MAIN				:=	main.cpp

@@ -21,10 +21,6 @@ public:
 
   void waitForEvents(const int timeout = -1);
 
-  // Getters
-  int getFd(const int index) const;
-  int getNumberOfFds() const;
-
 private:
   std::vector<Socket> _sockets;
   std::vector<pollfd> _clients; // vector of fds to poll
@@ -41,9 +37,11 @@ private:
   int _getEvent(const pollfd &fd);
   Socket &_getSocketForClient(const int fd);
 
-  int evaluateClient(pollfd const &event);
+  int evaluateClient(pollfd *client);
 
   void _addSocketsAsPollFd(short const &events);
+
+  int _processRequest(int const &fd);
 };
 
 #endif // MULTIPLEXER_HPP

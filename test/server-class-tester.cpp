@@ -11,7 +11,6 @@ SCENARIO("Constructing a new server class")
 		THEN("All has X functions should return false")
 		{
 			REQUIRE_FALSE(testServer.hasServerName());
-			REQUIRE_FALSE(testServer.hasMaxBody());
 		}
 
 		THEN("Server name can be set correctly")
@@ -50,7 +49,6 @@ SCENARIO("Constructing a new server class")
 		{
 			unsigned int maxBody = 10;
 			testServer.setMaxBody(maxBody);
-			REQUIRE(testServer.hasMaxBody());
 			REQUIRE(testServer.getMaxBody() == maxBody);
 		}
 	}
@@ -74,9 +72,7 @@ SCENARIO("Constructing a new server class with incorrect inputs")
 		{
 			// Lower than 0
 			REQUIRE(testServer.setMaxBody(0) == 1);
-			REQUIRE_FALSE(testServer.hasMaxBody());
 			REQUIRE(testServer.setMaxBody(UINT_MAX + 1) == 1);
-			REQUIRE_FALSE(testServer.hasMaxBody());
 		}
 	}
 }
