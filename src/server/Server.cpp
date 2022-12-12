@@ -67,6 +67,24 @@ HttpRequest *Server::getRequestByDiscriptor(int fd)
     return _requests[fd];
 }
 
+std::string Server::getRoot(std::string uri)
+{
+  unsigned long   maxlen = 0;
+  std::string     root;
+  for (std::vector<Route>::iterator it = _routes.begin(); it != _routes.end(); it++)
+  {
+    if (0 == uri.find(it->route))
+    {
+      if (maxlen < it->route.size())
+      {
+        root = it->rootDirectory;
+        maxlen = it->route.size();
+      }
+    }
+  }
+  return root;
+}
+
 /**************************************************/
 /* Setters                                        */
 /**************************************************/

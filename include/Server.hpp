@@ -66,13 +66,13 @@ during evaluation.
 
 struct Route
 {
-  std::string route;
+  std::string route; // location
   std::map<EHttpMethods, bool> allowedMethods;
   std::string httpRedirection;
   std::string searchDirectory;
   std::string defaultFile;
   std::string cgiParam;
-  std::string rootDirectory;
+  std::string rootDirectory;  //root
   bool autoIndex;
 };
 
@@ -111,6 +111,7 @@ public:
   int getFd() const;
   std::vector<int>& getConnectedClients();
   HttpRequest *getRequestByDiscriptor(int fd);
+  std::string getRoot(std::string uri);
 
   // Setters
   int setHost(int const &statusCode, std::string const &filePath);
