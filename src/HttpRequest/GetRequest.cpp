@@ -17,8 +17,7 @@ HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
   (void)server;
   HttpResponse response;
 
-  std::string path = server.getRoot(getUri()) + getUri();  // future get root from server class
-  logger.debug("root: " + server.getRoot(getUri()));
+  std::string path = server.getRoot(getUri()) + getUri();
   logger.log("Path: " + path);
 
   if (!_fileExists(path)) {
