@@ -52,6 +52,14 @@ static void matchSocketsAndServers(std::vector<Socket> *pSockets, std::vector<Se
     }
 }
 
+void    prepareSockets(std::vector<Socket>& socks)
+{
+    for (std::vector<Socket>::iterator it = socks.begin(); it != socks.end(); it++)
+    {
+        it->prepare();
+    }
+}
+
 int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath)
 {
     Logger &logger = Logger::getInstance();
@@ -71,6 +79,7 @@ int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath)
     logger.log("Config file successfully parsed");
     cFile.close();
     setupSockets(pSockets, servers);
+    prepareSockets(*pSockets);
     matchSocketsAndServers(pSockets, servers);
     return 0;
 }
