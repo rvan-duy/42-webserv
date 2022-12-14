@@ -11,13 +11,7 @@ int GetRequest::executeRequest(const Server& server) {
   return 0;
 }
 
-// Steps the function needs to take
-// 1. Determine the status code
-// - 200 OK
-// - 404 Not Found
-// - 500 Internal Server Error
-// 2. Determine the headers of the response, content length, date
-// 3. Determine the bod of the response, HTML Code, image etc
+
 
 HttpResponse GetRequest::constructResponse(const Server& server) {
   Logger&                  logger         = Logger::getInstance();
@@ -25,6 +19,8 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
   std::string              path           = _getPath(server);
   HttpResponse             response;
 
+  // TODO: Check if file permissions are allowed
+  // TODO: Replace the switch with a std::map
   switch(_fileExists(path)) {
     case IS_DIR:
       if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
