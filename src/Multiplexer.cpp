@@ -68,7 +68,7 @@ void Multiplexer::waitForEvents(const int timeout) {
           HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
           if (client_request) {
             HttpResponse client_response =
-                client_request->constructResponse(client_server, tmp_index);  // index.html shouldnt be hardcoded..
+                client_request->constructResponse(client_server);
             send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
           }
           delete client_request;
