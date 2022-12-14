@@ -11,8 +11,6 @@ int GetRequest::executeRequest(const Server& server) {
   return 0;
 }
 
-
-
 HttpResponse GetRequest::constructResponse(const Server& server) {
   Logger&                  logger         = Logger::getInstance();
   std::vector<std::string> accepted_types = _getAcceptedTypesFromHeader();
@@ -21,8 +19,8 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
 
   // TODO: Check if file permissions are allowed
   // TODO: Replace the switch with a std::map
-  switch(_fileExists(path)) {
-    case IS_DIR:
+  switch (_fileExists(path)) {
+    case IS_DIR: {
       if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
         // TODO make a 406 error page
         response._setResponse("root/406/index.html", 406, "Not Acceptable", getVersion());
@@ -30,14 +28,18 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
       }
       path += "/index.html";  // TODO: make this a config option
       break;
-    case IS_REG_FILE:
+    }
+    case IS_REG_FILE: {
       break;
-    case IS_UNKNOWN:
+    }
+    case IS_UNKNOWN: {
       response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
       return response;
-    default:
+    }
+    default: {
       response._setResponse("root/500/index.html", 500, "Internal Server Error", getVersion());
       return response;
+    }
   }
 
   if (_fileExists(path) == IS_UNKNOWN) {
