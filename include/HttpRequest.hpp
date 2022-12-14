@@ -51,6 +51,11 @@ class GetRequest : public HttpRequest {
   // Concrete
   int          executeRequest(const Server& server);
   HttpResponse constructResponse(const Server& server);
+
+ private:
+  // Private methods
+  std::string _getAbsolutePath(const Server& server);
+  bool        _fileExists(const std::string& path);
 };
 
 // DELETE

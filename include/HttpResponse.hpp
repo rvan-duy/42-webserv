@@ -36,6 +36,4 @@ class HttpResponse : public HttpMessage {
   std::string _getContentType(const std::string &path) const;
 };
 
-bool        _fileExists(const std::string &path);
-
 #endif  // HTTP_RESPONSE_HPP

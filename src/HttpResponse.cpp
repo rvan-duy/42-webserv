@@ -102,32 +102,6 @@ void HttpResponse::_setResponse(const std::string &path, const int status_code, 
 }
 
 /*
- * Checks if a file exists
- * @param path The path to the file to check
- * @return True if the file exists, false otherwise
- */
-bool _fileExists(const std::string &path) {
-  Logger     &logger = Logger::getInstance();
-
-  struct stat buffer;  // stat struct to store the file info
-  if (stat(path.c_str(), &buffer) == -1) {
-    logger.log("_fileExists -> File doesn't exist (" + path + ")");
-    return false;
-  }
-  if (buffer.st_mode & S_IFDIR) {
-    logger.log("_fileExists -> File is a directory (" + path + ")");
-    return false;
-  }
-  if (buffer.st_mode & S_IFREG) {
-    logger.log("_fileExists -> File is a regular file (" + path + ")");
-    return true;
-  }
-  logger.log("_fileExists -> File is something else (" + path + ")");
-  logger.error("WARNING: logic probably not implemented yet");
-  return false;
-}
-
-/*
  * Get the file type of a file
  * @param path The path to the file to check
  * @return The content type of the file
