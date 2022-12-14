@@ -69,7 +69,8 @@ void Multiplexer::waitForEvents(const int timeout) {
           HttpRequest *client_request = client_server.getRequestByDescriptor(CLIENT_SOCKET);
           if (client_request) {
             HttpResponse client_response = client_request->constructResponse(client_server);
-            send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
+            std::string  response        = client_response.toStr();
+            send(CLIENT_SOCKET, response.c_str(), response.size(), 0);
           }
           delete client_request;
           markForRemoval.push_back(CLIENT_SOCKET);

@@ -3,6 +3,7 @@
 
 #include <General.hpp>
 #include <string>
+#include <vector>
 
 #include "HttpMessage.hpp"
 #include "HttpResponse.hpp"
@@ -42,6 +43,10 @@ class HttpRequest : public HttpMessage {
 
 // GET
 
+#define IS_DIR 1
+#define IS_REG_FILE 2
+#define IS_UNKNOWN 3
+
 class GetRequest : public HttpRequest {
  public:
   GetRequest(std::string& msg);
@@ -54,8 +59,9 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
-  std::string _getAbsolutePath(const Server& server);
-  bool        _fileExists(const std::string& path);
+  std::vector<std::string> _getAcceptedTypesFromHeader();
+  std::string              _getPath(const Server& server);
+  int                      _fileExists(const std::string& path);
 };
 
 // DELETE

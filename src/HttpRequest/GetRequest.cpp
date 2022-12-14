@@ -20,77 +20,86 @@ int GetRequest::executeRequest(const Server& server) {
 // 3. Determine the bod of the response, HTML Code, image etc
 
 HttpResponse GetRequest::constructResponse(const Server& server) {
-  Logger& logger = Logger::getInstance();
-  logger.log("[RESPONSE-BUILDING] GetRequest: Response type: GET");
-  HttpResponse response;
+  Logger&                  logger         = Logger::getInstance();
+  std::vector<std::string> accepted_types = _getAcceptedTypesFromHeader();
+  std::string              path           = _getPath(server);
+  HttpResponse             response;
 
-  std::string  path = _getAbsolutePath(server);
-  logger.log("[RESPONSE-BUILDING] GetRequest: Parsed full path from request: " + path);
+  switch(_fileExists(path)) {
+    case IS_DIR:
+      if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
+        // TODO make a 406 error page
+        response._setResponse("root/406/index.html", 406, "Not Acceptable", getVersion());
+        return response;
+      }
+      path += "/index.html";  // TODO: make this a config option
+      break;
+    case IS_REG_FILE:
+      break;
+    case IS_UNKNOWN:
+      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      return response;
+    default:
+      response._setResponse("root/500/index.html", 500, "Internal Server Error", getVersion());
+      return response;
+  }
 
+  if (_fileExists(path) == IS_UNKNOWN) {
+    response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+    return response;
+  }
 
+  response._setResponse(path, 200, "OK", getVersion());
+  return response;
 }
 
 /*
  * Private methods
  */
-std::string GetRequest::_getAbsolutePath(const Server& server) {
+
+std::vector<std::string> GetRequest::_getAcceptedTypesFromHeader() {
+  std::string              accept = getHeader("Accept");
+  std::vector<std::string> accepted_types;
+  std::vector<std::string> all_types = {"text/html", "text/css", "application/javascript"};
+
+  if (accept.find("*/*") != std::string::npos) {
+    return all_types;
+  }
+
+  for (std::vector<std::string>::iterator it = all_types.begin(); it != all_types.end(); ++it) {
+    if (it->find(accept) != std::string::npos) {
+      accepted_types.push_back(*it);
+    }
+  }
+
+  return accepted_types;
+}
+
+std::string GetRequest::_getPath(const Server& server) {
   const std::string uri       = getUri();
   const std::string path      = server.getRoot(uri);
   const std::string full_path = path.substr(0, path.size() - 1) + uri;
+  Logger::getInstance().log("[RESPONSE-BUILDING] GetRequest: _getPath -> " + full_path);
   return full_path;
 }
 
-// HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
-//   Logger &logger = Logger::getInstance();
-//   logger.log("Response type: GET");
-//   (void)server;
-//   HttpResponse response;
-
-//   std::string path = server.getRoot(getUri()) + getUri();  // future get root from server class
-//   logger.debug("root: " + server.getRoot(getUri())); // the future is now
-//   logger.log("Path: " + path);
-
-//   if (!_fileExists(path)) {
-//     logger.log("File doesn't exist");
-
-//     const std::string index_path = path + index;
-//     logger.log("Looking for index path: " + index_path);
-//     if (!_fileExists(index_path)) {
-//       logger.log("Index file doesn't exist");
-
-//       response._setResponse("root/404/index.html", 404, "Not Found", getVersion()); // very hardcoded lol
-//       return response;
-//     } else {
-//       logger.log("Index file exists");
-//       path = index_path;
-//     }
-//   }
-//   response._setResponse(path, 200, "OK", getVersion());
-//   return response;
-// }
-
-/*
- * Checks if a file exists
- * @param path The path to the file to check
- * @return True if the file exists, false otherwise
- */
-bool GetRequest::_fileExists(const std::string& path) {
+int GetRequest::_fileExists(const std::string& path) {
   Logger&     logger = Logger::getInstance();
 
-  struct stat buffer;  // stat struct to store the file info
+  struct stat buffer;
   if (stat(path.c_str(), &buffer) == -1) {
-    logger.log("_fileExists -> File doesn't exist (" + path + ")");
-    return false;
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File doesn't exist (" + path + ")");
+    return IS_UNKNOWN;
   }
   if (buffer.st_mode & S_IFDIR) {
-    logger.log("_fileExists -> File is a directory (" + path + ")");
-    return false;
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a directory (" + path + ")");
+    return IS_DIR;
   }
   if (buffer.st_mode & S_IFREG) {
-    logger.log("_fileExists -> File is a regular file (" + path + ")");
-    return true;
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a regular file (" + path + ")");
+    return IS_REG_FILE;
   }
-  logger.log("_fileExists -> File is something else (" + path + ")");
+  logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is something else (" + path + ")");
   logger.error("WARNING: logic probably not implemented yet");
-  return false;
+  return IS_UNKNOWN;
 }
