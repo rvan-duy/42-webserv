@@ -111,7 +111,7 @@ public:
   int getFd() const;
   std::vector<int>& getConnectedClients();
   HttpRequest *getRequestByDiscriptor(int fd);
-  std::string getRoot(std::string uri);
+  std::string getRoot(std::string uri) const;
 
   // Setters
   int setHost(int const &statusCode, std::string const &filePath);

@@ -67,11 +67,11 @@ HttpRequest *Server::getRequestByDiscriptor(int fd)
     return _requests[fd];
 }
 
-std::string Server::getRoot(std::string uri)
+std::string Server::getRoot(std::string uri) const
 {
   unsigned long   maxlen = 0;
   std::string     root;
-  for (std::vector<Route>::iterator it = _routes.begin(); it != _routes.end(); it++)
+  for (std::vector<Route>::const_iterator it = _routes.begin(); it != _routes.end(); it++)
   {
     if (0 == uri.find(it->route))
     {
