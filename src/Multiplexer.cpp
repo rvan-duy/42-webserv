@@ -17,7 +17,8 @@ void Multiplexer::addServer(const Server &server, const short events) {
   Logger &logger = Logger::getInstance();
 
   logger.log("[PREPARING] Multiplexer: Adding server to multiplexer: " + server.getServerName()[0] + ":" +
-             std::to_string(server.getPort()), SILENT);
+                 std::to_string(server.getPort()),
+             SILENT);
 
   pollfd serverAsPollFD = {server.getFd(), events, 0};
   _servers.push_back(server);
@@ -65,10 +66,9 @@ void Multiplexer::waitForEvents(const int timeout) {
         case POLLOUT: {
           std::string  tmp_index("index.html");
           Server      &client_server  = _getServerForClient(CLIENT_SOCKET);
-          HttpRequest *client_request = client_server.getRequestByDiscriptor(CLIENT_SOCKET);
+          HttpRequest *client_request = client_server.getRequestByDescriptor(CLIENT_SOCKET);
           if (client_request) {
-            HttpResponse client_response =
-                client_request->constructResponse(client_server);
+            HttpResponse client_response = client_request->constructResponse(client_server);
             send(CLIENT_SOCKET, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
           }
           delete client_request;
