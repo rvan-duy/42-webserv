@@ -62,12 +62,12 @@ std::vector<Route> Server::getRoutes() const
     return _connectedClients;
 }
 
-HttpRequest *Server::getRequestByDiscriptor(int fd)
+HttpRequest *Server::getRequestByDescriptor(int fd)
 {
     return _requests[fd];
 }
 
-std::string Server::getRoot(std::string uri) const
+std::string Server::getRoot(const std::string& uri) const
 {
   unsigned long   maxlen = 0;
   std::string     root;

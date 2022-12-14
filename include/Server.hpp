@@ -6,10 +6,10 @@
 #include <unistd.h>
 
 #include <General.hpp>
-
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
 #include <Logger.hpp>
+#include <climits>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -17,7 +17,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <climits>
 
 /****************************************************************************************************/
 /* The Server Class (formerly known as Socket)                                                      */
@@ -64,29 +63,26 @@ during evaluation.
 #define DEFAULT_HOST_STATUS 777
 #define DEFAULT_HOST_PATH "default host path"
 
-struct Route
-{
-  std::string route; // location
+struct Route {
+  std::string                  route;  // location
   std::map<EHttpMethods, bool> allowedMethods;
-  std::string httpRedirection;
-  std::string searchDirectory;
-  std::string defaultFile;
-  std::string cgiParam;
-  std::string rootDirectory;  //root
-  bool autoIndex;
+  std::string                  httpRedirection;
+  std::string                  searchDirectory;
+  std::string                  defaultFile;
+  std::string                  cgiParam;
+  std::string                  rootDirectory;  // root
+  bool                         autoIndex;
 };
 
-struct PageData
-{
+struct PageData {
   PageData(int const &statusCode, std::string const &filePath) : statusCode(statusCode), filePath(filePath) {}
 
-  int statusCode;
+  int         statusCode;
   std::string filePath;
 };
 
-class Server
-{
-public:
+class Server {
+ public:
   Server();
   ~Server();
 
@@ -103,43 +99,43 @@ public:
 
   //  Getters
   std::vector<std::string> getServerName() const;
-  std::vector<Route> getRoutes() const;
-  PageData getHost() const;
-  PageData getErrorPage() const;
-  int getMaxBody() const;
-  int getPort() const;
-  int getFd() const;
-  std::vector<int>& getConnectedClients();
-  HttpRequest *getRequestByDiscriptor(int fd);
-  std::string getRoot(std::string uri) const;
+  std::vector<Route>       getRoutes() const;
+  PageData                 getHost() const;
+  PageData                 getErrorPage() const;
+  int                      getMaxBody() const;
+  int                      getPort() const;
+  int                      getFd() const;
+  std::vector<int>        &getConnectedClients();
+  HttpRequest             *getRequestByDescriptor(int fd);
+  std::string              getRoot(const std::string &uri) const;
 
   // Setters
-  int setHost(int const &statusCode, std::string const &filePath);
-  int setErrorPage(int const &statusCode, std::string const &filePath);
+  int  setHost(int const &statusCode, std::string const &filePath);
+  int  setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::vector<std::string> const &value);
-  int setPort(int const &value);
-  int setMaxBody(double const &value);
+  int  setPort(int const &value);
+  int  setMaxBody(double const &value);
   void addRoute(Route const &route);
 
   // Request generation
   HttpRequest *createRequest(std::string &msg);
-  void buildRequest(std::string &msg, int fd);
+  void         buildRequest(std::string &msg, int fd);
 
-private:
+ private:
   /* Config variables */
-  int _port;
-  int _maxBodySize;
-  std::vector<std::string> _serverName;
-  std::vector<int> _connectedClients; // list of connected clients
+  int                          _port;
+  int                          _maxBodySize;
+  std::vector<std::string>     _serverName;
+  std::vector<int>             _connectedClients;  // list of connected clients
   std::map<int, HttpRequest *> _requests;
-  std::vector<Route> _routes;
+  std::vector<Route>           _routes;
 
-  int _fd;                            // file descriptor for socket
-  int _domain;                        // domain of socket (IPv4 or IPv6)
-  int _type;                          // type of socket (TCP or UDP)
-  char _buffer[1000000];              // buffer for reading data from socket
-  PageData _defaultErrorPage;
-  int _accepted;                      // file descriptor for accepted connection, -1 if no connection
-  PageData _host;
-  struct sockaddr_in6 _servaddr;      // server address
+  int                          _fd;               // file descriptor for socket
+  int                          _domain;           // domain of socket (IPv4 or IPv6)
+  int                          _type;             // type of socket (TCP or UDP)
+  char                         _buffer[1000000];  // buffer for reading data from socket
+  PageData                     _defaultErrorPage;
+  int                          _accepted;  // file descriptor for accepted connection, -1 if no connection
+  PageData                     _host;
+  struct sockaddr_in6          _servaddr;  // server address
 };
