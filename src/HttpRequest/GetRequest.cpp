@@ -17,49 +17,45 @@ int GetRequest::executeRequest(Server &server)
 example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet).
 */
 // TODO: Make route getting great again
-static Route getCorrectRoute(Server const &server, std::string _url)
-{
-  std::vector<Route> routes = server.getRoutes();
+// static Route getCorrectRoute(Server const &server, std::string _url)
+// {
+//   std::vector<Route> routes = server.getRoutes();
 
-  for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
-  {
-    if (it->route == _url)
-    {
-      return *it;
-    }
-  }
-  // TODO: If no route matches -> return default route
-  return Route();
-}
+//   for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
+//   {
+//     if (it->route == _url)
+//     {
+//       return *it;
+//     }
+//   }
+//   // TODO: If no route matches -> return default route
+//   return Route();
+// }
 
-HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
-{
+HttpResponse GetRequest::constructResponse(Server& server, std::string& index) {
   Logger &logger = Logger::getInstance();
   logger.log("Response type: GET");
+  (void)server;
   HttpResponse response;
-  (void)index;
 
-  Route route = getCorrectRoute(server, _url);
+  std::string path = "root" + getUrl();  // future get root from server class
+  logger.log("Path: " + path);
 
-  // if (!_fileExists(path))
-  // {
-  //   logger.log("File doesn't exist");
+  if (!_fileExists(path)) {
+    logger.log("File doesn't exist");
 
-  //   const std::string index_path = path + index;
-  //   logger.log("Looking for index path: " + index_path);
-  //   if (!_fileExists(index_path))
-  //   {
-  //     logger.log("Index file doesn't exist");
+    const std::string index_path = path + index;
+    logger.log("Looking for index path: " + index_path);
+    if (!_fileExists(index_path)) {
+      logger.log("Index file doesn't exist");
 
-  //     response._setResponse("root/404/index.html", 404, "Not Found", getVersion()); // very hardcoded lol
-  //     return response;
-  //   }
-  //   else
-  //   {
-  //     logger.log("Index file exists");
-  //     path = index_path;
-  //   }
-  // }
-  response._setResponse("hi", 200, "OK", getVersion());
+      response._setResponse("root/404/index.html", 404, "Not Found", getVersion()); // very hardcoded lol
+      return response;
+    } else {
+      logger.log("Index file exists");
+      path = index_path;
+    }
+  }
+  response._setResponse(path, 200, "OK", getVersion());
   return response;
 }
