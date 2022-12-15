@@ -22,14 +22,16 @@ public:
     // Getters
     int getPort() const;
     int getFd() const;
-    std::vector<int> getConnectedClients() const;
+    std::vector<Server> getServers() const;
 
     // Setters
     void addServer(Server const &server);
 
 private:
     std::vector<Server> _servers;
-    std::vector<int> _connectedClients;
+    // key: client FD, value: request, server pair
+    std::map<int, std::pair<HttpRequest *, Server *>> _clients;
+    // std::vector<int> _connectedClients;
     int _fd;
     int _port;
     int _accepted;

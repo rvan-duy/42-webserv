@@ -2,8 +2,8 @@
 
 /*
  * Reads data from a client and stores it in the buffer
- * @param clientSocket The client socket to read from
  * @param result The string to store the data in
+ * @param clientSocket The client socket to read from
  * @return The number of bytes read
  */
 static int readFromSocket(std::string *result, const int socket)
@@ -28,16 +28,14 @@ static int readFromSocket(std::string *result, const int socket)
     return bytesReceived;
 }
 
-/**
- * TODO: rewrite this
- */
-static std::vector<Server> matchBasedOnIp(std::vector<Server> &allServers, std::string const &ipAdress)
+/* Checks which servers are listening to the host from the request*/
+static std::vector<Server> matchBasedOnHost(std::vector<Server> const &allServers, std::string const &host)
 {
     std::vector<Server> listeningServers;
 
-    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
+    for (std::vector<Server>::const_iterator it = allServers.begin(); it != allServers.end(); ++it)
     {
-        if (it->getIpAdress() == ipAdress)
+        if (it->getHost() == host)
         {
             listeningServers.push_back(*it);
         }
@@ -45,57 +43,69 @@ static std::vector<Server> matchBasedOnIp(std::vector<Server> &allServers, std::
     return listeningServers;
 }
 
-/**
- * TODO: fix this
- */
-static Server matchBasedOnName(std::vector<Server> &servers, std::string const &serverName)
+static Server matchBasedOnServerName(std::vector<Server> const &listeningServers, std::string const &serverName)
 {
+    for (std::vector<Server>::const_iterator it = listeningServers.begin(); it != listeningServers.end(); ++it)
+    {
+        if (it->getServerName() == serverName)
+        {
+            return *it;
+        }
+    }
+    return listeningServers.at(0);
 }
 
-/**
- * Legacy:
- */
-// void Multiplexer::matchRequestToServer(HttpRequest *request, int const &fd)
-// {
-//     std::vector<Server> listeningServers = matchBasedOnPort(_servers, fd);
-//     if (listeningServers.size() == 0)
-//         throw "No valid servers";
-//     std::string host = request->getHeader("Host");
-//     /* If no host is specified, go for default server */
-//     if (host == "")
-//     {
-//         listeningServers.at(0).addRequest(request);
-//         return;
-//     }
-//     listeningServers = matchBasedOnIp(listeningServers, "hi");
-//     if (listeningServers.size() == 1)
-//     {
-//         listeningServers.at(0).addRequest(request);
-//         return;
-//     }
-//     Server match = matchBasedOnName(listeningServers, host);
-// }
+static int matchRequestToServer(std::vector<Server> const &allServers, HttpRequest *request)
+{
+    std::vector<Server> listeningServers;
+    std::string host = request->getHeader("Host");
+    Server result;
 
-int Multiplexer::_processRequest(int const &fd)
+    /* Get servers that listen to the same ip address that the request is sent to*/
+    listeningServers = matchBasedOnHost(allServers, request->getUrl());
+    if (listeningServers.size() == 0)
+    {
+        return BAD_REQUEST;
+    }
+    else if (listeningServers.size() == 1)
+    {
+        result = listeningServers.at(0);
+    }
+    else
+    {
+        /* If multiple servers are listening to the ip address, get best match based on servername */
+        result = matchBasedOnServerName(listeningServers, "");
+    }
+    result.addRequest(request);
+    return 0;
+}
+
+int Multiplexer::_processRequest(int const &clientFd, Socket &socket)
 {
     std::string rawRequest;
     HttpRequest *request;
-    int readStatus = 0;
+    int bytesRead = 0;
 
-    readStatus = readFromSocket(&rawRequest, fd);
-    if (readStatus < 0)
-        return 1;
-    else if (readStatus == 0)
+    bytesRead = readFromSocket(&rawRequest, clientFd);
+    if (bytesRead < 0)
     {
-        // Return ok response?
-        return 2;
+        return INTERNAL_SERVER_ERROR;
+    }
+    else if (bytesRead == 0)
+    {
+        return OK;
     }
     request = RequestParser::parseHeader(rawRequest);
     if (request == NULL)
     {
-        // Return bad request
-        return 1;
+        return BAD_REQUEST;
     }
-    // TODO: match request to correct virtual server
+    // If no host is specified -> bad request
+    if (request->getHeader("Host").length() == 0)
+    {
+        return BAD_REQUEST;
+    }
+    // Server& server = matchRequestToServer(socket.getServers(), request);
+
     return 0;
 }

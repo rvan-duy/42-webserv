@@ -4,14 +4,14 @@
 /*
  *  Canonical
  */
-HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url), _chunked(data.chunked) {}
+HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _url(data.url), _chunked(data.chunked) {}
 
 HttpRequest::HttpRequest() {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj)
 {
   _method = obj._method;
-  _uri = obj._uri;
+  _url = obj._url;
   _chunked = obj._chunked;
 }
 
@@ -25,9 +25,9 @@ EHttpMethods HttpRequest::getMethod() const
   return _method;
 }
 
-std::string HttpRequest::getUri() const
+std::string HttpRequest::getUrl() const
 {
-  return _uri;
+  return _url;
 }
 
 bool HttpRequest::getChunked() const

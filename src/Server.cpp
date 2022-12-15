@@ -4,7 +4,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _ipAddress(DEFAULT_IP_ADRESS), _maxBodySize(DEFAULT_MAX_BODY), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)), _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH))
+Server::Server() : _host(DEFAULT_HOST), _maxBodySize(DEFAULT_MAX_BODY), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH))
 {
 }
 
@@ -19,12 +19,12 @@ Server::~Server()
 /* Getters                                        */
 /**************************************************/
 
-std::vector<std::string> Server::getServerName() const
+std::string Server::getServerName() const
 {
     return _serverName;
 }
 
-PageData Server::getHost() const
+std::string Server::getHost() const
 {
     return _host;
 }
@@ -32,11 +32,6 @@ PageData Server::getHost() const
 PageData Server::getErrorPage() const
 {
     return _defaultErrorPage;
-}
-
-std::string Server::getIpAdress() const
-{
-    return _ipAddress;
 }
 
 int Server::getPort() const
@@ -91,18 +86,6 @@ int Server::setMaxBody(double const &value)
     return 0;
 }
 
-int Server::setHost(int const &statusCode, std::string const &filePath)
-{
-    if (statusCode < 0)
-    {
-        Logger::getInstance().error("Incorrect statuscode set");
-        return 1;
-    }
-    _host.statusCode = statusCode;
-    _host.filePath = filePath;
-    return 0;
-}
-
 int Server::setErrorPage(int const &statusCode, std::string const &filePath)
 {
     if (statusCode < 0)
@@ -115,7 +98,7 @@ int Server::setErrorPage(int const &statusCode, std::string const &filePath)
     return 0;
 }
 
-void Server::setServerName(std::vector<std::string> const &value)
+void Server::setServerName(std::string const &value)
 {
     _serverName = value;
 }
@@ -136,13 +119,13 @@ int Server::setPort(int const &value)
     return 0;
 }
 
-int Server::setIpAddress(std::string const &address)
+int Server::setHost(std::string const &host)
 {
-    if (_ipAddress != DEFAULT_IP_ADRESS)
+    if (_host != DEFAULT_HOST)
     {
         return 1;
     }
-    _ipAddress = address;
+    _host = host;
     return 0;
 }
 

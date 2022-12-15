@@ -31,17 +31,16 @@ public:
 
   // Getters
   EHttpMethods getMethod() const;
-  std::string getUri() const;
+  std::string getUrl() const;
   bool getChunked() const;
 
 protected:
   EHttpMethods _method;
-  std::string _uri;
+  std::string _url;
   bool _chunked;
 };
 
 // GET
-
 class GetRequest : public HttpRequest
 {
 public:

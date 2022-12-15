@@ -9,7 +9,7 @@
 #include <regex>
 #include <General.hpp>
 
-#define PARSER_FUNC_N 5
+#define PARSER_FUNC_N 4
 #define BLOCK_FUNC_N 5
 
 /* Circle inclusion, so doesn't compile without this parser definition */

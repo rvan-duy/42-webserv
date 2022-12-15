@@ -9,7 +9,6 @@ t_parseFuncPair Parser::lineParsingFuncs[PARSER_FUNC_N] = {
     {"serverName", &Parser::parseServerName},
     {"errorPage", &Parser::parseErrorPage},
     {"maxBodySize", &Parser::parseMaxBodySize},
-    {"return", &Parser::parseHost},
 };
 
 int Parser::parseServerName(void *dest, t_dataLine line)
@@ -19,12 +18,16 @@ int Parser::parseServerName(void *dest, t_dataLine line)
         return 1;
     }
     Server *server = static_cast<Server *>(dest);
-    std::vector<std::string> serverName;
+    std::string serverName = "";
     std::vector<std::string>::iterator it = line.begin();
     it++;
     while (it != line.end())
     {
-        serverName.push_back(*it);
+        if (serverName.length() != 0)
+        {
+            serverName += " ";
+        }
+        serverName += *it;
         it++;
     }
     server->setServerName(serverName);
@@ -49,26 +52,6 @@ int Parser::parseErrorPage(void *dest, t_dataLine line)
         }
     }
     return server->setErrorPage(std::stoi(statusCode), line.at(2));
-}
-
-int Parser::parseHost(void *dest, t_dataLine line)
-{
-    if (!dest || line.size() != 3)
-    {
-        return 1;
-    }
-    Server *server = static_cast<Server *>(dest);
-    std::string statusCode;
-
-    statusCode = line.at(1);
-    for (size_t i = 0; i < statusCode.length(); i++)
-    {
-        if (!isdigit(statusCode[i]))
-        {
-            return 1;
-        }
-    }
-    return server->setHost(std::stoi(statusCode), line.at(2));
 }
 
 static int parsePort(std::string const &rawLine)
@@ -143,7 +126,7 @@ int Parser::parsePortAndIp(void *dest, t_dataLine line)
     }
     if (port != 0 && server->setPort(port))
         return 1;
-    return server->setIpAddress(rawLine);
+    return server->setHost(rawLine);
 }
 
 int Parser::parseMaxBodySize(void *dest, t_dataLine line)

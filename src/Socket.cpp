@@ -85,8 +85,8 @@ void Socket::addClient(const int socket)
 
     logger.log("[POLLING] Socket: Adding client " + std::to_string(socket) + " to server " + std::to_string(_fd) + ":" +
                std::to_string(_port));
-
-    _connectedClients.push_back(socket);
+    std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
+    _clients[socket] = newPair;
 }
 
 /*
@@ -94,20 +94,7 @@ void Socket::addClient(const int socket)
  */
 void Socket::removeClient(const int socket)
 {
-    Logger &logger = Logger::getInstance();
-
-    logger.log("[POLLING] Socket: Removing client " + std::to_string(socket) + " from server " + std::to_string(_fd) + ":" +
-               std::to_string(_port));
-    for (std::vector<int>::iterator it = _connectedClients.begin(); it != _connectedClients.end(); ++it)
-    {
-        if (*it == socket)
-        {
-            _connectedClients.erase(it);
-            break;
-        }
-    }
-    // TODO: Should this be here?
-    // _requests.erase(socket);
+    _clients.erase(socket);
 }
 
 int Socket::getPort() const
@@ -125,7 +112,7 @@ void Socket::addServer(Server const &server)
     _servers.push_back(server);
 }
 
-std::vector<int> Socket::getConnectedClients() const
+std::vector<Server> Socket::getServers() const
 {
-    return _connectedClients;
+    return _servers;
 }

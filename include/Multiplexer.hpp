@@ -41,7 +41,7 @@ private:
 
   void _addSocketsAsPollFd(short const &events);
 
-  int _processRequest(int const &fd);
+  int _processRequest(int const &clientFd, Socket &socket);
 };
 
 #endif // MULTIPLEXER_HPP

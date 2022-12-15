@@ -17,13 +17,13 @@ int GetRequest::executeRequest(Server &server)
 example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet).
 */
 // TODO: Make route getting great again
-static Route getCorrectRoute(Server const &server, std::string _uri)
+static Route getCorrectRoute(Server const &server, std::string _url)
 {
   std::vector<Route> routes = server.getRoutes();
 
   for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
   {
-    if (it->route == _uri)
+    if (it->route == _url)
     {
       return *it;
     }
@@ -39,7 +39,7 @@ HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
   HttpResponse response;
   (void)index;
 
-  Route route = getCorrectRoute(server, _uri);
+  Route route = getCorrectRoute(server, _url);
 
   // if (!_fileExists(path))
   // {

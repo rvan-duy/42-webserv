@@ -33,12 +33,16 @@ int Multiplexer::evaluateClient(pollfd *client)
     {
     case POLLIN:
     {
+        logger.log("Found event of type POLLIN on fd: " + std::to_string(client->fd));
         /* Rutger: dit kan ik allemaal doen. Ik heb hier een beeld bij */
         if (_isSocket(clientFd))
             _addClient(clientFd); // TODO: Oswin: fix this shit
         else
         {
-            int responseStatus = _processRequest(clientFd);
+            // match pollfd to socket
+            // Oswin schrijf algoritme please
+            Socket &temp = _sockets.at(0);
+            int responseStatus = _processRequest(clientFd, temp);
             if (responseStatus == 2)
                 return clientFd;
             // TODO: is this correct here or after POLLOUT?
@@ -52,6 +56,7 @@ int Multiplexer::evaluateClient(pollfd *client)
     /* Dit kunnen jullie aanpakken. */
     case POLLOUT:
     {
+        logger.log("Found event of type POLLOUT on fd: " + std::to_string(client->fd));
         // std::string tmp_index("index.html");
         // Socket &clientSocket = _getSocketForClient(clientFd);
         // HttpRequest *client_request = clientSocket.getRequestByDiscriptor(clientFd);
@@ -166,7 +171,6 @@ void Multiplexer::_addClient(const int socket)
 {
     Logger &logger = Logger::getInstance();
 
-    logger.log("[POLLING] Multiplexer: Adding server socket " + std::to_string(socket) + " to multiplexer");
     int newSocket = accept(socket, nullptr, nullptr);
     if (newSocket == -1)
     {
@@ -177,6 +181,7 @@ void Multiplexer::_addClient(const int socket)
     logger.log("[POLLING] Multiplexer: New connection accepted: " + std::to_string(newSocket));
     pollfd client = {newSocket, POLLIN | POLLOUT, 0};
     _clients.push_back(client);
+
     for (std::vector<Socket>::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
     {
         if (it->getFd() == socket)
@@ -288,13 +293,6 @@ int Multiplexer::_pollSockets(const int timeout)
  */
 Socket &Multiplexer::_getSocketForClient(const int fd)
 {
-    std::vector<Socket>::iterator it;
-
-    for (it = _sockets.begin(); it != _sockets.end(); it++)
-    {
-        if (std::find(it->getConnectedClients().begin(), it->getConnectedClients().end(), fd) !=
-            it->getConnectedClients().end())
-            return *it;
-    }
-    return *it;
+    (void)fd;
+    _sockets[0];
 }

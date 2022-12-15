@@ -36,11 +36,17 @@
 
 #define DEFAULT_MAX_BODY 1000000
 
-#define DEFAULT_IP_ADRESS "0.0.0.0"
+#define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 80
 
 #define ROOT_FOLDER "root/"
 /* End of default values */
+
+/* status codes for processing requests */
+#define INTERNAL_SERVER_ERROR 500
+#define OK 200
+#define BAD_REQUEST 400
+/* End of status codes */
 
 struct Route
 {
@@ -83,39 +89,33 @@ public:
   ~Server();
 
   //  Getters
-  std::vector<std::string> getServerName() const;
+  std::string getServerName() const;
   std::vector<Route> getRoutes() const;
-  PageData getHost() const;
+  std::string getHost() const;
   PageData getErrorPage() const;
   int getMaxBody() const;
-
   int getPort() const;
-  std::string getIpAdress() const;
-  int getFd() const;
-  std::vector<int> &getConnectedClients();
   HttpRequest *getRequestByDescriptor(int fd);
   HttpRequest *getNextRequest() const;
   void removeNextRequest();
 
   // Setters
   int setPort(int const &value);
-  int setIpAddress(std::string const &address);
-  int setHost(int const &statusCode, std::string const &filePath);
+  int setHost(std::string const &host);
   int setErrorPage(int const &statusCode, std::string const &filePath);
-  void setServerName(std::vector<std::string> const &value);
+  void setServerName(std::string const &value);
   int setMaxBody(double const &value);
   void addRoute(Route const &route);
   void addRequest(HttpRequest *request);
 
 private:
   int _port;
-  std::string _ipAddress;
+  std::string _host;
   int _maxBodySize;
-  std::vector<std::string> _serverName;
+  std::string _serverName;
   std::vector<HttpRequest *> _unhandledRequests;
   std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
 
   PageData _defaultErrorPage;
-  PageData _host;
 };

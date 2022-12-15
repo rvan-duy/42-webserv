@@ -8,7 +8,7 @@ PostRequest::~PostRequest() {}
 
 int PostRequest::executeRequest(Server &server)
 {
-  if (!isMethodAllowed(server, _uri, POST))
+  if (!isMethodAllowed(server, _url, POST))
     return 405;
   // Post the body to a file (std::string _body)
   return 0;
