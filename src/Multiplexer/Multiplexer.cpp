@@ -40,7 +40,6 @@ int Multiplexer::evaluateClient(pollfd *client)
         {
             Socket &temp = _getSocketForClient(clientFd);
             temp.processRequest(clientFd);
-            client->revents = POLLOUT;
             return 0;   // return 0 because we do no want to remove the clientFd
         }
         break;
@@ -214,6 +213,7 @@ void Multiplexer::_removeClient(const int socket)
  * Check for an return event on a socket
  * @param fd The pollfd to check
  */
+// TODO: hould this be its own function or can we just call the switch on revents instead
 int Multiplexer::_getEvent(const pollfd &fd)
 {
     Logger &logger = Logger::getInstance();
