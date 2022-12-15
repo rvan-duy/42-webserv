@@ -34,7 +34,6 @@ int Multiplexer::evaluateClient(pollfd *client)
     case POLLIN:
     {
         logger.log("Found event of type POLLIN on fd: " + std::to_string(client->fd));
-        /* Rutger: dit kan ik allemaal doen. Ik heb hier een beeld bij */
         if (_isSocket(clientFd))
             _addClient(clientFd); // TODO: Oswin: fix this shit
         else
@@ -42,7 +41,7 @@ int Multiplexer::evaluateClient(pollfd *client)
             // match pollfd to socket
             // Oswin schrijf algoritme please
             Socket &temp = _sockets.at(0);
-            int responseStatus = _processRequest(clientFd, temp);
+            int responseStatus = temp.processRequest(clientFd);
             if (responseStatus == 2)
                 return clientFd;
             // TODO: is this correct here or after POLLOUT?

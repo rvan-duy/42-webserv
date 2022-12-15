@@ -36,6 +36,7 @@ private:
   void _removeClient(const int socket);
   int _getEvent(const pollfd &fd);
   Socket &_getSocketForClient(const int fd);
+  void matchRequestToServer(std::vector<Server> const &allServers, HttpRequest *request);
 
   int evaluateClient(pollfd *client);
 

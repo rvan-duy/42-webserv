@@ -49,22 +49,6 @@ std::vector<Route> Server::getRoutes() const
     return _routes;
 }
 
-HttpRequest *Server::getRequestByDescriptor(int fd)
-{
-    return _requests[fd];
-}
-
-HttpRequest *Server::getNextRequest() const
-{
-    return _unhandledRequests.at(0);
-}
-
-void Server::removeNextRequest()
-{
-    delete _unhandledRequests.at(0);
-    _unhandledRequests.erase(_unhandledRequests.begin());
-}
-
 /**************************************************/
 /* Setters                                        */
 /**************************************************/
@@ -132,9 +116,4 @@ int Server::setHost(std::string const &host)
 void Server::addRoute(Route const &route)
 {
     _routes.push_back(route);
-}
-
-void Server::addRequest(HttpRequest *request)
-{
-    _unhandledRequests.push_back(request);
 }

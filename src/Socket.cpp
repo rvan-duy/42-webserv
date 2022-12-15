@@ -79,14 +79,39 @@ void Socket::sendResponse(const HttpResponse &response) const
 /*
  * Add a client socket to the server
  */
-void Socket::addClient(const int socket)
+void Socket::addClient(const int &socket)
 {
     Logger &logger = Logger::getInstance();
 
-    logger.log("[POLLING] Socket: Adding client " + std::to_string(socket) + " to server " + std::to_string(_fd) + ":" +
-               std::to_string(_port));
+    logger.log("[POLLING] Socket: Adding client to socket");
     std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
     _clients[socket] = newPair;
+}
+
+// TODO: fix segfault when printing request
+void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)
+{
+    std::pair<HttpRequest *, Server *> newPair(request, server);
+    _clients[clientFd] = newPair;
+}
+
+void Socket::_addBadRequestToClient(const int &fd, int type)
+{
+    std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
+    // TODO: add bad request
+    switch (type)
+    {
+    case INTERNAL_SERVER_ERROR:
+        Logger::getInstance().error("Adding internal server error to client with fd: " + std::to_string(fd));
+        // TODO: newPair.first = internal server error
+        _clients[fd] = newPair;
+        break;
+    default:
+        Logger::getInstance().error("Adding bad request to client with fd: " + std::to_string(fd));
+        // TODO: newPair.first = bad request
+        _clients[fd] = newPair;
+        break;
+    }
 }
 
 /*

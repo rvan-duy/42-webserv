@@ -147,7 +147,6 @@ static HttpRequest *createRequest(HttpHeaderData const &data)
         Logger::getInstance().error("Incorrect type of request received");
         return NULL;
     }
-    return NULL;
 }
 
 /**

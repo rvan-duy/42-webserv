@@ -16,7 +16,7 @@ public:
     // Methods
     void prepare();
     void sendResponse(const HttpResponse &response) const;
-    void addClient(const int fd);
+    void addClient(const int &fd);
     void removeClient(const int socket);
 
     // Getters
@@ -26,14 +26,18 @@ public:
 
     // Setters
     void addServer(Server const &server);
+    int processRequest(int const &clientFd);
 
 private:
     std::vector<Server> _servers;
     // key: client FD, value: request, server pair
     std::map<int, std::pair<HttpRequest *, Server *>> _clients;
-    // std::vector<int> _connectedClients;
     int _fd;
     int _port;
     int _accepted;
     struct sockaddr_in6 _servaddr;
+
+    void _matchRequestToServer(int const &clientFd, HttpRequest *request);
+    void _addRequestToClient(int const &clientFd, HttpRequest *request, Server *server);
+    void _addBadRequestToClient(const int &fd, int type);
 };

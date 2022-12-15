@@ -95,9 +95,6 @@ public:
   PageData getErrorPage() const;
   int getMaxBody() const;
   int getPort() const;
-  HttpRequest *getRequestByDescriptor(int fd);
-  HttpRequest *getNextRequest() const;
-  void removeNextRequest();
 
   // Setters
   int setPort(int const &value);
@@ -106,15 +103,12 @@ public:
   void setServerName(std::string const &value);
   int setMaxBody(double const &value);
   void addRoute(Route const &route);
-  void addRequest(HttpRequest *request);
 
 private:
   int _port;
   std::string _host;
   int _maxBodySize;
   std::string _serverName;
-  std::vector<HttpRequest *> _unhandledRequests;
-  std::map<int, HttpRequest *> _requests;
   std::vector<Route> _routes;
 
   PageData _defaultErrorPage;
