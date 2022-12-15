@@ -114,6 +114,10 @@ void Socket::_addBadRequestToClient(const int &fd, int type)
     }
 }
 
+bool Socket::hasClient(const int &fd) const {
+    return _clients.count(fd) != 0;
+}
+
 /*
  * Remove a client socket from the server
  */
@@ -140,4 +144,16 @@ void Socket::addServer(Server const &server)
 std::vector<Server> Socket::getServers() const
 {
     return _servers;
+}
+
+Server& Socket::getServerForClient(const int clientFd) {
+    // std::pair<*HttpRequest, *Server> tmp;
+    // tmp = ;
+    return *(_clients[clientFd].second);
+}
+
+HttpRequest* Socket::getRequestForClient(const int clientFd) {
+    // std::pair<*HttpRequest, *Server> tmp;
+    // tmp = ;
+    return _clients[clientFd].first;
 }

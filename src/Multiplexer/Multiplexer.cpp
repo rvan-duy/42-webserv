@@ -38,16 +38,15 @@ int Multiplexer::evaluateClient(pollfd *client)
             _addClient(clientFd); // TODO: Oswin: fix this shit
         else
         {
-            // match pollfd to socket
-            // Oswin schrijf algoritme please
-            Socket &temp = _sockets.at(0);
+            Socket &temp = _getSocketForClient(clientFd);
             int responseStatus = temp.processRequest(clientFd);
-            if (responseStatus == 2)
-                return clientFd;
-            // TODO: is this correct here or after POLLOUT?
-            else if (responseStatus < 0)
-                return -1;
+            // if (responseStatus == 2)
+            // TODO: is this correct here or after POLLOUT? after pollout
+            // else if (responseStatus < 0)
+            //     return -1;
             client->revents = POLLOUT;
+            return 0;
+            // return clientFd;// shoudl not remove this client!!! still want to poll for a response
         }
         break;
     }
@@ -56,18 +55,19 @@ int Multiplexer::evaluateClient(pollfd *client)
     case POLLOUT:
     {
         logger.log("Found event of type POLLOUT on fd: " + std::to_string(client->fd));
-        // std::string tmp_index("index.html");
-        // Socket &clientSocket = _getSocketForClient(clientFd);
-        // HttpRequest *client_request = clientSocket.getRequestByDiscriptor(clientFd);
-        // if (client_request)
-        // {
-        //   HttpResponse client_response =
-        //       client_request->constructResponse(clientSocket, tmp_index); // index.html shouldnt be hardcoded..
-        //   send(clientFd, (void *)client_response.toStr().c_str(), client_response.toStr().size(), 0);
-        // }
-        // delete client_request;
+        std::string tmp_index("index.html");
+        Socket& clientSocket = _getSocketForClient(clientFd);
+        HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
+        if (clientRequest)
+        {
+          HttpResponse clientResponse =
+              clientRequest->constructResponse(clientSocket.getServerForClient(clientFd), tmp_index); // index.html shouldnt be hardcoded..
+          send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
+        }
+        delete clientRequest;
+        return clientFd;
         // markForRemoval.push_back(clientFd);
-        // break;
+        break;
     }
 
     // case POLLOUT, POLLERR, POLLHUP?
@@ -290,8 +290,13 @@ int Multiplexer::_pollSockets(const int timeout)
  * @param socket The client socket
  * @return A reference to the server the client is connected to
  */
-Socket &Multiplexer::_getSocketForClient(const int fd)
+Socket &Multiplexer::_getSocketForClient(const int clientFd)
 {
-    (void)fd;
-    _sockets[0];
+    std::vector<Socket>::iterator it;
+    for (it = _sockets.begin(); it < _sockets.end(); it++) {
+        if (it->hasClient(clientFd))
+            return *it;
+    }
+    // should never happen to not match TODO check what coud cause this
+    return _sockets[0];
 }

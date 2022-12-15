@@ -19,10 +19,15 @@ public:
     void addClient(const int &fd);
     void removeClient(const int socket);
 
+    // Hassers
+    bool hasClient(const int &fd) const;
+
     // Getters
     int getPort() const;
     int getFd() const;
     std::vector<Server> getServers() const;
+    Server& getServerForClient(const int clientFd);
+    HttpRequest* getRequestForClient(const int clientFd);
 
     // Setters
     void addServer(Server const &server);
