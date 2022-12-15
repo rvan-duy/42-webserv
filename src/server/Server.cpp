@@ -63,18 +63,21 @@ HttpRequest *Server::getRequestByDescriptor(int fd) {
   return _requests[fd];
 }
 
-std::string Server::getRoot(const std::string &uri) const {
-  unsigned long maxlen = 0;
-  std::string   root;
+// Possible TODO: look for longest matching route
+const Route &Server::getRoute(const std::string &uri) const {
   for (std::vector<Route>::const_iterator it = _routes.begin(); it != _routes.end(); it++) {
-    if (0 == uri.find(it->route)) {
-      if (maxlen < it->route.size()) {
-        root   = it->rootDirectory;
-        maxlen = it->route.size();
-      }
+    const Route &route = *it;
+    if (route.route == uri) {
+      return route;
     }
   }
-  return root;
+  for (std::vector<Route>::const_iterator it = _routes.begin(); it != _routes.end(); it++) {
+    const Route &route = *it;
+    if (route.route == "/") {
+      return route;
+    }
+  }
+  return _routes[0];
 }
 
 /**************************************************/

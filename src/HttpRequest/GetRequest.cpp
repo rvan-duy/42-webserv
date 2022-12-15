@@ -12,13 +12,12 @@ int GetRequest::executeRequest(const Server& server) {
 }
 
 HttpResponse GetRequest::constructResponse(const Server& server) {
-  Logger&                  logger         = Logger::getInstance();
-  std::vector<std::string> accepted_types = _getAcceptedTypesFromHeader();
-  std::string              path           = _getPath(server);
-  HttpResponse             response;
+  const Route&                   routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const std::vector<std::string> accepted_types  = _getAcceptedTypesFromHeader();
+  const std::string              path            = _constructPath(routeOfResponse);
+  HttpResponse                   response;
 
-  // TODO: Check if file permissions are allowed
-  // TODO: Replace the switch with a std::map
+  Logger::getInstance().log("error-page: " + routeOfResponse.errorPages.at(404));
   switch (_fileExists(path)) {
     case IS_DIR: {
       if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
@@ -26,11 +25,19 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
         response._setResponse("root/406/index.html", 406, "Not Acceptable", getVersion());
         return response;
       }
-      path += "/index.html";  // TODO: make this a config option
-      break;
+      std::vector<std::string> possible_paths = _getPossiblePaths(path, routeOfResponse.indexFiles);
+      for (std::vector<std::string>::const_iterator it = possible_paths.begin(); it != possible_paths.end(); ++it) {
+        if (_fileExists(*it) == IS_REG_FILE) {
+          response._setResponse(*it, 200, "OK", getVersion());
+          return response;
+        }
+      }
+      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      return response;
     }
     case IS_REG_FILE: {
-      break;
+      response._setResponse(path, 200, "OK", getVersion());
+      return response;
     }
     case IS_UNKNOWN: {
       response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
@@ -41,19 +48,24 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
       return response;
     }
   }
-
-  if (_fileExists(path) == IS_UNKNOWN) {
-    response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
-    return response;
-  }
-
-  response._setResponse(path, 200, "OK", getVersion());
-  return response;
 }
 
 /*
  * Private methods
  */
+
+
+
+std::vector<std::string> GetRequest::_getPossiblePaths(const std::string&              path,
+                                                       const std::vector<std::string>& index_files) {
+  std::vector<std::string> possible_paths;
+
+  for (std::vector<std::string>::const_iterator it = index_files.begin(); it != index_files.end(); ++it) {
+    possible_paths.push_back(path + "/" + *it);
+  }
+
+  return possible_paths;
+}
 
 std::vector<std::string> GetRequest::_getAcceptedTypesFromHeader() {
   std::string              accept = getHeader("Accept");
@@ -73,11 +85,11 @@ std::vector<std::string> GetRequest::_getAcceptedTypesFromHeader() {
   return accepted_types;
 }
 
-std::string GetRequest::_getPath(const Server& server) {
+std::string GetRequest::_constructPath(const Route& route) {
   const std::string uri       = getUri();
-  const std::string path      = server.getRoot(uri);
+  const std::string path      = route.rootDirectory;
   const std::string full_path = path.substr(0, path.size() - 1) + uri;
-  Logger::getInstance().log("[RESPONSE-BUILDING] GetRequest: _getPath -> " + full_path);
+  Logger::getInstance().log("[RESPONSE-BUILDING] GetRequest: _constructPath -> " + full_path);
   return full_path;
 }
 

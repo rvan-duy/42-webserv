@@ -7,7 +7,6 @@
 t_parseFuncPair Parser::lineParsingFuncs[PARSER_FUNC_N] = {
     {"listen", &Parser::parsePort},
     {"serverName", &Parser::parseServerName},
-    {"errorPage", &Parser::parseErrorPage},
     {"maxBodySize", &Parser::parseMaxBodySize},
     {"return", &Parser::parseHost},
 };
@@ -29,26 +28,6 @@ int Parser::parseServerName(void *dest, t_dataLine line)
     }
     server->setServerName(serverName);
     return 0;
-}
-
-int Parser::parseErrorPage(void *dest, t_dataLine line)
-{
-    if (!dest || line.size() != 3)
-    {
-        return 1;
-    }
-    Server *server = static_cast<Server *>(dest);
-    std::string statusCode;
-
-    statusCode = line.at(1);
-    for (size_t i = 0; i < statusCode.length(); i++)
-    {
-        if (!isdigit(statusCode[i]))
-        {
-            return 1;
-        }
-    }
-    return server->setErrorPage(std::stoi(statusCode), line.at(2));
 }
 
 int Parser::parseHost(void *dest, t_dataLine line)

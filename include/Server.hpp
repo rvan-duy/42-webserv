@@ -65,7 +65,9 @@ during evaluation.
 
 struct Route {
   std::string                  route;  // location
-  std::map<EHttpMethods, bool> allowedMethods;
+  std::map<EHttpMethods, bool> allowedMethods; // Method, true if allowed
+  std::vector<std::string>     indexFiles;
+  std::map<int, std::string>   errorPages; // Error code, path
   std::string                  httpRedirection;
   std::string                  searchDirectory;
   std::string                  defaultFile;
@@ -100,6 +102,7 @@ class Server {
   //  Getters
   std::vector<std::string> getServerName() const;
   std::vector<Route>       getRoutes() const;
+  const Route             &getRoute(const std::string &uri) const;
   PageData                 getHost() const;
   PageData                 getErrorPage() const;
   int                      getMaxBody() const;
@@ -107,7 +110,6 @@ class Server {
   int                      getFd() const;
   std::vector<int>        &getConnectedClients();
   HttpRequest             *getRequestByDescriptor(int fd);
-  std::string              getRoot(const std::string &uri) const;
 
   // Setters
   int  setHost(int const &statusCode, std::string const &filePath);
