@@ -156,7 +156,6 @@ int Parser::parseLocationBlocks(Route *pRoute, std::vector<t_dataLine> const &li
 	{
 		for (size_t j = 0; j < BLOCK_FUNC_N; j++)
 		{
-			Logger::getInstance().debug(lines[i].at(0));
 			if (lines[i].size() != 0 && lines[i].at(0) == blockParsingFuncs[j].key)
 			{
 				if ((this->*(blockParsingFuncs[j].func))(pRoute, lines[i]))

@@ -9,7 +9,7 @@
 #include "HttpResponse.hpp"
 #include "Server.hpp"
 
-struct Route; // Forward declaration
+struct Route;  // Forward declaration
 
 std::string  extractArgument(const std::string& msg, int n);
 EHttpMethods _parseMethod(const std::string& method);
@@ -61,10 +61,11 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
+  std::string              _getErrorPageIndex(const Route& route, int errorCode) const;
   std::vector<std::string> _getPossiblePaths(const std::string& path, const std::vector<std::string>& index_files);
   std::vector<std::string> _getAcceptedTypesFromHeader();
   std::string              _constructPath(const Route& route);
-  int                      _fileExists(const std::string& path);
+  int                      _fileExists(const std::string& path) const;
 };
 
 // DELETE

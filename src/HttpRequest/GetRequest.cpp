@@ -1,5 +1,7 @@
 #include "HttpRequest.hpp"
 
+#define DEFAULT_ERROR_PAGE "root/404/error_pages/index.html"
+
 GetRequest::GetRequest(std::string& msg) : HttpRequest(msg) {}
 
 GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref) {}
@@ -17,7 +19,6 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
   const std::string              path            = _constructPath(routeOfResponse);
   HttpResponse                   response;
 
-  Logger::getInstance().log("error-page: " + routeOfResponse.errorPages.at(404));
   switch (_fileExists(path)) {
     case IS_DIR: {
       if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
@@ -32,7 +33,7 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
           return response;
         }
       }
-      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      response._setResponse(_getErrorPageIndex(routeOfResponse, 404), 404, "Not Found", getVersion());
       return response;
     }
     case IS_REG_FILE: {
@@ -40,7 +41,7 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
       return response;
     }
     case IS_UNKNOWN: {
-      response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
+      response._setResponse(_getErrorPageIndex(routeOfResponse, 404), 404, "Not Found", getVersion());
       return response;
     }
     default: {
@@ -54,7 +55,13 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
  * Private methods
  */
 
-
+std::string GetRequest::_getErrorPageIndex(const Route& route, int errorCode) const {
+  std::map<int, std::string>::const_iterator it = route.errorPages.find(errorCode);
+  if (it != route.errorPages.end() && _fileExists(route.rootDirectory + it->second) == IS_REG_FILE) {
+    return route.rootDirectory + it->second;
+  }
+  return std::string(DEFAULT_ERROR_PAGE);
+}
 
 std::vector<std::string> GetRequest::_getPossiblePaths(const std::string&              path,
                                                        const std::vector<std::string>& index_files) {
@@ -93,7 +100,7 @@ std::string GetRequest::_constructPath(const Route& route) {
   return full_path;
 }
 
-int GetRequest::_fileExists(const std::string& path) {
+int GetRequest::_fileExists(const std::string& path) const {
   Logger&     logger = Logger::getInstance();
 
   struct stat buffer;
