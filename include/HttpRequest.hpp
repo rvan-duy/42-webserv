@@ -84,7 +84,7 @@ public:
 class BadRequest : public HttpRequest
 {
 public:
-  BadRequest(std::string &msg);
+  BadRequest(HttpHeaderData const &data);
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 

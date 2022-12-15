@@ -145,7 +145,7 @@ static HttpRequest *createRequest(HttpHeaderData const &data)
         return new DeleteRequest(data);
     default:
         Logger::getInstance().error("Incorrect type of request received");
-        return NULL;
+        return new BadRequest(data);
     }
 }
 
@@ -165,20 +165,20 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest)
     endOfHeader = rawRequest.find("\r\n\r\n");
     if (endOfHeader == std::string::npos)
     {
-        logger.error("Incorrect end of header found -> returning NULL");
-        return NULL;
+        logger.error("Incorrect end of header found -> returning new BadRequest()");
+        return new BadRequest(headerData);
     }
     headerData.body = rawRequest.substr(endOfHeader + 4, rawRequest.length() - endOfHeader);
     headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2));
     if (parseFirstLine(&headerData, headerLines[0]))
     {
-        logger.error("Incorrect first line of request -> returning NULL");
-        return NULL;
+        logger.error("Incorrect first line of request -> returning new BadRequest()");
+        return new BadRequest(headerData);
     }
     if (makeHeaderMap(&headerData.headers, headerLines))
     {
-        logger.error("Incorrect header added to request -> returning NULL");
-        return NULL;
+        logger.error("Incorrect header added to request -> returning new BadRequest()");
+        return new BadRequest(headerData);
     }
     return createRequest(headerData);
 }
