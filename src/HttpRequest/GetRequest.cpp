@@ -40,8 +40,7 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
       return response;
     }
     case IS_UNKNOWN: {
-      response._setResponse(_getErrorPageIndex(routeOfResponse, 406), 406, "Not Acceptable", getVersion());
-      //response._setResponse(_getErrorPageIndex(routeOfResponse, 404), 404, "Not Found", getVersion());
+      response._setResponse(_getErrorPageIndex(routeOfResponse, 404), 404, "Not Found", getVersion());
       return response;
     }
     default: {
