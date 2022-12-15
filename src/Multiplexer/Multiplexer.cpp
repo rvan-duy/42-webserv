@@ -35,27 +35,21 @@ int Multiplexer::evaluateClient(pollfd *client)
     {
         logger.log("Found event of type POLLIN on fd: " + std::to_string(client->fd));
         if (_isSocket(clientFd))
-            _addClient(clientFd); // TODO: Oswin: fix this shit
+            _addClient(clientFd);
         else
         {
             Socket &temp = _getSocketForClient(clientFd);
-            int responseStatus = temp.processRequest(clientFd);
-            // if (responseStatus == 2)
-            // TODO: is this correct here or after POLLOUT? after pollout
-            // else if (responseStatus < 0)
-            //     return -1;
+            temp.processRequest(clientFd);
             client->revents = POLLOUT;
-            return 0;
-            // return clientFd;// shoudl not remove this client!!! still want to poll for a response
+            return 0;   // return 0 because we do no want to remove the clientFd
         }
         break;
     }
 
-    /* Dit kunnen jullie aanpakken. */
     case POLLOUT:
     {
         logger.log("Found event of type POLLOUT on fd: " + std::to_string(client->fd));
-        std::string tmp_index("index.html");
+        std::string tmp_index("index.html");    // TODO: less hardcoded
         Socket& clientSocket = _getSocketForClient(clientFd);
         HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
         if (clientRequest)
@@ -65,15 +59,13 @@ int Multiplexer::evaluateClient(pollfd *client)
           send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
         }
         delete clientRequest;
-        return clientFd;
-        // markForRemoval.push_back(clientFd);
-        break;
+        return clientFd;    // returned clientFd will be markedForRemoval and at end of pollLoop be removed
     }
 
-    // case POLLOUT, POLLERR, POLLHUP?
     case POLLNVAL:
     {
         logger.error("POLLNVAL on descriptor : " + std::to_string(clientFd));
+        // return clientFd; // this removes the faulty fd, could make debugging harder
         break;
     }
     default:

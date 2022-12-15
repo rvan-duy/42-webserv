@@ -88,7 +88,7 @@ void Socket::addClient(const int &socket)
     _clients[socket] = newPair;
 }
 
-// TODO: fix segfault when printing request
+// TODO: fix segfault when printing request, might be done
 void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)
 {
     std::pair<HttpRequest *, Server *> newPair(request, server);
