@@ -22,8 +22,7 @@ HttpResponse GetRequest::constructResponse(const Server& server) {
   switch (_fileExists(path)) {
     case IS_DIR: {
       if (std::find(accepted_types.begin(), accepted_types.end(), "text/html") == accepted_types.end()) {
-        // TODO make a 406 error page
-        response._setResponse("root/406/index.html", 406, "Not Acceptable", getVersion());
+        response._setResponse(_getErrorPageIndex(routeOfResponse, 406), 406, "Not Acceptable", getVersion());
         return response;
       }
       std::vector<std::string> possible_paths = _getPossiblePaths(path, routeOfResponse.indexFiles);
