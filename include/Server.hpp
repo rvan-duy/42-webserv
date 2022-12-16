@@ -64,16 +64,16 @@ during evaluation.
 #define DEFAULT_HOST_PATH "default host path"
 
 struct Route {
-  std::string                  route;  // location
-  std::map<EHttpMethods, bool> allowedMethods; // Method, true if allowed
-  std::vector<std::string>     indexFiles;
-  std::map<int, std::string>   errorPages; // Error code, path
-  std::string                  httpRedirection;
-  std::string                  searchDirectory;
-  std::string                  defaultFile;
-  std::string                  cgiParam;
-  std::string                  rootDirectory;  // root
-  bool                         autoIndex;
+  std::string                           route;           // location
+  std::map<EHttpMethods, bool>          allowedMethods;  // Method, true if allowed
+  std::vector<std::string>              indexFiles;
+  std::map<HTTPStatusCode, std::string> errorPages;  // Error code, path
+  std::string                           httpRedirection;
+  std::string                           searchDirectory;
+  std::string                           defaultFile;
+  std::string                           cgiParam;
+  std::string                           rootDirectory;  // root
+  bool                                  autoIndex;
 };
 
 struct PageData {

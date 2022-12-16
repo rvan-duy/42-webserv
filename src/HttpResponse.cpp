@@ -9,13 +9,10 @@ HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
   _statusMessage = obj._statusMessage;
 }
 
-HttpResponse::HttpResponse(HttpVersion version, int statusCode, std::string statusMessage)
-    : HttpMessage(version), _statusCode(statusCode), _statusMessage(statusMessage) {}
-
 HttpResponse::~HttpResponse() {}
 
 /*
- * Convert the response to a string // 2 keer dubbelop?
+ * Convert the response to a string
  * @return The response as a string
  */
 std::string HttpResponse::toStr() const {
@@ -27,7 +24,7 @@ std::string HttpResponse::toStr() const {
   {
     logger.log("1. Adding status line");
     std::ostringstream ss;
-    ss << getVersionToStr() << " " << _statusCode << " " << _statusMessage << "\r\n";
+    ss << getVersionToStr() << " " << static_cast<int>(_statusCode) << " " << _statusMessage << "\r\n";
     response_string += ss.str();
   }
 
@@ -57,42 +54,24 @@ std::string HttpResponse::toStr() const {
 }
 
 /*
- * Get the status code
- */
-int HttpResponse::getStatusCode() const {
-  return _statusCode;
-}
-
-/*
- * Get the status message
- */
-std::string HttpResponse::getStatusMessage() const {
-  return _statusMessage;
-}
-
-/*
  * Sets the HttpResponse Class attributes to the given values
- * @param path Path to the file to serve, relative to the root directory
- * @param status_code Status code to respond with
- * @param status_message Status message to respond with
- * @param version HTTP version to respond with
  */
-void HttpResponse::_setResponse(const std::string &path, const int status_code, const std::string &status_message,
-                                 const HttpVersion version) {
+void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCode, const std::string &status_message,
+                                const HttpVersion version) {
   Logger       &logger = Logger::getInstance();
 
   std::ifstream file(path.c_str());  // Open the file
   logger.log("Requested path: " + path);
 
-  file.seekg(0, std::ios::end);                          // Seek to the end of the file
-  std::stringstream ss;                                  // Create a stringstream to store the file contents in
-  ss << file.tellg();                                    // Get the file size
-  _statusCode               = status_code;              // Set the status code
-  _statusMessage            = status_message;           // Set the status message
-  _version                   = version;                  // Set the version
-  _headers["Content-Length"] = ss.str();                 // Set the content length header
+  file.seekg(0, std::ios::end);                        // Seek to the end of the file
+  std::stringstream ss;                                // Create a stringstream to store the file contents in
+  ss << file.tellg();                                  // Get the file size
+  _statusCode                = statusCode;             // Set the status code
+  _statusMessage             = status_message;         // Set the status message
+  _version                   = version;                // Set the version
+  _headers["Content-Length"] = ss.str();               // Set the content length header
   _headers["Content-Type"]   = _getContentType(path);  // Set the content type header
-  file.seekg(0, std::ios::beg);                          // Seek back to the beginning of the file
+  file.seekg(0, std::ios::beg);                        // Seek back to the beginning of the file
   if (file.is_open()) {
     std::string body((std::istreambuf_iterator<char>(file)),
                      std::istreambuf_iterator<char>());  // Read the file into a string

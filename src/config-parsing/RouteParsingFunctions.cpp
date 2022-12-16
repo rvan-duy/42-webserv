@@ -23,7 +23,8 @@ int Parser::parseErrorPage(void *dest, t_dataLine line) {
       Logger::getInstance().error("[CONFIG PARSER]: Invalid error code for error page");
       return 1;
     }
-    route->errorPages[errorCode] = line.at(2);
+    HTTPStatusCode code = static_cast<HTTPStatusCode>(errorCode);
+    route->errorPages[code] = line.at(2);
   } catch (std::exception &e) {
     Logger::getInstance().error("[CONFIG PARSER]: errorPage is not a number");
     return 1;

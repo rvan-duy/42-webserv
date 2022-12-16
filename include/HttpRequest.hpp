@@ -32,22 +32,26 @@ class HttpRequest : public HttpMessage {
   virtual int          executeRequest(const Server& server)    = 0;
   virtual HttpResponse constructResponse(const Server& server) = 0;
 
-  // Getters
-  EHttpMethods getMethod() const;
-  std::string  getUri() const;
-  bool         getChunked() const;
-
  protected:
   EHttpMethods _method;
   std::string  _uri;
   bool         _chunked;
+
+  // Protected methods
+  bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
 };
 
 // GET
 
-#define IS_DIR 1
-#define IS_REG_FILE 2
-#define IS_UNKNOWN 3
+enum class FileType {
+  IS_DIR,
+  IS_REG_FILE,
+  IS_UNKNOWN
+};
+
+// # define IS_DIR      0
+// # define IS_REG_FILE 1
+// # define IS_UNKNOWN  2
 
 class GetRequest : public HttpRequest {
  public:
@@ -61,11 +65,11 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
-  std::string              _getErrorPageIndex(const Route& route, int errorCode) const;
+  std::string              _getErrorPageIndex(const Route& route, HTTPStatusCode errorCode) const;
   std::vector<std::string> _getPossiblePaths(const std::string& path, const std::vector<std::string>& index_files);
   std::vector<std::string> _getAcceptedTypesFromHeader();
-  std::string              _constructPath(const Route& route);
-  int                      _fileExists(const std::string& path) const;
+  std::string              _constructPath(const std::string& root) const;
+  FileType                 _fileExists(const std::string& path) const;
 };
 
 // DELETE

@@ -78,18 +78,18 @@ void  HttpRequest::extractBody(const std::string& msg) {
 }
 
 /*
- * Getters
+ * Protected methods
  */
-EHttpMethods HttpRequest::getMethod() const {
-  return _method;
-}
 
-std::string HttpRequest::getUri() const {
-  return _uri;
-}
+bool HttpRequest::_isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const {
+  EHttpMethods currentMethod = _method;
 
-bool  HttpRequest::getChunked() const {
-  return _chunked;
+  for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++) {
+    if (it->first == currentMethod) {
+      return it->second;
+    }
+  }
+  return false;
 }
 
 /*

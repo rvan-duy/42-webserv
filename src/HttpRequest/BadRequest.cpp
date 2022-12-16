@@ -16,5 +16,5 @@ int BadRequest::executeRequest(const Server& server) {
 HttpResponse BadRequest::constructResponse(const Server& server) {
   (void)server;
   (void)index;
-  return HttpResponse(HTTP_1_1, 406, "Bad Request");
+  return HttpResponse();
 }

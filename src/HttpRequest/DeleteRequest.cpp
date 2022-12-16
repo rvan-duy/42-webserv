@@ -20,7 +20,5 @@ int DeleteRequest::executeRequest(const Server& server) {
 HttpResponse DeleteRequest::constructResponse(const Server& server) {
   int responseStatus = executeRequest(server);
   (void)index;
-  if (!responseStatus)
-    return HttpResponse(HTTP_1_1, 204, "OK");
-  return HttpResponse(HTTP_1_1, responseStatus, _parseResponseStatus(responseStatus));
+  return HttpResponse();
 }
