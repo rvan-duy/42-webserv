@@ -42,7 +42,6 @@ static int parseHttpVersion(std::string httpVersion)
     return -1;
 }
 
-// TODO: add more delimiters?
 /* Splits string based on "delimiter" */
 static std::vector<std::string> splitString(std::string const &str)
 {
@@ -121,8 +120,6 @@ static int makeHeaderMap(std::map<std::string, std::string> *pHeadersMap, std::v
             return 1;
         pair.first = stringTrim(currentLine.substr(0, semiColLocation));
         pair.second = stringTrim(currentLine.substr(semiColLocation + 1, currentLine.length() - semiColLocation));
-        logger.debug(pair.first);
-        logger.debug(pair.second);
         pHeadersMap->insert(pair);
     }
     return 0;

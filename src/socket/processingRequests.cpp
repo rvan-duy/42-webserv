@@ -78,8 +78,7 @@ static Server matchBasedOnServerName(std::vector<Server> const &listeningServers
 }
 
 /**
- * Finds server that matches the sent request
- * @return index of server or -1 in case of bad request
+ * Finds server that matches the sent request, then adds it to matching client
  */
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
@@ -128,11 +127,6 @@ int Socket::processRequest(int const &clientFd)
     }
     // rawRequest = "";
     request = RequestParser::parseHeader(rawRequest);
-    if (request == NULL)
-    {
-        _addBadRequestToClient(clientFd, BAD_REQUEST);
-        return 1;
-    }
     _matchRequestToServer(clientFd, request);
     return 0;
 }

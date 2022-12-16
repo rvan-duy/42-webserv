@@ -38,9 +38,9 @@ int Multiplexer::evaluateClient(pollfd *client)
             _addClient(clientFd);
         else
         {
-            Socket &temp = _getSocketForClient(clientFd);
-            temp.processRequest(clientFd);
-            return 0;   // return 0 because we do no want to remove the clientFd
+            Socket &matchingSocket = _getSocketForClient(clientFd);
+            matchingSocket.processRequest(clientFd);
+            return 0; // return 0 because we do no want to remove the clientFd
         }
         break;
     }
@@ -48,17 +48,17 @@ int Multiplexer::evaluateClient(pollfd *client)
     case POLLOUT:
     {
         logger.log("Found event of type POLLOUT on fd: " + std::to_string(client->fd));
-        std::string tmp_index("index.html");    // TODO: less hardcoded
-        Socket& clientSocket = _getSocketForClient(clientFd);
+        std::string tmp_index("index.html"); // TODO: less hardcoded
+        Socket &clientSocket = _getSocketForClient(clientFd);
         HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
         if (clientRequest)
         {
-          HttpResponse clientResponse =
-              clientRequest->constructResponse(clientSocket.getServerForClient(clientFd), tmp_index); // index.html shouldnt be hardcoded..
-          send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
+            HttpResponse clientResponse =
+                clientRequest->constructResponse(clientSocket.getServerForClient(clientFd), tmp_index); // index.html shouldnt be hardcoded..
+            send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
         }
         delete clientRequest;
-        return clientFd;    // returned clientFd will be markedForRemoval and at end of pollLoop be removed
+        return clientFd; // returned clientFd will be markedForRemoval and at end of pollLoop be removed
     }
 
     case POLLNVAL:
@@ -285,7 +285,8 @@ int Multiplexer::_pollSockets(const int timeout)
 Socket &Multiplexer::_getSocketForClient(const int clientFd)
 {
     std::vector<Socket>::iterator it;
-    for (it = _sockets.begin(); it < _sockets.end(); it++) {
+    for (it = _sockets.begin(); it < _sockets.end(); it++)
+    {
         if (it->hasClient(clientFd))
             return *it;
     }
