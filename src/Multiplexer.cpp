@@ -146,16 +146,16 @@ bool Multiplexer::_isSocket(const int fd) const
     return false;
 }
 
-Socket Multiplexer::_getSocketByFd(const int fd) const
-{
-    for (std::vector<Socket>::const_iterator it = _sockets.begin(); it != _sockets.end(); ++it)
-    {
-        if (it->getFd() == fd)
-            return *it;
-    }
-    // TODO: fix error handling?
-    return Socket(-1);
-}
+// Socket Multiplexer::_getSocketByFd(const int fd) const
+// {
+//     for (std::vector<Socket>::const_iterator it = _sockets.begin(); it != _sockets.end(); ++it)
+//     {
+//         if (it->getFd() == fd)
+//             return *it;
+//     }
+//     // TODO: fix error handling?
+//     return Socket(-1);
+// }
 
 void Multiplexer::_addClient(const int socket)
 {
@@ -205,7 +205,9 @@ void Multiplexer::_removeClient(const int socket)
     }
     for (std::vector<Socket>::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
     {
-        it->removeClient(socket);
+        // removes the client for all the sockets even thoug
+        if (it->hasClient(socket))
+            it->removeClient(socket);
     }
 }
 
@@ -290,6 +292,6 @@ Socket &Multiplexer::_getSocketForClient(const int clientFd)
         if (it->hasClient(clientFd))
             return *it;
     }
-    // should never happen to not match TODO check what coud cause this
+    // this cannot happen because there will always be a matching client in one of the sockets
     return _sockets[0];
 }

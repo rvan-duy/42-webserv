@@ -31,7 +31,7 @@ private:
   int _sendData(const int socket, const std::string &data) const;
   int _readData(const int socket, std::string &data) const;
   bool _isSocket(const int fd) const;
-  Socket _getSocketByFd(const int fd) const;
+  // Socket _getSocketByFd(const int fd) const;
   void _addClient(const int socket);
   void _removeClient(const int socket);
   int _getEvent(const pollfd &fd);
