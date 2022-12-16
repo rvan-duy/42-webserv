@@ -1,4 +1,10 @@
-#include <Webserver.hpp>
+#include <algorithm>
+#include <iostream>
+#include <Server.hpp>
+#include <Socket.hpp>
+#include <Lexer.hpp>
+#include <Parser.hpp>
+#include <Logger.hpp>
 
 static int openFile(std::ifstream &cFile, std::string const &filePath)
 {
@@ -19,9 +25,50 @@ static int parseFile(std::vector<Server> *pServers, std::ifstream &cFile)
     return 0;
 }
 
-int initWebserver(std::vector<Server> *pServers, std::string const &filePath)
+/**
+ * Per unique port in servers a socket must be opened
+ */
+static void setupSockets(std::vector<Socket> *pSockets, std::vector<Server> &servers)
+{
+    std::vector<int> ports;
+    for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        if (std::find(ports.begin(), ports.end(), it->getPort()) == std::end(ports))
+            ports.push_back(it->getPort());
+    }
+    for (std::vector<int>::iterator portsIt = ports.begin(); portsIt != ports.end(); ++portsIt)
+    {
+        pSockets->push_back(Socket(*portsIt));
+    }
+}
+
+/**
+ * Every server that listens to same port as socket is added to the list
+ */
+static void matchSocketsAndServers(std::vector<Socket> *pSockets, std::vector<Server> servers)
+{
+    for (std::vector<Socket>::iterator socketIt = pSockets->begin(); socketIt != pSockets->end(); ++socketIt)
+    {
+        for (std::vector<Server>::iterator serverIt = servers.begin(); serverIt != servers.end(); ++serverIt)
+        {
+            if (socketIt->getPort() == serverIt->getPort())
+                socketIt->addServer(*serverIt);
+        }
+    }
+}
+
+void prepareSockets(std::vector<Socket> &socks)
+{
+    for (std::vector<Socket>::iterator it = socks.begin(); it != socks.end(); it++)
+    {
+        it->prepare();
+    }
+}
+
+int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath)
 {
     Logger &logger = Logger::getInstance();
+    std::vector<Server> servers;
     std::ifstream cFile;
 
     if (openFile(cFile, filePath))
@@ -29,12 +76,15 @@ int initWebserver(std::vector<Server> *pServers, std::string const &filePath)
         logger.error("Error opening file: " + std::string(strerror(errno)));
         return 1;
     }
-    if (parseFile(pServers, cFile))
+    if (parseFile(&servers, cFile))
     {
         logger.error("Error parsing tokens from configfile");
         return 1;
     }
-    logger.log("Tokens successfully parsed");
+    logger.log("Config file successfully parsed");
     cFile.close();
+    setupSockets(pSockets, servers);
+    prepareSockets(*pSockets);
+    matchSocketsAndServers(pSockets, servers);
     return 0;
 }

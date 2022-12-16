@@ -2,17 +2,13 @@
 #include <Webserver.hpp>
 #include <CGI.hpp>
 
-int startWebserver(std::vector<Server> servers)
+int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath);
+
+int startWebserver(std::vector<Socket> sockets)
 {
-  Multiplexer multiplexer;
+  Multiplexer multiplexer(sockets);
   try
   {
-    // Iterate through all servers and add them to the multiplexer
-    for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-      it->prepare(); // socket() + bind() + listen()
-      multiplexer.addServer(*it, POLLIN);
-    }
     multiplexer.waitForEvents(); // Start the multiplexer loop, does all the polling and handling of events etc.
   }
   catch (std::exception &e)
@@ -26,14 +22,14 @@ int startWebserver(std::vector<Server> servers)
 int main(int argc, char **argv, char **env)
 {
   (void)env;
-  std::vector<Server> servers;
+  std::vector<Socket> sockets;
   /*  Input check */
   if (argc != 2)
   {
     std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
     return 1;
   }
-  if (initWebserver(&servers, argv[1]))
+  if (initWebserver(&sockets, argv[1]))
     return 1;
-  return startWebserver(servers);
+  return startWebserver(sockets);
 }

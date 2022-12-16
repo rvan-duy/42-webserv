@@ -15,19 +15,19 @@
 #define BUFFER_SIZE 1024
 
 #define PATH_TO_PYTHON "/usr/bin/python3"
+#define PATH_TO_PHP "/opt/homebrew/Cellar/php/8.1.13/bin/php"
 
 class CGI
 {
 public:
-	CGI(std::string const &rootDir, char *const *env);
+	CGI(char *const *env);
 	~CGI();
 
-	int executeFile(std::string *pDest, std::string const &filePath, std::string const &body) const;
+	int executeFile(std::string *pDest, std::string const &rootDir, std::string const &filePath, std::string const &body) const;
 
-private:
-	std::string _rootDir;
+protected:
+	/* Don't change the order of the '*' and keywords here please */
 	char *const *_env;
 
 	int forkCgiFile(int fd[2], std::string const &filePath, std::string const &body) const;
-	int checkFileAccess(std::string const &filePath) const;
 };

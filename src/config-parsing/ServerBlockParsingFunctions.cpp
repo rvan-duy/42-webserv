@@ -9,7 +9,6 @@ t_parseFuncPair Parser::lineParsingFuncs[PARSER_FUNC_N] = {
     {"serverName", &Parser::parseServerName},
     {"errorPage", &Parser::parseErrorPage},
     {"maxBodySize", &Parser::parseMaxBodySize},
-    {"return", &Parser::parseHost},
 };
 
 int Parser::parseServerName(void *dest, t_dataLine line)
@@ -19,12 +18,16 @@ int Parser::parseServerName(void *dest, t_dataLine line)
         return 1;
     }
     Server *server = static_cast<Server *>(dest);
-    std::vector<std::string> serverName;
+    std::string serverName = "";
     std::vector<std::string>::iterator it = line.begin();
     it++;
     while (it != line.end())
     {
-        serverName.push_back(*it);
+        if (serverName.length() != 0)
+        {
+            serverName += " ";
+        }
+        serverName += *it;
         it++;
     }
     server->setServerName(serverName);
@@ -51,24 +54,16 @@ int Parser::parseErrorPage(void *dest, t_dataLine line)
     return server->setErrorPage(std::stoi(statusCode), line.at(2));
 }
 
-int Parser::parseHost(void *dest, t_dataLine line)
+static bool isAllNumbers(std::string const &line)
 {
-    if (!dest || line.size() != 3)
+    for (size_t i = 0; i < line.length(); i++)
     {
-        return 1;
-    }
-    Server *server = static_cast<Server *>(dest);
-    std::string statusCode;
-
-    statusCode = line.at(1);
-    for (size_t i = 0; i < statusCode.length(); i++)
-    {
-        if (!isdigit(statusCode[i]))
+        if (!isdigit(line[i]))
         {
-            return 1;
+            return false;
         }
     }
-    return server->setHost(std::stoi(statusCode), line.at(2));
+    return true;
 }
 
 int Parser::parsePort(void *dest, t_dataLine line)
@@ -78,17 +73,15 @@ int Parser::parsePort(void *dest, t_dataLine line)
         return 1;
     }
     Server *server = static_cast<Server *>(dest);
-    std::string port;
-
-    port = line.at(1);
-    for (size_t i = 0; i < port.length(); i++)
+    std::string rawLine = line.at(1);
+    size_t port = 0;
+    /* In case only port is entered */
+    if (!isAllNumbers(rawLine))
     {
-        if (!isdigit(port[i]))
-        {
-            return 1;
-        }
+        return 1;
     }
-    return server->setPort(std::stoi(line.at(1)));
+    port = std::stoi(rawLine);
+    return server->setPort(port);
 }
 
 int Parser::parseMaxBodySize(void *dest, t_dataLine line)

@@ -1,22 +1,24 @@
 #include "HttpRequest.hpp"
 
-PostRequest::PostRequest(std::string& msg) : HttpRequest(msg) {}
+PostRequest::PostRequest(HttpHeaderData const &data) : HttpRequest(data) {}
 
-PostRequest::PostRequest(const PostRequest& ref) : HttpRequest(ref)  {}
+PostRequest::PostRequest(const PostRequest &ref) : HttpRequest(ref) {}
 
 PostRequest::~PostRequest() {}
 
-int PostRequest::executeRequest(Server& server) {
-  if (!isMethodAllowed(server, _uri, POST))
-    return 405;
+HTTPStatusCode PostRequest::executeRequest(Server &server)
+{
+  if (!isMethodAllowed(server, _url, POST))
+    return HTTPStatusCode::METHOD_NOT_ALLOWED;
   // Post the body to a file (std::string _body)
-  return 0;
+  return HTTPStatusCode::OK;
 }
 
-HttpResponse PostRequest::constructResponse(Server& server, std::string& index) {
-  int responseStatus = executeRequest(server);
+HttpResponse PostRequest::constructResponse(Server &server, std::string &index)
+{
+  HTTPStatusCode responseStatus = executeRequest(server);
   (void)index;
-  if (!responseStatus)
-    return HttpResponse(HTTP_1_1, 204, "OK");
-  return HttpResponse(HTTP_1_1, responseStatus, _parseResponseStatus(responseStatus));
+  if (responseStatus == HTTPStatusCode::OK)
+    return HttpResponse(HTTP_1_1, HTTPStatusCode::OK, "OK");
+  return HttpResponse(HTTP_1_1, responseStatus, getMessageByStatusCode(responseStatus));
 }
