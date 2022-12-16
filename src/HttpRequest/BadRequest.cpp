@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <HttpRequest.hpp>
 
-BadRequest::BadRequest(HttpHeaderData const &data) : HttpRequest(data) {}
+BadRequest::BadRequest(int statusCode) : HttpRequest(), _statusCode(statusCode) {}
 
 BadRequest::BadRequest(const BadRequest &ref) : HttpRequest(ref) {}
 

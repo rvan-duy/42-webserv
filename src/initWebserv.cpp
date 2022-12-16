@@ -1,5 +1,10 @@
-#include <Webserver.hpp>
 #include <algorithm>
+#include <iostream>
+#include <Server.hpp>
+#include <Socket.hpp>
+#include <Lexer.hpp>
+#include <Parser.hpp>
+#include <Logger.hpp>
 
 static int openFile(std::ifstream &cFile, std::string const &filePath)
 {
@@ -52,7 +57,7 @@ static void matchSocketsAndServers(std::vector<Socket> *pSockets, std::vector<Se
     }
 }
 
-void    prepareSockets(std::vector<Socket>& socks)
+void prepareSockets(std::vector<Socket> &socks)
 {
     for (std::vector<Socket>::iterator it = socks.begin(); it != socks.end(); it++)
     {

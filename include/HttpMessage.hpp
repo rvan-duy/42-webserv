@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <map>
-#include <General.hpp>
+#include <Webserver.hpp>
 
 class HttpMessage
 {

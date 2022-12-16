@@ -35,74 +35,11 @@ bool HttpRequest::getChunked() const
   return _chunked;
 }
 
-/*
- *  Extract a certain argument from the HttpMessage
- */
-std::string extractArgument(const std::string &msg, int n)
-{
-  std::string tmp;
-  size_t start;
-
-  start = 0;
-  while (n)
-  {
-    while (msg[start] == ' ')
-      start++;
-    if (n == 1)
-    {
-      std::string tmpo = msg.substr(start, msg.find_first_of(std::string("\r\n "), start) - start);
-      return (tmpo);
-    }
-    start = msg.find(' ', start);
-    n--;
-  }
-  return tmp;
-}
-
-/*
- * Parse the method string into the method enum
- * @param method the method string
- * @return the method enum
- */
-EHttpMethods _parseMethod(const std::string &method)
-{
-  Logger &logger = Logger::getInstance();
-  std::map<std::string, EHttpMethods> method_map;
-
-  method_map["GET"] = GET;
-  method_map["POST"] = POST;
-  method_map["DELETE"] = DELETE;
-
-  try
-  {
-    return method_map.at(method);
-  }
-  catch (std::exception &e)
-  {
-    // _status_code = 400;
-    logger.error("bad request: method unsupported ( " + method + " )");
-    return NONE;
-  }
-}
-
-/* This needs to include all the response statuses used in executeRequest */
-std::string _parseResponseStatus(const int &status)
-{
-  std::map<int, std::string> response_map;
-
-  response_map[403] = "Forbidden";
-  response_map[404] = "Not found";
-  response_map[405] = "Method not alowed";
-  response_map[409] = "Conflict";
-
-  return response_map.at(status);
-}
-
 // **
 // still can have conflicts with /file location and uri being /filename this will be looked in as file even though
 // it should be under / only..
 // coudl maybe fix by adding a / after location routes when it is a directory.. ?
-bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method)
+bool HttpRequest::isMethodAllowed(Server &server, std::string uri, EHttpMethods method)
 {
   std::vector<Route> routes = server.getRoutes();
   unsigned long maxlen = 0;

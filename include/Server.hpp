@@ -1,11 +1,9 @@
-#pragma once
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
+#ifndef SERVER_HPP
+#define SERVER_HPP
+
 #include <unistd.h>
 
-#include <General.hpp>
+#include <Webserver.hpp>
 
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
@@ -31,22 +29,11 @@
 
 #define DEFAULT_MAX_BODY 1000000
 
-#define DEFAULT_HOST_STATUS 420
-#define DEFAULT_HOST_PATH "index.html"
-
-#define DEFAULT_MAX_BODY 1000000
-
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 80
 
 #define ROOT_FOLDER "root/"
 /* End of default values */
-
-/* status codes for processing requests */
-#define INTERNAL_SERVER_ERROR 500
-#define OK 200
-#define BAD_REQUEST 400
-/* End of status codes */
 
 struct Route
 {
@@ -91,14 +78,12 @@ public:
   //  Getters
   std::string getServerName() const;
   std::vector<Route> getRoutes() const;
-  std::string getHost() const;
   PageData getErrorPage() const;
   int getMaxBody() const;
   int getPort() const;
 
   // Setters
   int setPort(int const &value);
-  int setHost(std::string const &host);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::string const &value);
   int setMaxBody(double const &value);
@@ -106,10 +91,11 @@ public:
 
 private:
   int _port;
-  std::string _host;
   int _maxBodySize;
   std::string _serverName;
   std::vector<Route> _routes;
 
   PageData _defaultErrorPage;
 };
+
+#endif

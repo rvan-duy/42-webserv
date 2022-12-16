@@ -3,6 +3,8 @@
 #include <vector>
 #include <arpa/inet.h>
 #include <HttpResponse.hpp>
+#include <Webserver.hpp>
+#include <sys/ioctl.h>
 
 /* backlog number of connections allowed on the incoming queue */
 #define BACKLOG 10
@@ -26,8 +28,8 @@ public:
     int getPort() const;
     int getFd() const;
     std::vector<Server> getServers() const;
-    Server& getServerForClient(const int clientFd);
-    HttpRequest* getRequestForClient(const int clientFd);
+    Server &getServerForClient(const int clientFd);
+    HttpRequest *getRequestForClient(const int clientFd);
 
     // Setters
     void addServer(Server const &server);

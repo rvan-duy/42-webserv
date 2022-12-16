@@ -6,7 +6,7 @@
 
 t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
     {"root", &Parser::parseRoot},
-    {"index", &Parser::parsePortAndIp},
+    {"index", &Parser::parsePort},
     {"autoIndex", &Parser::parseAutoIndex},
     {"cgi", &Parser::parseCgi},
     {"methods", &Parser::parseMethods},

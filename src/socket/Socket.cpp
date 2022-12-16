@@ -90,27 +90,17 @@ void Socket::addClient(const int &socket)
 // TODO: fix segfault when printing request, might be done
 void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)
 {
+    Logger::getInstance().log("Adding response to client with fd: " + std::to_string(clientFd));
     std::pair<HttpRequest *, Server *> newPair(request, server);
     _clients[clientFd] = newPair;
 }
 
 void Socket::_addBadRequestToClient(const int &fd, int type)
 {
+    Logger::getInstance().error("Adding error to client with fd: " + std::to_string(fd));
     std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
-    // TODO: add bad request
-    switch (type)
-    {
-    case INTERNAL_SERVER_ERROR:
-        Logger::getInstance().error("Adding internal server error to client with fd: " + std::to_string(fd));
-        // TODO: newPair.first = internal server error
-        _clients[fd] = newPair;
-        break;
-    default:
-        Logger::getInstance().error("Adding bad request to client with fd: " + std::to_string(fd));
-        // TODO: newPair.first = bad request
-        _clients[fd] = newPair;
-        break;
-    }
+    newPair.first = new BadRequest(type);
+    _clients[fd] = newPair;
 }
 
 bool Socket::hasClient(const int &fd) const
@@ -148,14 +138,10 @@ std::vector<Server> Socket::getServers() const
 
 Server &Socket::getServerForClient(const int clientFd)
 {
-    // std::pair<*HttpRequest, *Server> tmp;
-    // tmp = ;
     return *(_clients[clientFd].second);
 }
 
 HttpRequest *Socket::getRequestForClient(const int clientFd)
 {
-    // std::pair<*HttpRequest, *Server> tmp;
-    // tmp = ;
     return _clients[clientFd].first;
 }

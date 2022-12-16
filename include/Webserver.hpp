@@ -1,9 +1,23 @@
 #pragma once
 
-#include <vector>
-#include <Parser.hpp>
-#include <Lexer.hpp>
-#include <fstream>
-#include <Socket.hpp>
+#include <string>
 
-int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath);
+enum EHttpMethods
+{
+    GET,
+    POST,
+    DELETE,
+    NONE
+};
+
+enum HttpVersion
+{
+    HTTP_1_1,
+    HTTP_2_0,
+    HTTP_3_0
+};
+
+/**
+ * Utils
+ */
+bool isValidIpAdress(std::string const rawLine);

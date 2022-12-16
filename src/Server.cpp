@@ -4,7 +4,7 @@
 /*
  * Constructor for Server class
  */
-Server::Server() : _host(DEFAULT_HOST), _maxBodySize(DEFAULT_MAX_BODY), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH))
+Server::Server() : _maxBodySize(DEFAULT_MAX_BODY), _serverName(DEFAULT_HOST), _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH))
 {
 }
 
@@ -22,11 +22,6 @@ Server::~Server()
 std::string Server::getServerName() const
 {
     return _serverName;
-}
-
-std::string Server::getHost() const
-{
-    return _host;
 }
 
 PageData Server::getErrorPage() const
@@ -100,16 +95,6 @@ int Server::setPort(int const &value)
         return 1;
     }
     _port = value;
-    return 0;
-}
-
-int Server::setHost(std::string const &host)
-{
-    if (_host != DEFAULT_HOST)
-    {
-        return 1;
-    }
-    _host = host;
     return 0;
 }
 
