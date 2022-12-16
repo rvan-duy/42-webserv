@@ -17,8 +17,6 @@ HttpResponse BadRequest::constructResponse(Server &server, std::string &index)
 {
     (void)server;
     (void)index;
-    HttpResponse response;
-    response._setResponse("root/404/index.html", 404, "Not Found", getVersion());
-    // return HttpResponse(HTTP_1_1, 406, "Bad Request");
-    return (response);
+    std::string message = getMessageByStatusCode(_statusCode);
+    return HttpResponse(HTTP_1_1, _statusCode, message);
 }
