@@ -3,7 +3,6 @@
 /**
  * Constructors / destructors
  */
-
 Socket::Socket(int const &port) : _fd(-1), _port(port), _accepted(-1)
 {
     (void)_accepted;
@@ -114,7 +113,8 @@ void Socket::_addBadRequestToClient(const int &fd, int type)
     }
 }
 
-bool Socket::hasClient(const int &fd) const {
+bool Socket::hasClient(const int &fd) const
+{
     return _clients.count(fd) != 0;
 }
 
@@ -146,13 +146,15 @@ std::vector<Server> Socket::getServers() const
     return _servers;
 }
 
-Server& Socket::getServerForClient(const int clientFd) {
+Server &Socket::getServerForClient(const int clientFd)
+{
     // std::pair<*HttpRequest, *Server> tmp;
     // tmp = ;
     return *(_clients[clientFd].second);
 }
 
-HttpRequest* Socket::getRequestForClient(const int clientFd) {
+HttpRequest *Socket::getRequestForClient(const int clientFd)
+{
     // std::pair<*HttpRequest, *Server> tmp;
     // tmp = ;
     return _clients[clientFd].first;
