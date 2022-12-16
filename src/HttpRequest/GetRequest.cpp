@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-#define DEFAULT_ERROR_PAGE "root/404/error_pages/index.html"
+#define DEFAULT_ERROR_PAGE "root/error_pages/404/index.html"
 
 GetRequest::GetRequest(std::string& msg) : HttpRequest(msg) {}
 
