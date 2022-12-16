@@ -121,11 +121,12 @@ int Socket::processRequest(int const &clientFd)
         _addBadRequestToClient(clientFd, INTERNAL_SERVER_ERROR);
         return 1;
     }
-    else if (bytesRead == 0)
+    else if (bytesRead == 0)    // TODO: will never be called because of above statement
     {
         _addBadRequestToClient(clientFd, BAD_REQUEST);
         return 1;
     }
+    // rawRequest = "";
     request = RequestParser::parseHeader(rawRequest);
     if (request == NULL)
     {

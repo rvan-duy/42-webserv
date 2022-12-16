@@ -173,7 +173,7 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest)
     if (parseFirstLine(&headerData, headerLines[0]))
     {
         logger.error("Incorrect first line of request -> returning new BadRequest()");
-        return new BadRequest(headerData);
+        return new BadRequest(headerData);  // TODO: move these out of the if statement for testing
     }
     if (makeHeaderMap(&headerData.headers, headerLines))
     {
