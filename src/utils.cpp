@@ -10,19 +10,19 @@ bool isValidIpAdress(std::string const rawLine)
     return true;
 }
 
-std::string getMessageByStatusCode(int const &statusCode)
+std::string getMessageByStatusCode(HTTPStatusCode statusCode)
 {
     switch (statusCode)
     {
-    case OK:
+    case HTTPStatusCode::OK:
         return "OK";
-    case INTERNAL_SERVER_ERROR:
+    case HTTPStatusCode::INTERNAL_SERVER_ERROR:
         return "Internal server error";
-    case METHOD_NOT_ALLOWED:
+    case HTTPStatusCode::METHOD_NOT_ALLOWED:
         return "Method not allowed";
-    case CONTENT_TOO_LARGE:
+    case HTTPStatusCode::CONTENT_TOO_LARGE:
         return "Content too lage";
-    case I_AM_A_TEAPOT:
+    case HTTPStatusCode::I_AM_A_TEAPOT:
         return "I am a teapot";
     default:
         return "Bad request";
