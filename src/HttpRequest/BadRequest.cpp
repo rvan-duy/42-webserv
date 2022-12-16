@@ -1,16 +1,16 @@
 #include <cstdio>
 #include <HttpRequest.hpp>
 
-BadRequest::BadRequest(int statusCode) : HttpRequest(), _statusCode(statusCode) {}
+BadRequest::BadRequest(HTTPStatusCode statusCode) : HttpRequest(), _statusCode(statusCode) {}
 
 BadRequest::BadRequest(const BadRequest &ref) : HttpRequest(ref) {}
 
 BadRequest::~BadRequest() {}
 
-int BadRequest::executeRequest(Server &server)
+HTTPStatusCode BadRequest::executeRequest(Server &server)
 {
     (void)server;
-    return (0);
+    return HTTPStatusCode::OK;
 }
 
 HttpResponse BadRequest::constructResponse(Server &server, std::string &index)

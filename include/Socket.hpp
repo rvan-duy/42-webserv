@@ -46,5 +46,5 @@ private:
 
     void _matchRequestToServer(int const &clientFd, HttpRequest *request);
     void _addRequestToClient(int const &clientFd, HttpRequest *request, Server *server);
-    void _addBadRequestToClient(const int &fd, int type);
+    void _addBadRequestToClient(const int &fd, HTTPStatusCode statusCode);
 };

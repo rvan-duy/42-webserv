@@ -16,7 +16,7 @@ class HttpResponse : public HttpMessage
 public:
   HttpResponse();
   HttpResponse(const HttpResponse &obj);
-  HttpResponse(HttpVersion version, int statusCode, std::string statusMessage);
+  HttpResponse(HttpVersion version, HTTPStatusCode statusCode, std::string statusMessage);
   ~HttpResponse();
 
   // Methods
@@ -24,15 +24,15 @@ public:
   std::string toStr() const;
 
   // Getters
-  int getStatusCode() const;
+  HTTPStatusCode getStatusCode() const;
   std::string getStatusMessage() const;
 
   // Setters
-  void _setResponse(const std::string &path, const int status_code, const std::string &status_message,
+  void _setResponse(const std::string &path, HTTPStatusCode status_code, const std::string &status_message,
                     const HttpVersion version);
 
 private:
-  int _statusCode;            // status code of response
+  HTTPStatusCode _statusCode; // status code of response
   std::string _statusMessage; // status message of response
 
   std::string _getContentType(const std::string &path) const;

@@ -70,13 +70,13 @@ void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
     if (hostWithoutPort.length() == 0)
     {
         delete request;
-        return _addBadRequestToClient(clientFd, BAD_REQUEST);
+        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     }
     Server result;
     if (matchBasedOnHost(&result, _servers, hostWithoutPort))
     {
         delete request;
-        return _addBadRequestToClient(clientFd, BAD_REQUEST);
+        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     }
     return _addRequestToClient(clientFd, request, &result);
 }
@@ -90,12 +90,12 @@ int Socket::processRequest(int const &clientFd)
     bytesRead = readFromClientFd(&rawRequest, clientFd);
     if (bytesRead < 0)
     {
-        _addBadRequestToClient(clientFd, INTERNAL_SERVER_ERROR);
+        _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
         return 1;
     }
-    else if (bytesRead == 0)    // TODO: will never be called because of above statement
+    else if (bytesRead == 0) // TODO: will never be called because of above statement
     {
-        _addBadRequestToClient(clientFd, BAD_REQUEST);
+        _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
         return 1;
     }
     // rawRequest = "";

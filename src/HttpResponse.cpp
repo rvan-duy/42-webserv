@@ -10,7 +10,7 @@ HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj)
   _statusMessage = obj._statusMessage;
 }
 
-HttpResponse::HttpResponse(HttpVersion version, int statusCode, std::string statusMessage)
+HttpResponse::HttpResponse(HttpVersion version, HTTPStatusCode statusCode, std::string statusMessage)
     : HttpMessage(version), _statusCode(statusCode), _statusMessage(statusMessage) {}
 
 HttpResponse::~HttpResponse() {}
@@ -25,13 +25,6 @@ std::string HttpResponse::toStr() const
 
   logger.log("< Started creating response string", VERBOSE);
   std::string response_string;
-
-  {
-    logger.log("1. Adding status line", VERBOSE);
-    std::ostringstream ss;
-    ss << getVersionToStr() << " " << _statusCode << " " << _statusMessage << "\r\n";
-    response_string += ss.str();
-  }
 
   logger.log("2. Adding headers", VERBOSE);
   {
@@ -61,7 +54,7 @@ std::string HttpResponse::toStr() const
 /*
  * Get the status code
  */
-int HttpResponse::getStatusCode() const
+HTTPStatusCode HttpResponse::getStatusCode() const
 {
   return _statusCode;
 }
@@ -81,7 +74,7 @@ std::string HttpResponse::getStatusMessage() const
  * @param status_message Status message to respond with
  * @param version HTTP version to respond with
  */
-void HttpResponse::_setResponse(const std::string &path, const int status_code, const std::string &status_message,
+void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode status_code, const std::string &status_message,
                                 const HttpVersion version)
 {
   Logger &logger = Logger::getInstance();

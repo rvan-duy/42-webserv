@@ -6,10 +6,10 @@ GetRequest::GetRequest(const GetRequest &ref) : HttpRequest(ref) {}
 
 GetRequest::~GetRequest() {}
 
-int GetRequest::executeRequest(Server &server)
+HTTPStatusCode GetRequest::executeRequest(Server &server)
 {
   (void)server;
-  return 0;
+  return HTTPStatusCode::OK;
 }
 
 HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
@@ -32,7 +32,7 @@ HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
     {
       logger.log("Index file doesn't exist");
 
-      response._setResponse("root/404/index.html", 404, "Not Found", getVersion()); // very hardcoded lol
+      response._setResponse("root/404/index.html", HTTPStatusCode::NOT_FOUND, "Not Found", getVersion()); // very hardcoded lol
       return response;
     }
     else
@@ -41,6 +41,6 @@ HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
       path = index_path;
     }
   }
-  response._setResponse(path, 200, "OK", getVersion());
+  response._setResponse(path, HTTPStatusCode::OK, "OK", getVersion());
   return response;
 }

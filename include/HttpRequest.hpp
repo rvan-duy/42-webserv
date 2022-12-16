@@ -25,7 +25,7 @@ public:
   virtual ~HttpRequest();
 
   // Abstract
-  virtual int executeRequest(Server &server) = 0;
+  virtual HTTPStatusCode executeRequest(Server &server) = 0;
   virtual HttpResponse constructResponse(Server &server, std::string &index) = 0;
 
   // Getters
@@ -50,7 +50,7 @@ public:
   ~GetRequest();
 
   // Concrete
-  int executeRequest(Server &server);
+  HTTPStatusCode executeRequest(Server &server);
   HttpResponse constructResponse(Server &server, std::string &index);
 };
 
@@ -64,7 +64,7 @@ public:
   ~DeleteRequest();
 
   // Concrete
-  int executeRequest(Server &server);
+  HTTPStatusCode executeRequest(Server &server);
   HttpResponse constructResponse(Server &server, std::string &index);
 };
 
@@ -78,24 +78,24 @@ public:
   ~PostRequest();
 
   // Concrete
-  int executeRequest(Server &server);
+  HTTPStatusCode executeRequest(Server &server);
   HttpResponse constructResponse(Server &server, std::string &index);
 };
 
 class BadRequest : public HttpRequest
 {
 public:
-  BadRequest(int statusCode);
+  BadRequest(HTTPStatusCode _statusCode);
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
   // Concrete
-  int executeRequest(Server &server);
+  HTTPStatusCode executeRequest(Server &server);
   HttpResponse constructResponse(Server &server, std::string &index);
 
 private:
   std::string getErrorMessage() const;
-  int _statusCode;
+  HTTPStatusCode _statusCode;
 };
 
 #endif // HTTP_REQUEST_HPP
