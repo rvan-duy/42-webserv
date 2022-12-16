@@ -4,8 +4,9 @@
 
 HttpResponse::HttpResponse() {}
 
-HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
-  _statusCode    = obj._statusCode;
+HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj)
+{
+  _statusCode = obj._statusCode;
   _statusMessage = obj._statusMessage;
 }
 
@@ -15,10 +16,11 @@ HttpResponse::~HttpResponse() {}
  * Convert the response to a string
  * @return The response as a string
  */
-std::string HttpResponse::toStr() const {
+std::string HttpResponse::toStr() const
+{
   Logger &logger = Logger::getInstance();
 
-  logger.log("< Started creating response string");
+  logger.log("< Started creating response string", VERBOSE);
   std::string response_string;
 
   {
@@ -28,19 +30,21 @@ std::string HttpResponse::toStr() const {
     response_string += ss.str();
   }
 
-  logger.log("2. Adding headers");
+  logger.log("2. Adding headers", VERBOSE);
   {
     std::map<std::string, std::string>::const_iterator it;
 
-    for (it = _headers.begin(); it != _headers.end(); ++it) {
+    for (it = _headers.begin(); it != _headers.end(); ++it)
+    {
       response_string += it->first + ": " + it->second + "\r\n";
     }
 
-    response_string += "\r\n";  // Add an extra CRLF to separate headers from body
+    response_string += "\r\n"; // Add an extra CRLF to separate headers from body
   }
 
-  logger.log("3. Adding body");
-  if (_body.length() > 0) {
+  logger.log("3. Adding body", VERBOSE);
+  if (_body.length() > 0)
+  {
     response_string += _body;
   }
 
@@ -48,8 +52,6 @@ std::string HttpResponse::toStr() const {
   /* Return the response string                     */
   /**************************************************/
 
-  logger.log("! Finished creating response string:\n---------------------------\n" + response_string +
-             "\n---------------------------\n");
   return response_string;
 }
 
@@ -60,7 +62,7 @@ void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCo
                                 const HttpVersion version) {
   Logger       &logger = Logger::getInstance();
 
-  std::ifstream file(path.c_str());  // Open the file
+  std::ifstream file(path.c_str()); // Open the file
   logger.log("Requested path: " + path);
 
   file.seekg(0, std::ios::end);                        // Seek to the end of the file
@@ -74,7 +76,7 @@ void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCo
   file.seekg(0, std::ios::beg);                        // Seek back to the beginning of the file
   if (file.is_open()) {
     std::string body((std::istreambuf_iterator<char>(file)),
-                     std::istreambuf_iterator<char>());  // Read the file into a string
+                     std::istreambuf_iterator<char>()); // Read the file into a string
     file.close();
     _body = body;
   }
@@ -85,7 +87,8 @@ void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCo
  * @param path The path to the file to check
  * @return The content type of the file
  */
-std::string HttpResponse::_getContentType(const std::string &path) const {
+std::string HttpResponse::_getContentType(const std::string &path) const
+{
   /**************************************************/
   /* The map of file extensions to content types    */
   /**************************************************/
@@ -93,9 +96,9 @@ std::string HttpResponse::_getContentType(const std::string &path) const {
   std::map<std::string, std::string> file_types;
 
   file_types["html"] = "text/html";
-  file_types["css"]  = "text/css";
-  file_types["js"]   = "application/javascript";
-  file_types["png"]  = "image/png";
+  file_types["css"] = "text/css";
+  file_types["js"] = "application/javascript";
+  file_types["png"] = "image/png";
 
   // add more file types here if needed
 
@@ -111,7 +114,8 @@ std::string HttpResponse::_getContentType(const std::string &path) const {
   /* text/plain                                     */
   /**************************************************/
 
-  if (file_types.find(file_extension) != file_types.end()) {
+  if (file_types.find(file_extension) != file_types.end())
+  {
     return file_types[file_extension];
   }
   return "text/plain";

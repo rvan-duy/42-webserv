@@ -4,8 +4,10 @@
 /**************************************************/
 /* Constructors / destructors		 	          */
 /**************************************************/
-// TODO: implement getenv
-CGI::CGI(std::string const &rootDir, char *const *env) : _rootDir(rootDir), _env(env) {}
+CGI::CGI(char *const *env) : _env(env)
+{
+	// TODO: add checking if python can be found and run
+}
 
 CGI::~CGI() {}
 
@@ -17,11 +19,10 @@ CGI::~CGI() {}
 int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &body) const
 {
 	Logger &logger = Logger::getInstance();
-	std::string fullPath = _rootDir + filePath;
 
 	char *argv[] = {
 		const_cast<char *>(PATH_TO_PYTHON),
-		const_cast<char *>(fullPath.c_str()),
+		const_cast<char *>(filePath.c_str()),
 		const_cast<char *>(body.c_str()),
 		NULL};
 
@@ -41,9 +42,10 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath, std::string const &
 	if (execve(PATH_TO_PYTHON, static_cast<char *const *>(argv), _env))
 	{
 		logger.error("[EXECUTING] CGI: execve: " + std::string(strerror(errno)));
+		close(fd[WRITE]);
 		exit(1);
 	}
-	return 0;
+	return 1;
 }
 
 static int waitForChildProcess(pid_t const &pid)
@@ -96,11 +98,9 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd)
 	return 0;
 }
 
-int CGI::checkFileAccess(std::string const &filePath) const
+static int checkFileAccess(std::string const &filePath)
 {
-	std::string fullPath = _rootDir + filePath;
-
-	if (access(fullPath.c_str(), R_OK))
+	if (access(filePath.c_str(), R_OK))
 	{
 		Logger::getInstance().error("[PREPARING] CGI: access: " + std::string(strerror(errno)));
 		return 1;
@@ -109,15 +109,16 @@ int CGI::checkFileAccess(std::string const &filePath) const
 }
 
 /* CGI control flow */
-int CGI::executeFile(std::string *pDest, std::string const &filePath, std::string const &body) const
+int CGI::executeFile(std::string *pDest, std::string const &rootDir, std::string const &filePath, std::string const &body) const
 {
 	Logger &logger = Logger::getInstance();
+	std::string fullPath = rootDir + filePath;
 	int fd[2];
 	pid_t pid;
 
 	logger.log("[STARTING] CGI ");
 
-	if (checkFileAccess(filePath))
+	if (checkFileAccess(fullPath))
 	{
 		return 1;
 	}

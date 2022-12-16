@@ -6,9 +6,11 @@
 #include <vector>
 #include <map>
 #include <Logger.hpp>
+#include <regex>
+#include <Webserver.hpp>
 
 #define PARSER_FUNC_N 4
-#define BLOCK_FUNC_N 6
+#define BLOCK_FUNC_N 5
 
 /* Circle inclusion, so doesn't compile without this parser definition */
 class Parser;
@@ -79,8 +81,7 @@ private:
 	int parseErrorPage(void *dest, t_dataLine line);
 	int parseRoot(void *dest, t_dataLine line);
 	int parseIndex(void *dest, t_dataLine line);
-	int parseAutoIndex(void *dest, t_dataLine line);
-	int parseCgiParam(void *dest, t_dataLine line);
+	int parseCgi(void *dest, t_dataLine line);
 	int parseMethods(void *dest, t_dataLine line);
 	/* table with key value pairs for parsing AST */
 	static t_parseFuncPair lineParsingFuncs[PARSER_FUNC_N];

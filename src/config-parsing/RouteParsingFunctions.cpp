@@ -7,7 +7,7 @@
 
 t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
     {"root", &Parser::parseRoot},          {"index", &Parser::parseIndex},     {"autoIndex", &Parser::parsePort},
-    {"cgi_param", &Parser::parseCgiParam}, {"methods", &Parser::parseMethods}, {"errorPage", &Parser::parseErrorPage},
+    {"methods", &Parser::parseMethods}, {"errorPage", &Parser::parseErrorPage},
 };
 
 int Parser::parseErrorPage(void *dest, t_dataLine line) {
@@ -55,6 +55,12 @@ int Parser::parseMethods(void *dest, t_dataLine line) {
     } else if (line.at(i) == "DELETE") {
       if (route->allowedMethods[DELETE] == true) {
         return 1;
+    }
+    Route *route = static_cast<Route *>(dest);
+    if (route->rootDirectory != ROOT_FOLDER)
+    {
+        Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
+        return 1;
       }
       route->allowedMethods[DELETE] = true;
     } else {
@@ -98,27 +104,30 @@ int Parser::parseIndex(void *dest, t_dataLine line) {
   return 0;
 }
 
-int Parser::parseAutoIndex(void *dest, t_dataLine line) {
-  if (!dest || line.size() != 2) {
-    return 1;
-  }
-  Route *route = static_cast<Route *>(dest);
-  // TODO: can this error?
-  if (line.at(2) == "on") {
-    route->autoIndex = true;
-  } else if (line.at(2) == "off") {
-    route->autoIndex = false;
-  } else {
-    // TODO
-  }
-  return 0;
-}
-
-int Parser::parseCgiParam(void *dest, t_dataLine line) {
-  if (!dest || line.size() != 2) {
-    return 1;
-  }
-  Route *route    = static_cast<Route *>(dest);
-  route->cgiParam = line.at(2);
-  return 0;
+// TODO: implement php
+int Parser::parseCgi(void *dest, t_dataLine line)
+{
+    if (!dest || line.size() != 3)
+    {
+        Logger::getInstance().error("Cgi route invalid");
+        return 1;
+    }
+    Route *route = static_cast<Route *>(dest);
+    if (route->cgiRoot.length() != 0)
+    {
+        Logger::getInstance().error("CGI root already defined");
+        return 1;
+    }
+    std::string extension = line.at(2);
+    if (extension == ".py")
+    {
+        // TODO: save extension
+    }
+    else
+    {
+        Logger::getInstance().error("Extension invalid");
+        return 1;
+    }
+    route->cgiRoot = line.at(3);
+    return 0;
 }

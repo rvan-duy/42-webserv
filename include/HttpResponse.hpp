@@ -3,6 +3,8 @@
 
 #include <sys/stat.h>
 
+#include <Webserver.hpp>
+#include <StatusCodes.hpp>
 #include <fstream>
 #include <iterator>
 #include <sstream>
@@ -17,7 +19,6 @@ class HttpResponse : public HttpMessage {
   ~HttpResponse();
 
   // Methods
-  // void        createResponse(const HttpRequest &request, const std::string &root, const std::string &index);
   std::string toStr() const;
 
   // Setters

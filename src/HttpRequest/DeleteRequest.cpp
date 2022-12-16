@@ -2,23 +2,22 @@
 
 #include <cstdio>
 
-DeleteRequest::DeleteRequest(std::string& msg) : HttpRequest(msg) {}
+DeleteRequest::DeleteRequest(HttpHeaderData const &data) : HttpRequest(data) {}
 
-DeleteRequest::DeleteRequest(const DeleteRequest& ref) : HttpRequest(ref)  {}
+DeleteRequest::DeleteRequest(const DeleteRequest &ref) : HttpRequest(ref) {}
 
 DeleteRequest::~DeleteRequest() {}
 
-int DeleteRequest::executeRequest(const Server& server) {
-  // if (!isMethodAllowed(server, _uri, DELETE))
-  //    return 405;
-  int rem = remove(_uri.c_str()); // need to add the root as prefix to uri to find the right local file
-  if (rem != 0)
-    return 403;
-  return rem;
+HTTPStatusCode DeleteRequest::executeRequest(const Server &server)
+{
+  // int rem = remove(_url.c_str()); // need to add the root as prefix to uri to find the right local file
+  // if (rem != 0)
+  //   return 403;
+  return HTTPStatusCode::OK;
 }
 
-HttpResponse DeleteRequest::constructResponse(const Server& server) {
-  int responseStatus = executeRequest(server);
-  (void)index;
+HttpResponse DeleteRequest::constructResponse(const Server &server)
+{
+  HTTPStatusCode responseStatus = executeRequest(server);
   return HttpResponse();
 }

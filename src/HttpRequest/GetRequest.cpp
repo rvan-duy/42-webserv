@@ -2,21 +2,21 @@
 
 #define DEFAULT_ERROR_PAGE "root/error_pages/404/index.html"
 
-GetRequest::GetRequest(std::string& msg) : HttpRequest(msg) {}
+GetRequest::GetRequest(HttpHeaderData const& data) : HttpRequest(data) {}
 
 GetRequest::GetRequest(const GetRequest& ref) : HttpRequest(ref) {}
 
 GetRequest::~GetRequest() {}
 
-int GetRequest::executeRequest(const Server& server) {
+HTTPStatusCode GetRequest::executeRequest(const Server& server) {
   (void)server;
-  return 0;
+  return HTTPStatusCode::OK;
 }
 
 // no permissions check
 
 HttpResponse GetRequest::constructResponse(const Server& server) {
-  const Route&                   routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const Route                   routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::vector<std::string> acceptedTypes   = _getAcceptedTypesFromHeader();
   const std::string              path            = _constructPath(routeOfResponse.rootDirectory);
   HttpResponse                   response;

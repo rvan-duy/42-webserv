@@ -6,17 +6,9 @@
  * Constructor for Server class
  */
 Server::Server()
-    : _port(-1),
-      _maxBodySize(-1),
-      _fd(-1),
-      _domain(AF_INET6),
-      _type(SOCK_STREAM),
-      _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)),
-      _accepted(-1),
-      _host(PageData(DEFAULT_HOST_STATUS, DEFAULT_HOST_PATH)) {
-  memset(&_servaddr, 0, sizeof(_servaddr));
-  memset(&_buffer, 0, sizeof(_buffer));
-}
+    : _maxBodySize(DEFAULT_MAX_BODY),
+      _serverName(DEFAULT_HOST),
+      _defaultErrorPage(PageData(DEFAULT_ERROR_STATUS, DEFAULT_ERROR_PATH)) {}
 
 /*
  * Destructor for Server class
@@ -27,16 +19,8 @@ Server::~Server() {}
 /* Getters                                        */
 /**************************************************/
 
-int Server::getFd() const {
-  return _fd;
-}
-
-std::vector<std::string> Server::getServerName() const {
+std::string Server::getServerName() const {
   return _serverName;
-}
-
-PageData Server::getHost() const {
-  return _host;
 }
 
 PageData Server::getErrorPage() const {
@@ -53,14 +37,6 @@ int Server::getMaxBody() const {
 
 std::vector<Route> Server::getRoutes() const {
   return _routes;
-}
-
-std::vector<int> &Server::getConnectedClients() {
-  return _connectedClients;
-}
-
-HttpRequest *Server::getRequestByDescriptor(int fd) {
-  return _requests[fd];
 }
 
 // Possible TODO: look for longest matching route
@@ -80,10 +56,6 @@ const Route &Server::getRoute(const std::string &uri) const {
   return _routes[0];
 }
 
-/**************************************************/
-/* Setters                                        */
-/**************************************************/
-
 int Server::setMaxBody(double const &value) {
   // TODO: check if 0 is possible
   if (value <= 0) {
@@ -97,14 +69,8 @@ int Server::setMaxBody(double const &value) {
   return 0;
 }
 
-int Server::setHost(int const &statusCode, std::string const &filePath) {
-  if (statusCode < 0) {
-    Logger::getInstance().error("Incorrect statuscode set");
-    return 1;
-  }
-  _host.statusCode = statusCode;
-  _host.filePath   = filePath;
-  return 0;
+void Server::setServerName(std::string const &value) {
+  _serverName = value;
 }
 
 int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
@@ -115,10 +81,6 @@ int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
   _defaultErrorPage.statusCode = statusCode;
   _defaultErrorPage.filePath   = filePath;
   return 0;
-}
-
-void Server::setServerName(std::vector<std::string> const &value) {
-  _serverName = value;
 }
 
 int Server::setPort(int const &value) {
@@ -136,30 +98,3 @@ int Server::setPort(int const &value) {
 void Server::addRoute(Route const &route) {
   _routes.push_back(route);
 }
-
-/**************************************************/
-/* End of getters and setters                     */
-/**************************************************/
-
-/*
- * To check if variables are set
- */
-// bool Server::hasServerName() const
-// {
-//     return (_serverName.size() != 0);
-// }
-
-// bool Server::hasPort() const
-// {
-//     return (_port != -1);
-// }
-
-// bool Server::hasMaxBody() const
-// {
-//     return (_maxBodySize != -1);
-// }
-
-// bool Server::hasRoutes() const
-// {
-//     return (_routes.size() != 0);
-// }
