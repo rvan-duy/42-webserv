@@ -3,6 +3,8 @@
 #include <HttpRequest.hpp>
 #include <string>
 
+class HttpRequest;
+
 struct HttpHeaderData
 {
     HttpHeaderData() : chunked(false) {}

@@ -2,6 +2,8 @@
 #include <Webserver.hpp>
 #include <CGI.hpp>
 
+int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath);
+
 int startWebserver(std::vector<Socket> sockets)
 {
   Multiplexer multiplexer(sockets);

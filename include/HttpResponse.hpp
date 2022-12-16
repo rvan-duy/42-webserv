@@ -9,7 +9,7 @@
 
 #include "HttpMessage.hpp"
 #include "HttpRequest.hpp"
-#include <General.hpp>
+#include <Webserver.hpp>
 
 class HttpResponse : public HttpMessage
 {

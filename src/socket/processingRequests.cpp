@@ -43,38 +43,21 @@ static std::string getHostWithoutPort(HttpRequest *request)
     {
         host = host.substr(0, semiCol);
     }
-    if (host == "localhost")
-    {
-        return "0.0.0.0";
-    }
     return host;
 }
 
 /* Checks which servers are listening to the host from the request*/
-static std::vector<Server> matchBasedOnHost(std::vector<Server> const &allServers, std::string const &host)
+static int matchBasedOnHost(Server *dest, std::vector<Server> &allServers, std::string const &host)
 {
-    std::vector<Server> listeningServers;
-
-    for (std::vector<Server>::const_iterator it = allServers.begin(); it != allServers.end(); ++it)
+    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
     {
-        if (it->getHost() == host)
+        if (it->getServerName() == host)
         {
-            listeningServers.push_back(*it);
+            *dest = *it;
+            return 0;
         }
     }
-    return listeningServers;
-}
-
-static Server matchBasedOnServerName(std::vector<Server> const &listeningServers, std::string const &serverName)
-{
-    for (std::vector<Server>::const_iterator it = listeningServers.begin(); it != listeningServers.end(); ++it)
-    {
-        if (it->getServerName() == serverName)
-        {
-            return *it;
-        }
-    }
-    return listeningServers.at(0);
+    return 1;
 }
 
 /**
@@ -83,29 +66,19 @@ static Server matchBasedOnServerName(std::vector<Server> const &listeningServers
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
     std::string hostWithoutPort = getHostWithoutPort(request);
-    std::vector<Server> listeningServers;
-    Server result;
 
     if (hostWithoutPort.length() == 0)
     {
+        delete request;
         return _addBadRequestToClient(clientFd, BAD_REQUEST);
     }
-    /* Get servers that listen to the same ip address that the request is sent to*/
-    listeningServers = matchBasedOnHost(_servers, hostWithoutPort);
-    if (listeningServers.size() == 0)
+    Server result;
+    if (matchBasedOnHost(&result, _servers, hostWithoutPort))
     {
+        delete request;
         return _addBadRequestToClient(clientFd, BAD_REQUEST);
     }
-    else if (listeningServers.size() == 1)
-    {
-        return _addRequestToClient(clientFd, request, &listeningServers.at(0));
-    }
-    else
-    {
-        /* If multiple servers are listening to the ip address, get best match based on servername */
-        result = matchBasedOnServerName(listeningServers, "");
-        return _addRequestToClient(clientFd, request, &result);
-    }
+    return _addRequestToClient(clientFd, request, &result);
 }
 
 int Socket::processRequest(int const &clientFd)
@@ -115,7 +88,7 @@ int Socket::processRequest(int const &clientFd)
     int bytesRead = 0;
 
     bytesRead = readFromClientFd(&rawRequest, clientFd);
-    if (bytesRead <= 0)
+    if (bytesRead < 0)
     {
         _addBadRequestToClient(clientFd, INTERNAL_SERVER_ERROR);
         return 1;

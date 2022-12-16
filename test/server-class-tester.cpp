@@ -8,27 +8,6 @@ SCENARIO("Constructing a new server class")
 	GIVEN("A new server class")
 	{
 		Server testServer;
-		THEN("All has X functions should return false")
-		{
-			REQUIRE_FALSE(testServer.hasServerName());
-		}
-
-		THEN("Server name can be set correctly")
-		{
-			std::vector<std::string> serverName;
-			serverName.push_back("test");
-			testServer.setServerName(serverName);
-			REQUIRE(testServer.hasServerName());
-			REQUIRE(testServer.getServerName() == serverName);
-		}
-
-		THEN("Host can be set correctly")
-		{
-			testServer.setHost(300, "bla");
-			PageData host = testServer.getHost();
-			REQUIRE(host.statusCode == 300);
-			REQUIRE(host.filePath == "bla");
-		}
 
 		THEN("Error page can be set correctly")
 		{

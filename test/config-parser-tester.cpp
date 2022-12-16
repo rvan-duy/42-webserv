@@ -185,26 +185,6 @@ SCENARIO("Test config files")
 		REQUIRE(ret == 0);
 		REQUIRE(servers.size() == 2);
 
-		THEN("Port should be set for first server")
-		{
-			REQUIRE(servers[0].hasPort());
-			REQUIRE(servers[0].getPort() == 80);
-		}
-
-		THEN("Server name should be set for first server")
-		{
-			REQUIRE(servers[0].hasServerName());
-			std::vector<std::string> serverName = servers[0].getServerName();
-			REQUIRE(serverName.size() == 2);
-			REQUIRE(serverName.at(0) == "localhost");
-			REQUIRE(serverName.at(1) == "www.localhost");
-		}
-
-		THEN("Max body shouldnt be set for first server")
-		{
-			REQUIRE_FALSE(servers[0].hasMaxBody());
-		}
-
 		THEN("Error page should be set for first server")
 		{
 			PageData data = servers[0].getErrorPage();
@@ -212,29 +192,10 @@ SCENARIO("Test config files")
 			REQUIRE(data.filePath == "/error.html");
 		}
 
-		THEN("Host should be set for first server")
-		{
-			PageData data = servers[0].getHost();
-			REQUIRE(data.statusCode == 302);
-			REQUIRE(data.filePath == "http://localhost:8200$uri");
-		}
-
 		THEN("First server should have four routes")
 		{
 			std::vector<Route> routes = servers[0].getRoutes();
 			REQUIRE(routes.size() == 4);
-		}
-
-		THEN("Port should be set for second server")
-		{
-			REQUIRE(servers[1].hasPort());
-			REQUIRE(servers[1].getPort() == 100);
-		}
-
-		THEN("max body should be set for second server")
-		{
-			REQUIRE(servers[1].hasMaxBody());
-			REQUIRE(servers[1].getPort() == 100);
 		}
 
 		destructConfig();

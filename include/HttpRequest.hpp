@@ -1,20 +1,19 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
-#include <General.hpp>
-
+#include <Webserver.hpp>
+#include <StatusCodes.hpp>
 #include "HttpMessage.hpp"
 #include <RequestParser.hpp>
 #include "HttpResponse.hpp"
-#include "Server.hpp"
+#include <Server.hpp>
 #include <string>
 
-struct HttpHeaderData;
+class Server;
+class HttpResponse;
 
-std::string extractArgument(const std::string &msg, int n);
-EHttpMethods _parseMethod(const std::string &method);
-std::string _parseResponseStatus(const int &status);
-bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
+struct HttpHeaderData;
+// bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage
@@ -35,6 +34,8 @@ public:
   bool getChunked() const;
 
 protected:
+  bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
+
   EHttpMethods _method;
   std::string _url;
   bool _chunked;
@@ -84,13 +85,17 @@ public:
 class BadRequest : public HttpRequest
 {
 public:
-  BadRequest(HttpHeaderData const &data);
+  BadRequest(int statusCode);
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
   // Concrete
   int executeRequest(Server &server);
   HttpResponse constructResponse(Server &server, std::string &index);
+
+private:
+  std::string getErrorMessage() const;
+  int _statusCode;
 };
 
 #endif // HTTP_REQUEST_HPP

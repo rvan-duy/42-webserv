@@ -7,7 +7,7 @@
 #include <map>
 #include <Logger.hpp>
 #include <regex>
-#include <General.hpp>
+#include <Webserver.hpp>
 
 #define PARSER_FUNC_N 4
 #define BLOCK_FUNC_N 5
@@ -73,7 +73,7 @@ private:
 	int convertBlockToServer(Server *pServer, DataBlock block);
 
 	/* AST line parsing functions */
-	int parsePortAndIp(void *dest, t_dataLine line);
+	int parsePort(void *dest, t_dataLine line);
 	int parseMaxBodySize(void *dest, t_dataLine line);
 	int parseErrorPage(void *dest, t_dataLine line);
 	int parseHost(void *dest, t_dataLine line);

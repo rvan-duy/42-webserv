@@ -51,8 +51,11 @@ int Multiplexer::evaluateClient(pollfd *client)
         std::string tmp_index("index.html"); // TODO: less hardcoded
         Socket &clientSocket = _getSocketForClient(clientFd);
         HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
+
         if (clientRequest)
         {
+            // char *message = "HTTP/1.0 200 OK\r\n\r\nHello";
+            // write(clientFd, (char *)message, strlen(message));
             HttpResponse clientResponse =
                 clientRequest->constructResponse(clientSocket.getServerForClient(clientFd), tmp_index); // index.html shouldnt be hardcoded..
             send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
