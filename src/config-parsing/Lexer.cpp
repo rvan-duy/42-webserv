@@ -1,60 +1,73 @@
 #include <Lexer.hpp>
 #include <Logger.hpp>
 
-std::vector<Token>	Lexer::tokenizeFile(std::ifstream &file) {
-	std::vector<Token>	tokens;
-	Logger& logger = Logger::getInstance();
-	if (!file.is_open()) {
+std::vector<Token> Lexer::tokenizeFile(std::ifstream &file)
+{
+	std::vector<Token> tokens;
+	Logger &logger = Logger::getInstance();
+	if (!file.is_open())
+	{
 		logger.error("Attempting to tokenize file that isn't open");
 		return tokens;
 	}
-	logger.log("Starting tokenizing file");
+	logger.log("Starting tokenizing file", VERBOSE);
 
 	/**
- 	* Parses file line by line
-	*/
+	 * Parses file line by line
+	 */
 	std::string line;
-	while (std::getline(file, line)) {
+	while (std::getline(file, line))
+	{
 		parseLine(&tokens, line);
 	}
+	logger.log("File successfully lexed", VERBOSE);
 	return tokens;
 }
 
-void	Lexer::parseLine(std::vector<Token> *tokens, std::string &line) {
+void Lexer::parseLine(std::vector<Token> *tokens, std::string &line)
+{
 	std::string::iterator it = line.begin();
 	std::string word("");
-	Token::ETokenType	type;
+	Token::ETokenType type;
 
-	while (it != line.end()) {
+	while (it != line.end())
+	{
 		while (isspace(*it))
 			it++;
-		if (!*it) {
-			return ;
+		if (!*it)
+		{
+			return;
 		}
 		type = getType(*it);
-		if (type == Token::WORD) {
+		if (type == Token::WORD)
+		{
 			word = parseWord(it);
 			tokens->push_back(Token(word));
 			it += word.length();
 			word = "";
-		} else {
+		}
+		else
+		{
 			tokens->push_back(Token(type));
 			it++;
 		}
 	}
 }
 
-std::string	Lexer::parseWord(std::string::iterator it) {
+std::string Lexer::parseWord(std::string::iterator it)
+{
 	std::string word("");
 
-	while (*it && !isspace(*it) && !isSpecialChar(*it)) {
+	while (*it && !isspace(*it) && !isSpecialChar(*it))
+	{
 		word += *it;
 		it++;
 	}
 	return word;
 }
 
-Token::ETokenType	Lexer::getType(int c) {
+Token::ETokenType Lexer::getType(int c)
+{
 	switch (c)
 	{
 	case ';':
@@ -68,10 +81,11 @@ Token::ETokenType	Lexer::getType(int c) {
 	}
 }
 
-bool	Lexer::isSpecialChar(int c) {
-	if (c == ';' || c == '{' || c == '}') {
+bool Lexer::isSpecialChar(int c)
+{
+	if (c == ';' || c == '{' || c == '}')
+	{
 		return true;
 	}
 	return false;
 }
-

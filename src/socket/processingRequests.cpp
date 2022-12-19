@@ -14,7 +14,7 @@ static int readFromClientFd(std::string *result, const int clientFd)
     bzero(buffer, bufferSize);
 
     // TODO: make loop?
-    logger.log("[READING] Multiplexer: Reading data from client " + std::to_string(clientFd));
+    logger.log("[READING] Multiplexer: Reading data from client " + std::to_string(clientFd), VERBOSE);
     int bytesReceived = read(clientFd, buffer, bufferSize);
     if (bytesReceived == -1)
     {
@@ -63,7 +63,6 @@ static int matchBasedOnHost(Server *dest, std::vector<Server> &allServers, std::
 /**
  * Finds server that matches the sent request, then adds it to matching client
  */
-// TODO: add 0.0.0.0 matching ?
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
     Logger &logger = Logger::getInstance();
@@ -78,7 +77,7 @@ void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
     Server result;
     if (matchBasedOnHost(&result, _servers, hostWithoutPort))
     {
-        logger.error("No matching host found");
+        logger.error("No matching host found -> adding bad request");
         delete request;
         return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     }

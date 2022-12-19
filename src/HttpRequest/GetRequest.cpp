@@ -28,7 +28,7 @@ HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
     logger.log("Looking for index path: " + index_path);
     if (!_fileExists(index_path))
     {
-      logger.log("Index file doesn't exist");
+      logger.error("Index file doesn't exist");
 
       response._setResponse("root/404/index.html", HTTPStatusCode::NOT_FOUND, "Not Found", getVersion()); // very hardcoded lol
       return response;

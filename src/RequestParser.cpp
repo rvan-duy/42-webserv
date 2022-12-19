@@ -156,7 +156,7 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest)
     HttpHeaderData headerData;
     size_t endOfHeader;
 
-    logger.log("Starting to parse request");
+    logger.log("Starting to parse request", VERBOSE);
     endOfHeader = rawRequest.find("\r\n\r\n");
     if (endOfHeader == std::string::npos)
     {

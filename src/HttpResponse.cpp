@@ -112,20 +112,20 @@ bool _fileExists(const std::string &path)
   struct stat buffer; // stat struct to store the file info
   if (stat(path.c_str(), &buffer) == -1)
   {
-    logger.log("_fileExists -> File doesn't exist (" + path + ")");
+    logger.log("_fileExists -> File doesn't exist (" + path + ")", VERBOSE);
     return false;
   }
   if (buffer.st_mode & S_IFDIR)
   {
-    logger.log("_fileExists -> File is a directory (" + path + ")");
+    logger.log("_fileExists -> File is a directory (" + path + ")", VERBOSE);
     return false;
   }
   if (buffer.st_mode & S_IFREG)
   {
-    logger.log("_fileExists -> File is a regular file (" + path + ")");
+    logger.log("_fileExists -> File is a regular file (" + path + ")", VERBOSE);
     return true;
   }
-  logger.log("_fileExists -> File is something else (" + path + ")");
+  logger.log("_fileExists -> File is something else (" + path + ")", VERBOSE);
   logger.error("WARNING: logic probably not implemented yet");
   return false;
 }

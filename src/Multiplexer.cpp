@@ -33,7 +33,6 @@ int Multiplexer::evaluateClient(pollfd *client)
     {
     case POLLIN:
     {
-        logger.log("Found event of type POLLIN on fd: " + std::to_string(client->fd));
         if (_isSocket(clientFd))
             _addClient(clientFd);
         else
@@ -47,7 +46,6 @@ int Multiplexer::evaluateClient(pollfd *client)
 
     case POLLOUT:
     {
-        logger.log("Found event of type POLLOUT on fd: " + std::to_string(client->fd));
         std::string tmp_index("index.html"); // TODO: less hardcoded
         Socket &clientSocket = _getSocketForClient(clientFd);
         HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
@@ -72,7 +70,7 @@ int Multiplexer::evaluateClient(pollfd *client)
     }
     default:
     {
-        logger.log("[POLLING] Multiplexer: No events on socket");
+        logger.log("[POLLING] Multiplexer: No events on socket", VERBOSE);
         break;
     }
     }
@@ -94,7 +92,7 @@ void Multiplexer::waitForEvents(const int timeout)
     {
         if (_pollSockets(timeout) == -1)
             break;
-        logger.log("[POLLING] Multiplexer: Poll returned successfully, checking for events on sockets");
+        logger.log("[POLLING] Multiplexer: Poll returned successfully, checking for events on sockets", VERBOSE);
 
         /* Loop over clients and evaluate */
         for (size_t i = 0; i < _clients.size(); i++)
@@ -212,10 +210,10 @@ int Multiplexer::_getEvent(const pollfd &fd)
 {
     Logger &logger = Logger::getInstance();
 
-    logger.log("[POLLING] Multiplexer: Checking for event on socket " + std::to_string(fd.fd));
+    logger.log("[POLLING] Multiplexer: Checking for event on socket " + std::to_string(fd.fd), VERBOSE);
     if (fd.revents == 0)
     {
-        logger.log("[POLLING] Multiplexer: No event on socket " + std::to_string(fd.fd));
+        logger.log("[POLLING] Multiplexer: No event on socket " + std::to_string(fd.fd), VERBOSE);
         return 0;
     }
     else if (fd.revents & POLLIN)
