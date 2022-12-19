@@ -7,6 +7,7 @@
 #include <vector>
 #include <Server.hpp>
 #include <Socket.hpp>
+#include <stdexcept>
 
 /****************************************************************************************/
 /* The Multiplexer Class                                                                */

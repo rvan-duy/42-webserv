@@ -1,15 +1,6 @@
 #include <regex>
 #include <StatusCodes.hpp>
 
-bool isValidIpAdress(std::string const rawLine)
-{
-    const std::regex ipAdressRegex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
-
-    if (rawLine.length() > 15 || !std::regex_match(rawLine, ipAdressRegex))
-        return false;
-    return true;
-}
-
 std::string getMessageByStatusCode(HTTPStatusCode statusCode)
 {
     switch (statusCode)

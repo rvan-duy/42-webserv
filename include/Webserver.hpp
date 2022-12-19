@@ -16,8 +16,3 @@ enum HttpVersion
     HTTP_2_0,
     HTTP_3_0
 };
-
-/**
- * Utils
- */
-bool isValidIpAdress(std::string const rawLine);

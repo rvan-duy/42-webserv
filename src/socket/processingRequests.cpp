@@ -14,7 +14,8 @@ static int readFromClientFd(std::string *result, const int clientFd) {
 
   // TODO: make loop?
   logger.log("[READING] Multiplexer: Reading data from client " +
-             std::to_string(clientFd));
+                 std::to_string(clientFd),
+             VERBOSE);
   int bytesReceived = read(clientFd, buffer, bufferSize);
   if (bytesReceived == -1) {
     logger.error("[READING] Multiplexer: Failed to read data from client " +
@@ -24,7 +25,8 @@ static int readFromClientFd(std::string *result, const int clientFd) {
   }
   *result = std::string(buffer, bytesReceived);
   logger.log("[READING] Multiplexer: Read " + std::to_string(bytesReceived) +
-             " bytes from client " + std::to_string(clientFd));
+                 " bytes from client " + std::to_string(clientFd),
+             VERBOSE);
   return bytesReceived;
 }
 
@@ -44,37 +46,36 @@ static std::string getHostWithoutPort(HttpRequest *request) {
 }
 
 /* Checks which servers are listening to the host from the request*/
-static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string const &host)
-{
-    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
-    {
-        if (it->getServerName() == host)
-        {
-            return *it;
-        }
+static Server &matchBasedOnHost(std::vector<Server> &allServers,
+                                std::string const &host) {
+  for (std::vector<Server>::iterator it = allServers.begin();
+       it != allServers.end(); ++it) {
+    if (it->getServerName() == host) {
+      return *it;
     }
-    throw std::runtime_error("No matching server found");
+  }
+  throw std::runtime_error("No matching server found");
 }
 
 /**
  * Finds server that matches the sent request, then adds it to matching client
  */
-void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
-{
-    std::string hostWithoutPort = getHostWithoutPort(request);
+void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request) {
+  Logger &logger = Logger::getInstance();
+  std::string hostWithoutPort = getHostWithoutPort(request);
 
-    if (hostWithoutPort.length() == 0)
-    {
-        delete request;
-        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-    }
-    try {
-        Server& result = matchBasedOnHost(_servers, hostWithoutPort);
-        return _addRequestToClient(clientFd, request, &result);
-    } catch (std::runtime_error error) {
-        delete request;
-        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-    }
+  if (hostWithoutPort.length() == 0) {
+    logger.error("No host found in request -> adding bad request");
+    delete request;
+    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+  }
+  try {
+    Server &result = matchBasedOnHost(_servers, hostWithoutPort);
+    return _addRequestToClient(clientFd, request, &result);
+  } catch (std::runtime_error error) {
+    delete request;
+    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+  }
 }
 
 int Socket::processRequest(int const &clientFd) {
