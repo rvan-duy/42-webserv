@@ -31,19 +31,18 @@
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 80
 
-#define ROOT_FOLDER "root/"
 /* End of default values */
 
 struct Route {
   Route(std::string const &name)
-      : route(name), rootDirectory(ROOT_FOLDER), defaultFile("index.html"), autoIndex(false) {
+      : route(name), defaultFile("index.html"), autoIndex(false) {
     allowedMethods[GET]    = true;
     allowedMethods[POST]   = true;
     allowedMethods[DELETE] = true;
   }
   // Default route constructor
   Route()
-      : route("/"), rootDirectory(ROOT_FOLDER), cgiRoot(ROOT_FOLDER), defaultFile("index.html"), httpRedirection("") {
+      : route("/"), defaultFile("index.html"), httpRedirection("") {
     allowedMethods[GET]    = true;
     allowedMethods[POST]   = true;
     allowedMethods[DELETE] = true;

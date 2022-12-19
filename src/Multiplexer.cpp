@@ -53,8 +53,6 @@ int Multiplexer::evaluateClient(pollfd *client)
 
         if (clientRequest)
         {
-            // char *message = "HTTP/1.0 200 OK\r\n\r\nHello";
-            // write(clientFd, (char *)message, strlen(message));
             HttpResponse clientResponse =
                 clientRequest->constructResponse(clientSocket.getServerForClient(clientFd));
             send(clientFd, (void *)clientResponse.toStr().c_str(), clientResponse.toStr().size(), 0);
