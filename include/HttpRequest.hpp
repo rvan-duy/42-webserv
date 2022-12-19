@@ -25,6 +25,8 @@ public:
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
+  HttpRequest *operator+(const HttpRequest& other);
+
   // Abstract
   virtual HTTPStatusCode executeRequest(const Server &server) = 0;
   virtual HttpResponse constructResponse(const Server &server) = 0;
