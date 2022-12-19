@@ -4,57 +4,67 @@
 /*
  *  Canonical
  */
-HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _url(data.url), _chunked(data.chunked) {}
+HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url), _chunked(data.chunked) {}
 
-HttpRequest::HttpRequest() {}
+HttpRequest::HttpRequest() : _chunked(false) {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj)
 {
   _method = obj._method;
-  _url = obj._url;
+  _uri = obj._uri;
   _chunked = obj._chunked;
 }
 
 HttpRequest::~HttpRequest() {}
 
 /*
- * Getters
+ * Protected methods
  */
-EHttpMethods HttpRequest::getMethod() const
-{
-  return _method;
-}
 
-std::string HttpRequest::getUrl() const
+bool HttpRequest::_isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const
 {
-  return _url;
-}
+  EHttpMethods currentMethod = _method;
 
-bool HttpRequest::getChunked() const
-{
-  return _chunked;
-}
-
-// **
-// still can have conflicts with /file location and uri being /filename this will be looked in as file even though
-// it should be under / only..
-// coudl maybe fix by adding a / after location routes when it is a directory.. ?
-bool HttpRequest::isMethodAllowed(Server &server, std::string uri, EHttpMethods method)
-{
-  std::vector<Route> routes = server.getRoutes();
-  unsigned long maxlen = 0;
-  bool isAllowed = true;
-
-  for (std::vector<Route>::iterator it = routes.begin(); it != routes.end(); it++)
+  for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
   {
-    if (0 == uri.find(it->route)) // **
+    if (it->first == currentMethod)
     {
-      if (maxlen < it->route.size())
-      {
-        isAllowed = it->allowedMethods.at(method);
-        maxlen = it->route.size();
-      }
+      return it->second;
     }
   }
-  return isAllowed;
+  return false;
 }
+
+/*
+//  * Parse the method string into the method enum
+//  * @param method the method string
+//  * @return the method enum
+//  */
+// EHttpMethods _parseMethod(const std::string &method) {
+//   Logger &logger = Logger::getInstance();
+//   std::map<std::string, EHttpMethods> method_map;
+
+//   method_map["GET"]    = GET;
+//   method_map["POST"]   = POST;
+//   method_map["DELETE"] = DELETE;
+
+//   try {
+//     return method_map.at(method);
+//   } catch (std::exception& e) {
+//     // _status_code = 400;
+//     logger.error("bad request: method unsupported ( " + method + " )");
+//     return NONE;
+//   }
+// }
+
+// /* This needs to include all the response statuses used in executeRequest */
+// std::string _parseResponseStatus(const int &status) {
+//   std::map<int, std::string> response_map;
+
+//   response_map[403]   = "Forbidden";
+//   response_map[404]   = "Not found";
+//   response_map[405]   = "Method not alowed";
+//   response_map[409]   = "Conflict";
+
+//   return response_map.at(status);
+// }

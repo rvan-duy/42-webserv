@@ -1,23 +1,22 @@
-#include <cstdio>
 #include <HttpRequest.hpp>
+#include <cstdio>
 
-BadRequest::BadRequest(HTTPStatusCode statusCode) : HttpRequest(), _statusCode(statusCode) {}
+BadRequest::BadRequest(HTTPStatusCode statusCode)
+    : HttpRequest(), _statusCode(statusCode) {}
 
 BadRequest::BadRequest(const BadRequest &ref) : HttpRequest(ref) {}
 
 BadRequest::~BadRequest() {}
 
-HTTPStatusCode BadRequest::executeRequest(Server &server)
-{
-    (void)server;
-    return HTTPStatusCode::OK;
+HTTPStatusCode BadRequest::executeRequest(const Server &server) {
+  (void)server;
+  return HTTPStatusCode::OK;
 }
 
-HttpResponse BadRequest::constructResponse(Server &server, std::string &index)
-{
-    (void)server;
-    (void)index;
-
-    std::string message = getMessageByStatusCode(_statusCode);
-    return HttpResponse(HTTP_1_1, _statusCode, message);
+HttpResponse BadRequest::constructResponse(const Server &server) {
+  (void)server;
+  // std::string message = getMessageByStatusCode(_statusCode);
+  // return HttpResponse(HTTP_1_1, _statusCode, message);
+  (void)_statusCode;
+  return HttpResponse();
 }

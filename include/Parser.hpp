@@ -75,13 +75,12 @@ private:
 	/* AST line parsing functions */
 	int parsePort(void *dest, t_dataLine line);
 	int parseMaxBodySize(void *dest, t_dataLine line);
-	int parseErrorPage(void *dest, t_dataLine line);
 	int parseHost(void *dest, t_dataLine line);
 	int parseServerName(void *dest, t_dataLine line);
 	/* AST block parsing functions */
+	int parseErrorPage(void *dest, t_dataLine line);
 	int parseRoot(void *dest, t_dataLine line);
 	int parseIndex(void *dest, t_dataLine line);
-	int parseAutoIndex(void *dest, t_dataLine line);
 	int parseCgi(void *dest, t_dataLine line);
 	int parseMethods(void *dest, t_dataLine line);
 	/* table with key value pairs for parsing AST */

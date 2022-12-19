@@ -10,13 +10,10 @@ HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj)
   _statusMessage = obj._statusMessage;
 }
 
-HttpResponse::HttpResponse(HttpVersion version, HTTPStatusCode statusCode, std::string statusMessage)
-    : HttpMessage(version), _statusCode(statusCode), _statusMessage(statusMessage) {}
-
 HttpResponse::~HttpResponse() {}
 
 /*
- * Convert the response to a string // 2 keer dubbelop?
+ * Convert the response to a string
  * @return The response as a string
  */
 std::string HttpResponse::toStr() const
@@ -25,6 +22,13 @@ std::string HttpResponse::toStr() const
 
   logger.log("< Started creating response string", VERBOSE);
   std::string response_string;
+
+  {
+    logger.log("1. Adding status line", VERBOSE);
+    std::ostringstream ss;
+    ss << getVersionToStr() << " " << static_cast<int>(_statusCode) << " " << _statusMessage << "\r\n";
+    response_string += ss.str();
+  }
 
   logger.log("2. Adding headers", VERBOSE);
   {
@@ -52,29 +56,9 @@ std::string HttpResponse::toStr() const
 }
 
 /*
- * Get the status code
- */
-HTTPStatusCode HttpResponse::getStatusCode() const
-{
-  return _statusCode;
-}
-
-/*
- * Get the status message
- */
-std::string HttpResponse::getStatusMessage() const
-{
-  return _statusMessage;
-}
-
-/*
  * Sets the HttpResponse Class attributes to the given values
- * @param path Path to the file to serve, relative to the root directory
- * @param status_code Status code to respond with
- * @param status_message Status message to respond with
- * @param version HTTP version to respond with
  */
-void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode status_code, const std::string &status_message,
+void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCode, const std::string &status_message,
                                 const HttpVersion version)
 {
   Logger &logger = Logger::getInstance();
@@ -85,7 +69,7 @@ void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode status_c
   file.seekg(0, std::ios::end);                     // Seek to the end of the file
   std::stringstream ss;                             // Create a stringstream to store the file contents in
   ss << file.tellg();                               // Get the file size
-  _statusCode = status_code;                        // Set the status code
+  _statusCode = statusCode;                         // Set the status code
   _statusMessage = status_message;                  // Set the status message
   _version = version;                               // Set the version
   _headers["Content-Length"] = ss.str();            // Set the content length header
@@ -98,36 +82,6 @@ void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode status_c
     file.close();
     _body = body;
   }
-}
-
-/*
- * Checks if a file exists
- * @param path The path to the file to check
- * @return True if the file exists, false otherwise
- */
-bool _fileExists(const std::string &path)
-{
-  Logger &logger = Logger::getInstance();
-
-  struct stat buffer; // stat struct to store the file info
-  if (stat(path.c_str(), &buffer) == -1)
-  {
-    logger.log("_fileExists -> File doesn't exist (" + path + ")");
-    return false;
-  }
-  if (buffer.st_mode & S_IFDIR)
-  {
-    logger.log("_fileExists -> File is a directory (" + path + ")");
-    return false;
-  }
-  if (buffer.st_mode & S_IFREG)
-  {
-    logger.log("_fileExists -> File is a regular file (" + path + ")");
-    return true;
-  }
-  logger.log("_fileExists -> File is something else (" + path + ")");
-  logger.error("WARNING: logic probably not implemented yet");
-  return false;
 }
 
 /*

@@ -3,12 +3,12 @@
 
 #include <unistd.h>
 
-#include <Webserver.hpp>
-
+#include <CGI.hpp>
 #include <HttpRequest.hpp>
 #include <HttpResponse.hpp>
-#include <CGI.hpp>
 #include <Logger.hpp>
+#include <Webserver.hpp>
+#include <climits>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -16,7 +16,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <climits>
 
 #define MAX_PORT 65535
 
@@ -32,70 +31,66 @@
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 80
 
-#define ROOT_FOLDER "root/"
 /* End of default values */
 
-struct Route
-{
-  Route(std::string const &name) : route(name), rootDirectory(ROOT_FOLDER), defaultFile("index.html"), autoIndex(false)
-  {
-    allowedMethods[GET] = true;
-    allowedMethods[POST] = true;
+struct Route {
+  Route(std::string const &name)
+      : route(name), defaultFile("index.html"), autoIndex(false) {
+    allowedMethods[GET]    = true;
+    allowedMethods[POST]   = true;
     allowedMethods[DELETE] = true;
   }
   // Default route constructor
-  Route() : route("/"), rootDirectory(ROOT_FOLDER), cgiRoot(ROOT_FOLDER), defaultFile("index.html"), httpRedirection("")
-  {
-    allowedMethods[GET] = true;
-    allowedMethods[POST] = true;
+  Route()
+      : route("/"), defaultFile("index.html"), httpRedirection("") {
+    allowedMethods[GET]    = true;
+    allowedMethods[POST]   = true;
     allowedMethods[DELETE] = true;
   }
   // Vector for bonus
-  std::string route;
-  std::string rootDirectory;
-  std::string cgiRoot;
-  std::string defaultFile;
-  std::map<EHttpMethods, bool> allowedMethods;
-  std::vector<std::string> indexFiles;
-  std::string httpRedirection;
-  bool autoIndex;
+  std::string                           route;
+  std::string                           rootDirectory;
+  std::string                           cgiRoot;
+  std::string                           defaultFile;
+  std::map<HTTPStatusCode, std::string> errorPages;
+  std::map<EHttpMethods, bool>          allowedMethods;
+  std::vector<std::string>              indexFiles;
+  std::string                           httpRedirection;
+  bool                                  autoIndex;
 };
 
-struct PageData
-{
+struct PageData {
   PageData(int const &statusCode, std::string const &filePath) : statusCode(statusCode), filePath(filePath) {}
-
-  int statusCode;
+  int         statusCode;
   std::string filePath;
 };
 
-class Server
-{
-public:
+class Server {
+ public:
   Server();
   ~Server();
 
-  //  Getters
-  std::string getServerName() const;
+  std::string        getServerName() const;
   std::vector<Route> getRoutes() const;
-  PageData getErrorPage() const;
-  int getMaxBody() const;
-  int getPort() const;
+  PageData           getErrorPage() const;
+  int                getMaxBody() const;
+  int                getPort() const;
+  int                setPort(int const &value);
+  int                setErrorPage(int const &statusCode, std::string const &filePath);
+  void               setServerName(std::string const &value);
+  int                setMaxBody(double const &value);
+  void               addRoute(Route const &route);
+  const Route       &getRoute(const std::string &uri) const;
+  // int                setHost(int const &statusCode, std::string const &filePath);
 
-  // Setters
-  int setPort(int const &value);
-  int setErrorPage(int const &statusCode, std::string const &filePath);
-  void setServerName(std::string const &value);
-  int setMaxBody(double const &value);
-  void addRoute(Route const &route);
-
-private:
-  int _port;
-  int _maxBodySize;
-  std::string _serverName;
+ private:
+  int                _port;
+  int                _maxBodySize;
+  std::string        _serverName;
   std::vector<Route> _routes;
-
-  PageData _defaultErrorPage;
+  PageData           _defaultErrorPage;
 };
+
+std::ostream& operator<<(std::ostream& os, const Server& ob);
 
 #endif

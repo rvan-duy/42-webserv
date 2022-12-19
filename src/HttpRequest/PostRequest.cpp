@@ -6,19 +6,14 @@ PostRequest::PostRequest(const PostRequest &ref) : HttpRequest(ref) {}
 
 PostRequest::~PostRequest() {}
 
-HTTPStatusCode PostRequest::executeRequest(Server &server)
+HTTPStatusCode PostRequest::executeRequest(const Server &server)
 {
-  if (!isMethodAllowed(server, _url, POST))
-    return HTTPStatusCode::METHOD_NOT_ALLOWED;
-  // Post the body to a file (std::string _body)
+  (void)server;
   return HTTPStatusCode::OK;
 }
 
-HttpResponse PostRequest::constructResponse(Server &server, std::string &index)
-{
+HttpResponse PostRequest::constructResponse(const Server& server) {
   HTTPStatusCode responseStatus = executeRequest(server);
-  (void)index;
-  if (responseStatus == HTTPStatusCode::OK)
-    return HttpResponse(HTTP_1_1, HTTPStatusCode::OK, "OK");
-  return HttpResponse(HTTP_1_1, responseStatus, getMessageByStatusCode(responseStatus));
+  (void)responseStatus;
+  return HttpResponse();
 }

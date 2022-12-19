@@ -1,47 +1,56 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
-#include <Webserver.hpp>
-#include <StatusCodes.hpp>
-#include "HttpMessage.hpp"
 #include <RequestParser.hpp>
-#include "HttpResponse.hpp"
 #include <Server.hpp>
+#include <StatusCodes.hpp>
+#include <Webserver.hpp>
 #include <string>
+#include <vector>
+
+#include "HttpMessage.hpp"
+#include "HttpResponse.hpp"
 
 class Server;
 class HttpResponse;
-
+struct Route;
 struct HttpHeaderData;
-// bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage
 {
 public:
-  HttpRequest(HttpHeaderData const &data);
   HttpRequest();
+  HttpRequest(HttpHeaderData const &data);
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
   // Abstract
-  virtual HTTPStatusCode executeRequest(Server &server) = 0;
-  virtual HttpResponse constructResponse(Server &server, std::string &index) = 0;
-
-  // Getters
-  EHttpMethods getMethod() const;
-  std::string getUrl() const;
-  bool getChunked() const;
+  virtual HTTPStatusCode executeRequest(const Server &server) = 0;
+  virtual HttpResponse constructResponse(const Server &server) = 0;
 
 protected:
-  bool isMethodAllowed(Server &server, std::string uri, EHttpMethods method);
-
   EHttpMethods _method;
-  std::string _url;
+  std::string _uri;
   bool _chunked;
+
+  // Protected methods
+  bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
 };
 
 // GET
+
+enum class FileType
+{
+  IS_DIR,
+  IS_REG_FILE,
+  IS_UNKNOWN
+};
+
+// # define IS_DIR      0
+// # define IS_REG_FILE 1
+// # define IS_UNKNOWN  2
+
 class GetRequest : public HttpRequest
 {
 public:
@@ -50,8 +59,16 @@ public:
   ~GetRequest();
 
   // Concrete
-  HTTPStatusCode executeRequest(Server &server);
-  HttpResponse constructResponse(Server &server, std::string &index);
+  HTTPStatusCode executeRequest(const Server &server);
+  HttpResponse constructResponse(const Server &server);
+
+private:
+  // Private methods
+  std::string _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
+  std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
+  std::vector<std::string> _getAcceptedTypesFromHeader();
+  std::string _constructPath(const std::string &root) const;
+  FileType _fileExists(const std::string &path) const;
 };
 
 // DELETE
@@ -64,8 +81,8 @@ public:
   ~DeleteRequest();
 
   // Concrete
-  HTTPStatusCode executeRequest(Server &server);
-  HttpResponse constructResponse(Server &server, std::string &index);
+  HTTPStatusCode executeRequest(const Server &server);
+  HttpResponse constructResponse(const Server &server);
 };
 
 // POST
@@ -78,23 +95,24 @@ public:
   ~PostRequest();
 
   // Concrete
-  HTTPStatusCode executeRequest(Server &server);
-  HttpResponse constructResponse(Server &server, std::string &index);
+  HTTPStatusCode executeRequest(const Server &server);
+  HttpResponse constructResponse(const Server &server);
 };
+
+// BAD
 
 class BadRequest : public HttpRequest
 {
 public:
-  BadRequest(HTTPStatusCode _statusCode);
+  BadRequest(HTTPStatusCode statusCode);
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
   // Concrete
-  HTTPStatusCode executeRequest(Server &server);
-  HttpResponse constructResponse(Server &server, std::string &index);
+  HTTPStatusCode executeRequest(const Server &server);
+  HttpResponse constructResponse(const Server &server);
 
 private:
-  std::string getErrorMessage() const;
   HTTPStatusCode _statusCode;
 };
 
