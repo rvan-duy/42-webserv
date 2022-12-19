@@ -14,5 +14,6 @@ HTTPStatusCode PostRequest::executeRequest(const Server &server)
 
 HttpResponse PostRequest::constructResponse(const Server& server) {
   HTTPStatusCode responseStatus = executeRequest(server);
+  (void)responseStatus;
   return HttpResponse();
 }

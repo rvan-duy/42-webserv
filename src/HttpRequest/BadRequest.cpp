@@ -17,5 +17,6 @@ HttpResponse BadRequest::constructResponse(const Server &server) {
   (void)server;
   // std::string message = getMessageByStatusCode(_statusCode);
   // return HttpResponse(HTTP_1_1, _statusCode, message);
+  (void)_statusCode;
   return HttpResponse();
 }
