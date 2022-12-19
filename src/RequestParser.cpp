@@ -6,7 +6,7 @@ RequestParser::~RequestParser() {}
 
 static std::string stringTrim(std::string toTrim) {
   size_t i = 0;
-  size_t j = toTrim.length() - 1;
+  size_t j = toTrim.length();
 
   while (toTrim[i] == ' ') i++;
   while (toTrim[j] == ' ') j--;
