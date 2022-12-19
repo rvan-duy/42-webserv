@@ -40,7 +40,7 @@ Logger::~Logger()
  */
 void Logger::log(std::string const &message)
 {
-	logToConsole("\033[1;32m[INFO]:   \033[0m", INFO, message);
+	logToConsole("\033[1;32m[INFO]:  \033[0m", INFO, message);
 	logToFile("[INFO]:   ", message);
 }
 

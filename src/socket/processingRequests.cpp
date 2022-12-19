@@ -63,18 +63,22 @@ static int matchBasedOnHost(Server *dest, std::vector<Server> &allServers, std::
 /**
  * Finds server that matches the sent request, then adds it to matching client
  */
+// TODO: add 0.0.0.0 matching ?
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
+    Logger &logger = Logger::getInstance();
     std::string hostWithoutPort = getHostWithoutPort(request);
 
     if (hostWithoutPort.length() == 0)
     {
+        logger.error("No host found in request -> adding bad request");
         delete request;
         return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     }
     Server result;
     if (matchBasedOnHost(&result, _servers, hostWithoutPort))
     {
+        logger.error("No matching host found");
         delete request;
         return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     }

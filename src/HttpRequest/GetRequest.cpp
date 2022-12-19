@@ -15,12 +15,10 @@ HTTPStatusCode GetRequest::executeRequest(Server &server)
 HttpResponse GetRequest::constructResponse(Server &server, std::string &index)
 {
   Logger &logger = Logger::getInstance();
-  logger.log("Response type: GET");
   (void)server;
   HttpResponse response;
 
   std::string path = "root" + getUrl(); // future get root from server class
-  logger.log("Path: " + path);
 
   if (!_fileExists(path))
   {

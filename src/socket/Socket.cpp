@@ -97,7 +97,6 @@ void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Serv
 
 void Socket::_addBadRequestToClient(const int &fd, HTTPStatusCode statusCode)
 {
-    Logger::getInstance().error("Adding error to client with fd: " + std::to_string(fd));
     std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
     newPair.first = new BadRequest(statusCode);
     _clients[fd] = newPair;
