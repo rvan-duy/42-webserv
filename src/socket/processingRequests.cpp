@@ -44,34 +44,37 @@ static std::string getHostWithoutPort(HttpRequest *request) {
 }
 
 /* Checks which servers are listening to the host from the request*/
-static int matchBasedOnHost(Server *dest, std::vector<Server> *allServers,
-                            std::string const &host) {
-  for (std::vector<Server>::iterator it = allServers->begin();
-       it != allServers->end(); ++it) {
-    if (it->getServerName() == host) {
-      *dest = *it;
-      return 0;
+static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string const &host)
+{
+    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
+    {
+        if (it->getServerName() == host)
+        {
+            return *it;
+        }
     }
-  }
-  return 1;
+    throw std::runtime_error("No matching server found");
 }
 
 /**
  * Finds server that matches the sent request, then adds it to matching client
  */
-void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request) {
-  std::string hostWithoutPort = getHostWithoutPort(request);
+void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
+{
+    std::string hostWithoutPort = getHostWithoutPort(request);
 
-  if (hostWithoutPort.length() == 0) {
-    delete request;
-    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  }
-  Server result;
-  if (matchBasedOnHost(&result, &_servers, hostWithoutPort)) {
-    delete request;
-    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  }
-  return _addRequestToClient(clientFd, request, &result);
+    if (hostWithoutPort.length() == 0)
+    {
+        delete request;
+        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+    }
+    try {
+        Server& result = matchBasedOnHost(_servers, hostWithoutPort);
+        return _addRequestToClient(clientFd, request, &result);
+    } catch (std::runtime_error error) {
+        delete request;
+        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+    }
 }
 
 int Socket::processRequest(int const &clientFd) {
