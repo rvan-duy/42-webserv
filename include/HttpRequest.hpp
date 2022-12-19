@@ -1,102 +1,114 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
-#include <General.hpp>
+#include <RequestParser.hpp>
+#include <Server.hpp>
+#include <StatusCodes.hpp>
+#include <Webserver.hpp>
+#include <string>
+#include <vector>
 
 #include "HttpMessage.hpp"
 #include "HttpResponse.hpp"
-#include "Server.hpp"
-#include <string>
 
-std::string  extractArgument(const std::string& msg, int n);
-EHttpMethods _parseMethod(const std::string &method);
-std::string _parseResponseStatus(const int &status);
-bool  isMethodAllowed(Server& server, std::string uri, EHttpMethods method);
+class Server;
+class HttpResponse;
+struct Route;
+struct HttpHeaderData;
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
+  HttpRequest(HttpHeaderData const& data);
   HttpRequest(const std::string& msg);
-  HttpRequest(const HttpRequest &obj);
+  HttpRequest(const HttpRequest& obj);
   virtual ~HttpRequest();
 
-  // enum HttpMethod { GET, POST, DELETE, NONE };
-
-  void  extractInitialResponsLine(const std::string& msg);
-  void  extractHeaders(const std::string& msg);
-  void  extractBody(const std::string& msg);
-
+  void extractInitialResponseLine(const std::string& msg);
+  void extractHeaders(const std::string& msg);
+  void extractBody(const std::string& msg);
 
   // Abstract
-  virtual int executeRequest(Server& server) = 0;
-  virtual HttpResponse constructResponse(Server& server, std::string& index) = 0;
-
-  // Getters
-  EHttpMethods  getMethod() const;
-  std::string   getUri() const;
-  bool          getChunked() const;
+  virtual HTTPStatusCode executeRequest(const Server& server)    = 0;
+  virtual HttpResponse   constructResponse(const Server& server) = 0;
 
  protected:
-  EHttpMethods                       _method;
-  std::string                        _uri;
-  bool                               _chunked;
+  EHttpMethods _method;
+  std::string  _uri;
+  bool         _chunked;
+
+  // Protected methods
+  bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
 };
 
 // GET
 
-class	GetRequest : public HttpRequest
-{
-public:
-	GetRequest(std::string& msg);
-	GetRequest(const GetRequest& ref);
-	~GetRequest();
+enum class FileType { IS_DIR, IS_REG_FILE, IS_UNKNOWN };
 
-	// Concrete
-  int executeRequest(Server& server);
-  HttpResponse constructResponse(Server& server, std::string& index);
+// # define IS_DIR      0
+// # define IS_REG_FILE 1
+// # define IS_UNKNOWN  2
+
+class GetRequest : public HttpRequest {
+ public:
+  GetRequest(HttpHeaderData const& data);
+  GetRequest(const GetRequest& ref);
+  ~GetRequest();
+
+  // Concrete
+  HTTPStatusCode executeRequest(const Server& server);
+  HttpResponse   constructResponse(const Server& server);
+
+ private:
+  // Private methods
+  std::string              _getErrorPageIndex(const Route& route, HTTPStatusCode errorCode) const;
+  std::vector<std::string> _getPossiblePaths(const std::string& path, const std::vector<std::string>& index_files);
+  std::vector<std::string> _getAcceptedTypesFromHeader();
+  std::string              _constructPath(const std::string& root) const;
+  FileType                 _fileExists(const std::string& path) const;
 };
 
 // DELETE
 
-class	DeleteRequest : public HttpRequest
-{
-public:
-	DeleteRequest(std::string& msg);
-	DeleteRequest(const DeleteRequest& ref);
-	~DeleteRequest();
+class DeleteRequest : public HttpRequest {
+ public:
+  DeleteRequest(HttpHeaderData const& data);
+  DeleteRequest(const DeleteRequest& ref);
+  ~DeleteRequest();
 
-	// Concrete
-  int executeRequest(Server& server);
-  HttpResponse constructResponse(Server& server, std::string& index);
+  // Concrete
+  HTTPStatusCode executeRequest(const Server& server);
+  HttpResponse   constructResponse(const Server& server);
 };
 
 // POST
 
-class	PostRequest : public HttpRequest
-{
-public:
-	PostRequest(std::string& msg);
-	PostRequest(const PostRequest& ref);
-	~PostRequest();
+class PostRequest : public HttpRequest {
+ public:
+  PostRequest(HttpHeaderData const& data);
+  PostRequest(const PostRequest& ref);
+  ~PostRequest();
 
-	// Concrete
-  int executeRequest(Server& server);
-  HttpResponse constructResponse(Server& server, std::string& index);
+  // Concrete
+  HTTPStatusCode executeRequest(const Server& server);
+  HttpResponse   constructResponse(const Server& server);
 };
 
 // BAD
 
-class	BadRequest : public HttpRequest
-{
-public:
-	BadRequest(std::string& msg);
-	BadRequest(const BadRequest& ref);
-	~BadRequest();
+class BadRequest : public HttpRequest {
+ public:
+  BadRequest(HTTPStatusCode statusCode);
+  BadRequest(const BadRequest& ref);
+  ~BadRequest();
 
-	// Concrete
-  int executeRequest(Server& server);
-  HttpResponse constructResponse(Server& server, std::string& index);
+  // Concrete
+  HTTPStatusCode executeRequest(const Server& server);
+  HttpResponse   constructResponse(const Server& server);
+
+ private:
+  HTTPStatusCode _statusCode;
 };
 
 #endif  // HTTP_REQUEST_HPP
