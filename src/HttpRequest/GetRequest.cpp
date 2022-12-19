@@ -13,66 +13,41 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
   return HTTPStatusCode::OK;
 }
 
-// no permissions check
+// TODO: add redirection support, with return ? 301 and 302
+
 HttpResponse GetRequest::constructResponse(const Server &server) {
-  const Route routeOfResponse = server.getRoute(HttpRequest::_uri);
-  const std::vector<std::string> acceptedTypes = _getAcceptedTypesFromHeader();
-  const std::string path = _constructPath(routeOfResponse.rootDirectory);
-  HttpResponse response;
+  const Route       routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const std::string path            = _constructPath(routeOfResponse.rootDirectory);
+  HttpResponse      response;
 
   if (_isMethodAllowed(routeOfResponse.allowedMethods) == false) {
-    response._setResponse(
-        _getErrorPageIndex(routeOfResponse, HTTPStatusCode::METHOD_NOT_ALLOWED),
-        HTTPStatusCode::METHOD_NOT_ALLOWED, "Method Not Allowed", _version);
-    return response;
+    return _createResponseObject(path, HTTPStatusCode::METHOD_NOT_ALLOWED, routeOfResponse);
   }
 
   switch (_fileExists(path)) {
     case FileType::IS_DIR: {
-      if (std::find(acceptedTypes.begin(), acceptedTypes.end(), "text/html") ==
-          acceptedTypes.end()) {
-        response._setResponse(
-            _getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_ACCEPTABLE),
-            HTTPStatusCode::NOT_ACCEPTABLE, "Not Acceptable", getVersion());
-        return response;
+      if (_typeIsAccepted() == false) {
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE, routeOfResponse);
       }
-      std::vector<std::string> possible_paths =
-          _getPossiblePaths(path, routeOfResponse.indexFiles);
-      for (std::vector<std::string>::const_iterator it = possible_paths.begin();
-           it != possible_paths.end(); ++it) {
+      std::vector<std::string> possible_paths = _getPossiblePaths(path, routeOfResponse.indexFiles);
+      for (std::vector<std::string>::const_iterator it = possible_paths.begin(); it != possible_paths.end(); ++it) {
         if (_fileExists(*it) == FileType::IS_REG_FILE) {
-          response._setResponse(*it, HTTPStatusCode::OK, "OK", getVersion());
-          return response;
+          return _createResponseObject(*it, HTTPStatusCode::OK, routeOfResponse);
         }
       }
-      response._setResponse(
-          _getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_FOUND),
-          HTTPStatusCode::NOT_FOUND, "Not Found", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, routeOfResponse);
     }
     case FileType::IS_REG_FILE: {
-      if (acceptedTypes.empty()) {
-        response._setResponse(
-            _getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_ACCEPTABLE),
-            HTTPStatusCode::NOT_ACCEPTABLE, "Not Acceptable", getVersion());
-      } else {
-        response._setResponse(path, HTTPStatusCode::OK, "OK", getVersion());
+      if (_typeIsAccepted() == false) {
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE, routeOfResponse);
       }
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::OK, routeOfResponse);
     }
     case FileType::IS_UNKNOWN: {
-      response._setResponse(
-          _getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_FOUND),
-          HTTPStatusCode::NOT_FOUND, "Not Found", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, routeOfResponse);
     }
     default: {
-      response._setResponse(
-          _getErrorPageIndex(routeOfResponse,
-                             HTTPStatusCode::INTERNAL_SERVER_ERROR),
-          HTTPStatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error",
-          getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::INTERNAL_SERVER_ERROR, routeOfResponse);
     }
   }
 }
@@ -81,47 +56,66 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
  * Private methods
  */
 
-std::string GetRequest::_getErrorPageIndex(const Route &route,
-                                           HTTPStatusCode errorCode) const {
-  std::map<HTTPStatusCode, std::string>::const_iterator it =
-      route.errorPages.find(errorCode);
-  if (it != route.errorPages.end() &&
-      _fileExists(route.rootDirectory + it->second) == FileType::IS_REG_FILE) {
+HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const {
+  HttpResponse response;
+
+  if (statusCode == HTTPStatusCode::OK) {
+    response._setResponse(path, statusCode, getMessageByStatusCode(statusCode), getVersion());
+    return response;
+  } else {
+    response._setResponse(_getErrorPageIndex(route, statusCode), statusCode, getMessageByStatusCode(statusCode), getVersion());
+    return response;
+  }
+}
+
+bool GetRequest::_typeIsAccepted() const {
+  // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the server can accept
+  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css", "application/javascript"};
+  const std::string              ACCEPT_HEADER   = getHeader("Accept");
+  std::vector<std::string>       acceptedTypes;
+
+  if (ACCEPT_HEADER.empty() || ACCEPT_HEADER == "*/*") {
+    return true;
+  } else {
+    std::size_t pos  = 0;
+    std::size_t prev = 0;
+    while ((pos = ACCEPT_HEADER.find(',', prev)) != std::string::npos) {
+      acceptedTypes.push_back(ACCEPT_HEADER.substr(prev, pos - prev));
+      prev = pos + 1;
+    }
+    acceptedTypes.push_back(ACCEPT_HEADER.substr(prev));
+  }
+
+  for (std::vector<std::string>::const_iterator it = acceptedTypes.begin(); it != acceptedTypes.end(); ++it) {
+    for (std::vector<std::string>::const_iterator it2 = TYPES_TO_ACCEPT.begin(); it2 != TYPES_TO_ACCEPT.end(); ++it2) {
+      if (*it == *it2) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+std::string GetRequest::_getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const {
+  std::map<HTTPStatusCode, std::string>::const_iterator it = route.errorPages.find(errorCode);
+  if (it != route.errorPages.end() && _fileExists(route.rootDirectory + it->second) == FileType::IS_REG_FILE) {
+    Logger::getInstance().log("GetRequest::_getErrorPageIndex: " + route.rootDirectory + it->second);
     return route.rootDirectory + it->second;
   }
+  Logger::getInstance().log("GetRequest::_getErrorPageIndex (DEFAULT): " + std::string(DEFAULT_ERROR_PAGE));
   return std::string(DEFAULT_ERROR_PAGE);
 }
 
-std::vector<std::string> GetRequest::_getPossiblePaths(
-    const std::string &path, const std::vector<std::string> &index_files) {
+std::vector<std::string> GetRequest::_getPossiblePaths(const std::string              &path,
+                                                       const std::vector<std::string> &index_files) {
   std::vector<std::string> possible_paths;
 
-  for (std::vector<std::string>::const_iterator it = index_files.begin();
-       it != index_files.end(); ++it) {
+  for (std::vector<std::string>::const_iterator it = index_files.begin(); it != index_files.end(); ++it) {
     possible_paths.push_back(path + "/" + *it);
   }
 
   return possible_paths;
-}
-
-std::vector<std::string> GetRequest::_getAcceptedTypesFromHeader() {
-  std::string accept = getHeader("Accept");
-  std::vector<std::string> acceptedTypes;
-  std::vector<std::string> all_types = {"text/html", "text/css",
-                                        "application/javascript"};
-
-  if (accept.find("*/*") != std::string::npos) {
-    return all_types;
-  }
-
-  for (std::vector<std::string>::iterator it = all_types.begin();
-       it != all_types.end(); ++it) {
-    if (it->find(accept) != std::string::npos) {
-      acceptedTypes.push_back(*it);
-    }
-  }
-
-  return acceptedTypes;
 }
 
 std::string GetRequest::_constructPath(const std::string &root) const {
@@ -135,38 +129,27 @@ std::string GetRequest::_constructPath(const std::string &root) const {
     full_path = _uri;
   }
 
-  Logger::getInstance().log(
-      "[RESPONSE-BUILDING] GetRequest: _constructPath -> " + full_path);
+  Logger::getInstance().log("[RESPONSE-BUILDING] GetRequest: _constructPath -> " + full_path);
   return full_path;
 }
 
 FileType GetRequest::_fileExists(const std::string &path) const {
-  Logger &logger = Logger::getInstance();
+  Logger     &logger = Logger::getInstance();
 
   struct stat buffer;
   if (stat(path.c_str(), &buffer) == -1) {
-    logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File doesn't exist (" +
-        path + ")");
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File doesn't exist (" + path + ")");
     return FileType::IS_UNKNOWN;
   }
   if (buffer.st_mode & S_IFDIR) {
-    logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a directory (" +
-        path + ")");
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a directory (" + path + ")");
     return FileType::IS_DIR;
   }
   if (buffer.st_mode & S_IFREG) {
-    logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a regular file "
-        "(" +
-        path + ")");
+    logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a regular file (" + path + ")");
     return FileType::IS_REG_FILE;
   }
-  logger.log(
-      "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is something else "
-      "(" +
-      path + ")");
+  logger.log("[RESPONSE-BUILDING] GetRequest: _fileExists -> File is something else (" + path + ")");
   logger.error("WARNING: logic probably not implemented yet");
   return FileType::IS_UNKNOWN;
 }
