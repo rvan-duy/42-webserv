@@ -98,3 +98,9 @@ int Server::setPort(int const &value) {
 void Server::addRoute(Route const &route) {
   _routes.push_back(route);
 }
+
+std::ostream& operator<<(std::ostream& os, const Server& ob)
+{
+    os << ob.getServerName() << "\n\t" << ob.getErrorPage().filePath << "\n\t" << ob.getRoute("/").route;
+    return os;
+}
