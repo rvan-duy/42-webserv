@@ -13,6 +13,8 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
   return HTTPStatusCode::OK;
 }
 
+// TODO: add redirection support, with return ? 301 and 302
+
 HttpResponse GetRequest::constructResponse(const Server &server) {
   const Route       routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path            = _constructPath(routeOfResponse.rootDirectory);
