@@ -35,33 +35,40 @@
 
 struct Route {
   Route(std::string const &name)
-      : route(name), defaultFile("index.html"), autoIndex(false) {
-    allowedMethods[GET]    = true;
-    allowedMethods[POST]   = true;
+      : route(name),
+        defaultFile("index.html"),
+        autoIndex(false),
+        cgiEnabled(false) {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
     allowedMethods[DELETE] = true;
   }
   // Default route constructor
   Route()
-      : route("/"), defaultFile("index.html"), httpRedirection("") {
-    allowedMethods[GET]    = true;
-    allowedMethods[POST]   = true;
+      : route("/"),
+        defaultFile("index.html"),
+        httpRedirection(""),
+        cgiEnabled(false) {
+    allowedMethods[GET] = true;
+    allowedMethods[POST] = true;
     allowedMethods[DELETE] = true;
   }
   // Vector for bonus
-  std::string                           route;
-  std::string                           rootDirectory;
-  std::string                           cgiRoot;
-  std::string                           defaultFile;
+  std::string route;
+  std::string rootDirectory;
+  std::string defaultFile;
   std::map<HTTPStatusCode, std::string> errorPages;
-  std::map<EHttpMethods, bool>          allowedMethods;
-  std::vector<std::string>              indexFiles;
-  std::string                           httpRedirection;
-  bool                                  autoIndex;
+  std::map<EHttpMethods, bool> allowedMethods;
+  std::vector<std::string> indexFiles;
+  std::string httpRedirection;
+  bool autoIndex;
+  bool cgiEnabled;
 };
 
 struct PageData {
-  PageData(int const &statusCode, std::string const &filePath) : statusCode(statusCode), filePath(filePath) {}
-  int         statusCode;
+  PageData(int const &statusCode, std::string const &filePath)
+      : statusCode(statusCode), filePath(filePath) {}
+  int statusCode;
   std::string filePath;
 };
 
@@ -70,25 +77,26 @@ class Server {
   Server();
   ~Server();
 
-  std::string        getServerName() const;
+  std::string getServerName() const;
   std::vector<Route> getRoutes() const;
-  PageData           getErrorPage() const;
-  int                getMaxBody() const;
-  int                getPort() const;
-  int                setPort(int const &value);
-  int                setErrorPage(int const &statusCode, std::string const &filePath);
-  void               setServerName(std::string const &value);
-  int                setMaxBody(double const &value);
-  void               addRoute(Route const &route);
-  const Route       &getRoute(const std::string &uri) const;
-  // int                setHost(int const &statusCode, std::string const &filePath);
+  PageData getErrorPage() const;
+  int getMaxBody() const;
+  int getPort() const;
+  int setPort(int const &value);
+  int setErrorPage(int const &statusCode, std::string const &filePath);
+  void setServerName(std::string const &value);
+  int setMaxBody(double const &value);
+  void addRoute(Route const &route);
+  const Route &getRoute(const std::string &uri) const;
+  // int                setHost(int const &statusCode, std::string const
+  // &filePath);
 
  private:
-  int                _port;
-  int                _maxBodySize;
-  std::string        _serverName;
+  int _port;
+  int _maxBodySize;
+  std::string _serverName;
   std::vector<Route> _routes;
-  PageData           _defaultErrorPage;
+  PageData _defaultErrorPage;
 };
 
 #endif
