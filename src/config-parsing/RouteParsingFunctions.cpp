@@ -55,17 +55,7 @@ int Parser::parseMethods(void *dest, t_dataLine line) {
     } else if (line.at(i) == "DELETE") {
       if (route->allowedMethods[DELETE] == true) {
         return 1;
-    }
-    Route *route = static_cast<Route *>(dest);
-    if (route->rootDirectory != ROOT_FOLDER)
-    {
-        Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
-        return 1;
       }
-      route->allowedMethods[DELETE] = true;
-    } else {
-      Logger::getInstance().error("[CONFIG PARSER]: Invalid method set");
-      return 1;
     }
   }
   return 0;
@@ -78,11 +68,10 @@ int Parser::parseRoot(void *dest, t_dataLine line) {
 
   Route *route = static_cast<Route *>(dest);
 
-  if (route->rootDirectory != "") {
+  if (route->rootDirectory.length() != 0) {
     Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
     return 1;
   }
-
   route->rootDirectory = line.at(1);
   return 0;
 }
@@ -104,7 +93,6 @@ int Parser::parseIndex(void *dest, t_dataLine line) {
   return 0;
 }
 
-// TODO: implement php
 int Parser::parseCgi(void *dest, t_dataLine line)
 {
     if (!dest || line.size() != 3)

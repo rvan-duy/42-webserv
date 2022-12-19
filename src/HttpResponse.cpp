@@ -24,7 +24,7 @@ std::string HttpResponse::toStr() const
   std::string response_string;
 
   {
-    logger.log("1. Adding status line");
+    logger.log("1. Adding status line", VERBOSE);
     std::ostringstream ss;
     ss << getVersionToStr() << " " << static_cast<int>(_statusCode) << " " << _statusMessage << "\r\n";
     response_string += ss.str();
@@ -59,22 +59,24 @@ std::string HttpResponse::toStr() const
  * Sets the HttpResponse Class attributes to the given values
  */
 void HttpResponse::_setResponse(const std::string &path, HTTPStatusCode statusCode, const std::string &status_message,
-                                const HttpVersion version) {
-  Logger       &logger = Logger::getInstance();
+                                const HttpVersion version)
+{
+  Logger &logger = Logger::getInstance();
 
   std::ifstream file(path.c_str()); // Open the file
   logger.log("Requested path: " + path);
 
-  file.seekg(0, std::ios::end);                        // Seek to the end of the file
-  std::stringstream ss;                                // Create a stringstream to store the file contents in
-  ss << file.tellg();                                  // Get the file size
-  _statusCode                = statusCode;             // Set the status code
-  _statusMessage             = status_message;         // Set the status message
-  _version                   = version;                // Set the version
-  _headers["Content-Length"] = ss.str();               // Set the content length header
-  _headers["Content-Type"]   = _getContentType(path);  // Set the content type header
-  file.seekg(0, std::ios::beg);                        // Seek back to the beginning of the file
-  if (file.is_open()) {
+  file.seekg(0, std::ios::end);                     // Seek to the end of the file
+  std::stringstream ss;                             // Create a stringstream to store the file contents in
+  ss << file.tellg();                               // Get the file size
+  _statusCode = statusCode;                         // Set the status code
+  _statusMessage = status_message;                  // Set the status message
+  _version = version;                               // Set the version
+  _headers["Content-Length"] = ss.str();            // Set the content length header
+  _headers["Content-Type"] = _getContentType(path); // Set the content type header
+  file.seekg(0, std::ios::beg);                     // Seek back to the beginning of the file
+  if (file.is_open())
+  {
     std::string body((std::istreambuf_iterator<char>(file)),
                      std::istreambuf_iterator<char>()); // Read the file into a string
     file.close();
