@@ -68,7 +68,7 @@ HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStat
 
 bool GetRequest::_typeIsAccepted() const {
   // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the server can accept
-  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "style/css", "application/javascript"};
+  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css", "application/javascript"};
   const std::string              ACCEPT_HEADER   = getHeader("Accept");
   std::vector<std::string>       acceptedTypes;
 
