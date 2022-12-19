@@ -19,47 +19,33 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
   HttpResponse      response;
 
   if (_isMethodAllowed(routeOfResponse.allowedMethods) == false) {
-    response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::METHOD_NOT_ALLOWED),
-                          HTTPStatusCode::METHOD_NOT_ALLOWED, "Method Not Allowed", _version);
-    return response;
+    return _createResponseObject(path, HTTPStatusCode::METHOD_NOT_ALLOWED, routeOfResponse);
   }
 
   switch (_fileExists(path)) {
     case FileType::IS_DIR: {
       if (_typeIsAccepted() == false) {
-        response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_ACCEPTABLE),
-                              HTTPStatusCode::NOT_ACCEPTABLE, "Not Acceptable", getVersion());
-        return response;
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE, routeOfResponse);
       }
       std::vector<std::string> possible_paths = _getPossiblePaths(path, routeOfResponse.indexFiles);
       for (std::vector<std::string>::const_iterator it = possible_paths.begin(); it != possible_paths.end(); ++it) {
         if (_fileExists(*it) == FileType::IS_REG_FILE) {
-          response._setResponse(*it, HTTPStatusCode::OK, "OK", getVersion());
-          return response;
+          return _createResponseObject(*it, HTTPStatusCode::OK, routeOfResponse);
         }
       }
-      response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_FOUND), HTTPStatusCode::NOT_FOUND,
-                            "Not Found", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, routeOfResponse);
     }
     case FileType::IS_REG_FILE: {
       if (_typeIsAccepted() == false) {
-        response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_ACCEPTABLE),
-                              HTTPStatusCode::NOT_ACCEPTABLE, "Not Acceptable", getVersion());
-        return response;
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE, routeOfResponse);
       }
-      response._setResponse(path, HTTPStatusCode::OK, "OK", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::OK, routeOfResponse);
     }
     case FileType::IS_UNKNOWN: {
-      response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::NOT_FOUND), HTTPStatusCode::NOT_FOUND,
-                            "Not Found", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, routeOfResponse);
     }
     default: {
-      response._setResponse(_getErrorPageIndex(routeOfResponse, HTTPStatusCode::INTERNAL_SERVER_ERROR),
-                            HTTPStatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error", getVersion());
-      return response;
+      return _createResponseObject(path, HTTPStatusCode::INTERNAL_SERVER_ERROR, routeOfResponse);
     }
   }
 }
@@ -67,6 +53,18 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
 /*
  * Private methods
  */
+
+HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const {
+  HttpResponse response;
+
+  if (statusCode == HTTPStatusCode::OK) {
+    response._setResponse(path, statusCode, getMessageByStatusCode(statusCode), getVersion());
+    return response;
+  } else {
+    response._setResponse(_getErrorPageIndex(route, statusCode), statusCode, getMessageByStatusCode(statusCode), getVersion());
+    return response;
+  }
+}
 
 bool GetRequest::_typeIsAccepted() const {
   // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the server can accept

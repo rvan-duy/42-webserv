@@ -57,6 +57,7 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
+  HttpResponse             _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
   bool                     _typeIsAccepted() const;
   std::string              _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
   std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
