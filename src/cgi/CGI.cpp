@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include <CGI.hpp>
 
 /**************************************************/
@@ -74,7 +72,6 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
       return 1;
     }
     if (bytesRead > 0) {
-      std::cout << buffer << std::endl;
       output += buffer->c_str();
       buffer->clear();
     }
@@ -85,28 +82,51 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
   return 0;
 }
 
-static int checkFileAccess(std::string const &filePath) {
+static HTTPStatusCode checkFileAccess(std::string const &filePath) {
   if (access(filePath.c_str(), R_OK)) {
     Logger::getInstance().error("[PREPARING] CGI: access: " +
                                 std::string(strerror(errno)));
-    return 1;
+    switch (errno) {
+      case EACCES:
+        return HTTPStatusCode::METHOD_NOT_ALLOWED;
+      case ENOENT:
+        return HTTPStatusCode::NOT_FOUND;
+      default:
+        return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+    }
   }
-  return 0;
+  return HTTPStatusCode::OK;
+}
+
+static HTTPStatusCode parseCgiOutput(std::string *pBody,
+                                     std::vector<std::string> *pHeaders,
+                                     std::string &src) {
+  Logger &logger = Logger::getInstance();
+  size_t endOfHeader = src.find("\r\n\r\n");
+  if (endOfHeader == std::string::npos) {
+    logger.error("Incorrect end of header found -> returning new BadRequest()");
+    return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+  }
+  *pBody = src.substr(endOfHeader + 4, src.length() - endOfHeader);
+  *pHeaders = splitHeader(src.substr(0, endOfHeader + 2));
+  return HTTPStatusCode::OK;
 }
 
 /* CGI control flow */
-int CGI::executeFile(std::string *pDest, std::string const &rootDir,
-                     std::string const &filePath,
-                     std::string const &body) const {
+HTTPStatusCode CGI::executeFile(std::string *pBody,
+                                std::vector<std::string> *pHeaders,
+                                std::string const &filePath,
+                                std::string const &body) const {
   Logger &logger = Logger::getInstance();
-  std::string fullPath = rootDir + filePath;
+  HTTPStatusCode status = HTTPStatusCode::OK;
+  std::string buffer;
   int fd[2];
   pid_t pid;
 
   logger.log("[STARTING] CGI ", VERBOSE);
-
-  if (checkFileAccess(fullPath)) {
-    return 1;
+  status = checkFileAccess(filePath);
+  if (status != HTTPStatusCode::OK) {
+    return status;
   }
 
   /* Open pipe */
@@ -129,9 +149,9 @@ int CGI::executeFile(std::string *pDest, std::string const &rootDir,
     }
   } else {
     close(fd[WRITE]);
-    if (readFromChildProcess(pDest, pid, fd[READ])) {
-      return 1;
+    if (readFromChildProcess(&buffer, pid, fd[READ])) {
+      return HTTPStatusCode::INTERNAL_SERVER_ERROR;
     }
   }
-  return 0;
+  return parseCgiOutput(pBody, pHeaders, buffer);
 }

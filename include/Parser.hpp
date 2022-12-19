@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#define PARSER_FUNC_N 4
+#define PARSER_FUNC_N 3
 #define BLOCK_FUNC_N 6
 
 /* Circle inclusion, so doesn't compile without this parser definition */
