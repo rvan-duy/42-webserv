@@ -129,7 +129,7 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
   }
   headerData.body =
       rawRequest.substr(endOfHeader + 4, rawRequest.length() - endOfHeader);
-  headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2));
+  headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), false);
   if (parseFirstLine(&headerData, headerLines[0])) {
     logger.error(
         "Incorrect first line of request -> returning new BadRequest()");

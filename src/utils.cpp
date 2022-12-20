@@ -24,7 +24,8 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
   }
 }
 
-std::vector<std::string> splitHeader(std::string headerString) {
+std::vector<std::string> splitHeader(std::string headerString,
+                                     bool withNewline) {
   std::vector<std::string> headerLines;
   std::string currentLine;
   size_t lastLocation = 0;  // last location of \n\r
@@ -33,10 +34,11 @@ std::vector<std::string> splitHeader(std::string headerString) {
   do {
     nextLocation = headerString.find("\r\n", nextLocation);
     if (nextLocation == std::string::npos) break;
+    if (withNewline) nextLocation += 2;
     currentLine =
         headerString.substr(lastLocation, nextLocation - lastLocation);
     headerLines.push_back(currentLine);
-    nextLocation += 2;
+    if (!withNewline) nextLocation += 2;
     lastLocation = nextLocation;
   } while (true);
   return headerLines;

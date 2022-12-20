@@ -48,7 +48,6 @@ static int waitForChildProcess(pid_t const &pid) {
     return 1;
   }
   if (WIFEXITED(status)) {
-    std::cout << WEXITSTATUS(status) << std::endl;
     return WEXITSTATUS(status);
   }
   return 0;
@@ -98,6 +97,22 @@ static HTTPStatusCode checkFileAccess(std::string const &filePath) {
   return HTTPStatusCode::OK;
 }
 
+static bool areHeadersValid(std::vector<std::string> const &headers) {
+  Logger &logger = Logger::getInstance();
+
+  for (std::vector<std::string>::const_iterator it = headers.begin();
+       it != headers.end(); it++) {
+    if (it->find(':') == std::string::npos) {
+      logger.error("No semicolon found in header from CGI output");
+      return false;
+    }
+    if (it->substr(it->length() - 2) != "\r\n") {
+      return false;
+    }
+  }
+  return true;
+}
+
 static HTTPStatusCode parseCgiOutput(std::string *pBody,
                                      std::vector<std::string> *pHeaders,
                                      std::string &src) {
@@ -108,7 +123,12 @@ static HTTPStatusCode parseCgiOutput(std::string *pBody,
     return HTTPStatusCode::INTERNAL_SERVER_ERROR;
   }
   *pBody = src.substr(endOfHeader + 4, src.length() - endOfHeader);
-  *pHeaders = splitHeader(src.substr(0, endOfHeader + 2));
+  *pHeaders = splitHeader(src.substr(0, endOfHeader + 2), true);
+  if (areHeadersValid(*pHeaders) == false) {
+    pBody->clear();
+    pHeaders->clear();
+    return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+  }
   return HTTPStatusCode::OK;
 }
 
