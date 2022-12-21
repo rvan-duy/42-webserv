@@ -57,13 +57,16 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
-  HttpResponse             _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
+  HttpResponse             _createResponseWithFile(std::string const &path, HTTPStatusCode statusCode) const;
+  HttpResponse             _createAutoIndexResponse(const std::string &path) const;
   bool                     _typeIsAccepted() const;
   std::string              _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
   std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
   std::vector<std::string> _getAcceptedTypesFromHeader() const;
   std::string              _constructPath(const std::string &root) const;
   FileType                 _fileExists(const std::string &path) const;
+  HttpResponse _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
+  bool         _checkIfIndexFileExists(const std::vector<std::string> &indexFiles, const std::string &path) const;
 };
 
 // DELETE
