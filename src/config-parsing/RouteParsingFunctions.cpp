@@ -67,7 +67,6 @@ int Parser::parseRoot(void *dest, t_dataLine line) {
   if (!dest || line.size() != 2) {
     return 1;
   }
-
   Route *route = static_cast<Route *>(dest);
 
   if (route->rootDirectory.length() != 0) {
