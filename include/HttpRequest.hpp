@@ -26,6 +26,8 @@ public:
   virtual ~HttpRequest();
 
   HttpRequest *operator+(const HttpRequest& other);
+  void  unChunkBody();
+  bool  isFirstChunk();
 
   // Abstract
   virtual HTTPStatusCode executeRequest(const Server &server) = 0;
@@ -34,7 +36,7 @@ public:
 protected:
   EHttpMethods _method;
   std::string _uri;
-  bool _chunked;
+  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 
   // Protected methods
   bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
@@ -113,9 +115,6 @@ public:
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
   HttpResponse constructResponse(const Server &server);
-
-private:
-  HTTPStatusCode _statusCode;
 };
 
 #endif // HTTP_REQUEST_HPP

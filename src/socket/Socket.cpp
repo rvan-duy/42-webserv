@@ -87,20 +87,9 @@ void Socket::addClient(const int &socket)
     _clients[socket] = newPair;
 }
 
-void    Socket::_addChunk(HttpRequest *request, int const &clientFd) {
-    Logger::getInstance().log("Adding chunk on client fd: " + std::to_string(clientFd), VERBOSE);
-    HttpRequest *original = _client[clientFd].first;
-    original = *original + *request;    // this will work because the '+' overload changes the original object so that the return is not important.
-}
-
 // TODO: fix segfault when printing request, might be done
 void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)//TODO: CHUNKED support
 {
-    if (_client[clientFd].first != NULL)
-    {
-        _addChunk()
-        return ;
-    }
     Logger::getInstance().log("Adding response to client with fd: " + std::to_string(clientFd));
     std::pair<HttpRequest *, Server *> newPair(request, server);
     _clients[clientFd] = newPair;

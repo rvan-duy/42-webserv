@@ -21,6 +21,7 @@ struct HttpHeaderData {
 class RequestParser {
  public:
   static HttpRequest *parseHeader(std::string &rawRequest);
+  static HttpRequest *processChunk(std::string &rawRequest);
 
  private:
   RequestParser();

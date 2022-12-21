@@ -61,20 +61,20 @@ static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string con
  */
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
-    std::string hostWithoutPort = getHostWithoutPort(request);
+  std::string hostWithoutPort = getHostWithoutPort(request);
 
-    if (hostWithoutPort.length() == 0)
-    {
-        delete request;
-        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-    }
-    try {
-        Server& result = matchBasedOnHost(_servers, hostWithoutPort);
-        return _addRequestToClient(clientFd, request, &result);
-    } catch (std::runtime_error error) {
-        delete request;
-        return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-    }
+  if (hostWithoutPort.length() == 0)
+  {
+      delete request;
+      return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+  }
+  try {
+      Server& result = matchBasedOnHost(_servers, hostWithoutPort);
+      return _addRequestToClient(clientFd, request, &result);
+  } catch (std::runtime_error error) {
+      delete request;
+      return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
+  }
 }
 
 int Socket::processRequest(int const &clientFd) {
@@ -86,13 +86,21 @@ int Socket::processRequest(int const &clientFd) {
   if (bytesRead < 0) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
     return 1;
-  } else if (bytesRead ==
-             0)  // TODO: will never be called because of above statement
+  } else if (bytesRead == 0)
   {
     _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     return 1;
   }
+  if (isChunked(clientFd))
+  {
+    request = RequestParser::processChunk(rawRequest);
+    addChunk(request, clientFd);
+    delete request; // the body or header data has been added to og request
+    return 0;
+  }
   request = RequestParser::parseHeader(rawRequest);
+  if(request->isFirstChunk()) // trailing headers will be caught by above ischunked already
+    request->unChunkBody();
   _matchRequestToServer(clientFd, request);
   return 0;
 }

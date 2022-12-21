@@ -4,24 +4,17 @@
 /*
  *  Canonical
  */
-HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url), _chunked(data.chunked) {}
+HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url) {}
 
-HttpRequest::HttpRequest() : _chunked(false) {}
+HttpRequest::HttpRequest() {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj)
 {
   _method = obj._method;
   _uri = obj._uri;
-  _chunked = obj._chunked;
 }
 
 HttpRequest::~HttpRequest() {}
-
-HttpRequest *HttpRequest::operator+(const HttpRequest& chunk) {
-  _body += chunk._body;
-  _headers.insert(std::begin(chunk._headers), std::end(chunk._headers));
-  return this;
-}
 
 /*
  * Protected methods
@@ -39,4 +32,26 @@ bool HttpRequest::_isMethodAllowed(const std::map<EHttpMethods, bool> allowedMet
     }
   }
   return false;
+}
+
+HttpRequest *HttpRequest::operator+(const HttpRequest& chunk) {
+  if (chunk._statusCode != HTTPStatusCode::NOT_SET)
+  {
+    delete this;
+    return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+  }
+  _body += chunk._body;
+  _headers.insert(std::begin(chunk._headers), std::end(chunk._headers));
+  return this;
+}
+
+void  HttpRequest::unChunkBody() {
+  _body = unChunk(_body);
+}
+
+/**
+ * Determines whether a given HTTP request uses chunked transfer encoding.
+ */
+bool  HttpRequest::isFirstChunk() {
+  return "chunked" == getHeader("Transfer-Encoding");
 }
