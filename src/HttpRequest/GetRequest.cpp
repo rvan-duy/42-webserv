@@ -42,7 +42,7 @@ HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
 
   HTTPStatusCode status = CGI::executeFile(&body, &headers, path, "");
   if (status != HTTPStatusCode::OK) {
-    return HttpResponse(status);
+    return _errorResponseWithFile(status, route);
   }
 }
 
@@ -51,29 +51,30 @@ HttpResponse GetRequest::_handleFileRequest(std::string const &path,
   switch (_getFileType(path)) {
     case FileType::IS_DIR: {
       if (_typeIsAccepted() == false) {
-        return HttpResponse(HTTPStatusCode::NOT_ACCEPTABLE);
+        return _errorResponseWithFile(HTTPStatusCode::NOT_ACCEPTABLE, route);
       }
       std::vector<std::string> possible_paths =
           _getPossiblePaths(path, route.indexFiles);
       for (std::vector<std::string>::const_iterator it = possible_paths.begin();
            it != possible_paths.end(); ++it) {
         if (_getFileType(*it) == FileType::IS_REG_FILE) {
-          return _createResponseWithFile(*it, HTTPStatusCode::OK);
+          return _responseWithFile(*it, HTTPStatusCode::OK);
         }
       }
       return HttpResponse(HTTPStatusCode::NOT_FOUND);
     }
     case FileType::IS_REG_FILE: {
       if (_typeIsAccepted() == false) {
-        return HttpResponse(HTTPStatusCode::NOT_ACCEPTABLE);
+        return _errorResponseWithFile(HTTPStatusCode::NOT_ACCEPTABLE, route);
       }
-      return _createResponseWithFile(path, HTTPStatusCode::OK);
+      return _responseWithFile(path, HTTPStatusCode::OK);
     }
     case FileType::IS_UNKNOWN: {
-      return HttpResponse(HTTPStatusCode::NOT_FOUND);
+      return _errorResponseWithFile(HTTPStatusCode::NOT_FOUND, route);
     }
     default: {
-      return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
+      return _errorResponseWithFile(HTTPStatusCode::INTERNAL_SERVER_ERROR,
+                                    route);
     }
   }
 }
@@ -93,12 +94,9 @@ static std::string fileToStr(std::ifstream &file) {
   std::string body((std::istreambuf_iterator<char>(file)),
                    std::istreambuf_iterator<char>());
   return body;  // Read
-  std::ostringstream ss;
-  ss << file.rdbuf();  // reading data
-  std::cout << file.rdbuf();
-  return ss.str();
-  // return std::string(std::istreambuf_iterator<char>(file),
-  //                    std::istreambuf_iterator<char>());
+  // std::ostringstream ss;
+  // std::cout << file.rdbuf();
+  // return ss.str();
 }
 
 /*
@@ -121,8 +119,14 @@ static std::string getContentType(const std::string &path) {
   return "text/plain";
 }
 
-HttpResponse GetRequest::_createResponseWithFile(
-    std::string const &path, HTTPStatusCode statusCode) const {
+HttpResponse GetRequest::_errorResponseWithFile(
+    HTTPStatusCode const &statusCode, Route const &route) const {
+  std::string pathToErrorFile = _getErrorPageIndex(route, statusCode);
+  return _responseWithFile(pathToErrorFile, statusCode);
+}
+
+HttpResponse GetRequest::_responseWithFile(std::string const &path,
+                                           HTTPStatusCode statusCode) const {
   std::ifstream file(path.c_str());
   if (!file.is_open()) {
     return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);

@@ -74,8 +74,10 @@ class GetRequest : public HttpRequest {
   HttpResponse _handleFileRequest(std::string const &path,
                                   Route const &route) const;
 
-  HttpResponse _createResponseWithFile(std::string const &path,
-                                       HTTPStatusCode statusCode) const;
+  HttpResponse _errorResponseWithFile(HTTPStatusCode const &statusCode,
+                                      Route const &route) const;
+  HttpResponse _responseWithFile(std::string const &path,
+                                 HTTPStatusCode statusCode) const;
 };
 
 // DELETE
