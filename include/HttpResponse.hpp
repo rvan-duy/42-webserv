@@ -3,8 +3,8 @@
 
 #include <sys/stat.h>
 
-#include <Webserver.hpp>
 #include <StatusCodes.hpp>
+#include <Webserver.hpp>
 #include <fstream>
 #include <iterator>
 #include <sstream>
@@ -22,14 +22,15 @@ class HttpResponse : public HttpMessage {
   std::string toStr() const;
 
   // Setters
-  void _setResponse(const std::string &path, HTTPStatusCode statusCode, const std::string &status_message,
+  void _setResponse(const std::string &path, HTTPStatusCode statusCode,
+                    const std::string &status_message,
                     const HttpVersion version);
 
  private:
-  HTTPStatusCode _statusCode;     // status code of response
-  std::string    _statusMessage;  // status message of response
+  HTTPStatusCode _statusCode;  // status code of response
+  std::string _statusMessage;  // status message of response
 
-  std::string    _getContentType(const std::string &path) const;
+  std::string _getContentType(const std::string &path) const;
 };
 
 #endif  // HTTP_RESPONSE_HPP

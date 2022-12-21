@@ -45,11 +45,6 @@ std::string HttpResponse::toStr() const {
   if (_body.length() > 0) {
     response_string += _body;
   }
-
-  /**************************************************/
-  /* Return the response string                     */
-  /**************************************************/
-
   return response_string;
 }
 
@@ -72,8 +67,7 @@ void HttpResponse::_setResponse(const std::string &path,
   _statusMessage = status_message;        // Set the status message
   _version = version;                     // Set the version
   _headers["Content-Length"] = ss.str();  // Set the content length header
-  _headers["Content-Type"] =
-      _getContentType(path);     // Set the content type header
+  _headers["Content-Type"] = _getContentType(path);
   file.seekg(0, std::ios::beg);  // Seek back to the beginning of the file
   if (file.is_open()) {
     std::string body(

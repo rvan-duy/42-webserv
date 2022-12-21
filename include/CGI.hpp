@@ -22,18 +22,16 @@
 
 class CGI {
  public:
-  CGI(char *const *env);
-  ~CGI();
-
-  HTTPStatusCode executeFile(std::string *pBody,
-                             std::vector<std::string> *pHeaders,
-                             std::string const &filePath,
-                             std::string const &body) const;
+  static HTTPStatusCode executeFile(std::string *pBody,
+                                    std::vector<std::string> *pHeaders,
+                                    std::string const &filePath,
+                                    std::string const &body);
 
  protected:
-  /* Don't change the order of the '*' and keywords here please */
-  char *const *_env;
+  static int _forkCgiFile(int fd[2], std::string const &filePath,
+                          std::string const &body);
 
-  int forkCgiFile(int fd[2], std::string const &filePath,
-                  std::string const &body) const;
+ private:
+  CGI();
+  ~CGI();
 };

@@ -74,7 +74,6 @@ class Parser {
   /* AST line parsing functions */
   int parsePort(void *dest, t_dataLine line);
   int parseMaxBodySize(void *dest, t_dataLine line);
-  int parseHost(void *dest, t_dataLine line);
   int parseServerName(void *dest, t_dataLine line);
   /* AST block parsing functions */
   int parseErrorPage(void *dest, t_dataLine line);

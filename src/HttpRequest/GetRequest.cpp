@@ -13,16 +13,25 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
   return HTTPStatusCode::OK;
 }
 
-// TODO: add redirection support, with return ? 301 and 302
+static bool isCgiRequest(std::string path) {
+  if (path.substr(path.length() - 3) != ".py") {
+    return false;
+  }
+  return true;
+}
 
+// TODO: add redirection support, with return ? 301 and 302
 HttpResponse GetRequest::constructResponse(const Server &server) {
   const Route routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path = _constructPath(routeOfResponse.rootDirectory);
-  HttpResponse response;
 
   if (_isMethodAllowed(routeOfResponse.allowedMethods) == false) {
     return _createResponseObject(path, HTTPStatusCode::METHOD_NOT_ALLOWED,
                                  routeOfResponse);
+  }
+
+  if (isCgiRequest(path)) {
+    return _handleCgiRequest(path, routeOfResponse);
   }
 
   switch (_fileExists(path)) {
@@ -58,6 +67,17 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
       return _createResponseObject(path, HTTPStatusCode::INTERNAL_SERVER_ERROR,
                                    routeOfResponse);
     }
+  }
+}
+
+HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
+                                           Route const &route) const {
+  std::vector<std::string> headers;
+  std::string body;
+
+  HTTPStatusCode status = CGI::executeFile(&body, &headers, path, "");
+  if (status != HTTPStatusCode::OK) {
+    return _createResponseObject(path, status, route);
   }
 }
 

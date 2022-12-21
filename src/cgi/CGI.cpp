@@ -1,9 +1,11 @@
+#include <unistd.h>
+
 #include <CGI.hpp>
 
 /**************************************************/
 /* Constructors / destructors		 	          */
 /**************************************************/
-CGI::CGI(char *const *env) : _env(env) {}
+CGI::CGI() {}
 
 CGI::~CGI() {}
 
@@ -12,8 +14,8 @@ CGI::~CGI() {}
 /**************************************************/
 
 /* Child process that executes CGI file */
-int CGI::forkCgiFile(int fd[2], std::string const &filePath,
-                     std::string const &body) const {
+int CGI::_forkCgiFile(int fd[2], std::string const &filePath,
+                      std::string const &body) {
   Logger &logger = Logger::getInstance();
 
   char *argv[] = {const_cast<char *>(PATH_TO_PYTHON),
@@ -31,7 +33,7 @@ int CGI::forkCgiFile(int fd[2], std::string const &filePath,
     close(fd[WRITE]);
     exit(1);
   }
-  if (execve(PATH_TO_PYTHON, static_cast<char *const *>(argv), _env)) {
+  if (execve(PATH_TO_PYTHON, static_cast<char *const *>(argv), environ)) {
     logger.error("[EXECUTING] CGI: execve: " + std::string(strerror(errno)));
     close(fd[WRITE]);
     exit(1);
@@ -136,7 +138,7 @@ static HTTPStatusCode parseCgiOutput(std::string *pBody,
 HTTPStatusCode CGI::executeFile(std::string *pBody,
                                 std::vector<std::string> *pHeaders,
                                 std::string const &filePath,
-                                std::string const &body) const {
+                                std::string const &body) {
   Logger &logger = Logger::getInstance();
   HTTPStatusCode status = HTTPStatusCode::OK;
   std::string buffer;
@@ -151,7 +153,6 @@ HTTPStatusCode CGI::executeFile(std::string *pBody,
 
   /* Open pipe */
   if (pipe(fd) == -1) {
-    logger.error("[PREPARING] CGI: pipe: " + std::string(strerror(errno)));
     throw std::runtime_error("[PREPARING] CGI: pipe: " +
                              std::string(strerror(errno)));
   }
@@ -159,15 +160,16 @@ HTTPStatusCode CGI::executeFile(std::string *pBody,
   /* Start fork */
   pid = fork();
   if (pid == -1) {
-    logger.error("[PREPARING] CGI: fork: " + std::string(strerror(errno)));
     throw std::runtime_error("[PREPARING] CGI: fork: " +
                              std::string(strerror(errno)));
   } else if (pid == CHILD) {
-    if (forkCgiFile(fd, filePath, body)) {
+    /* Child process */
+    if (_forkCgiFile(fd, filePath, body)) {
       throw std::runtime_error("[EXECUTING] CGI: " +
                                std::string(strerror(errno)));
     }
   } else {
+    /* Parent process */
     close(fd[WRITE]);
     if (readFromChildProcess(&buffer, pid, fd[READ])) {
       return HTTPStatusCode::INTERNAL_SERVER_ERROR;

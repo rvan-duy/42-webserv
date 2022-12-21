@@ -17,8 +17,7 @@ int startWebserver(std::vector<Socket> sockets) {
   return 0;
 }
 
-int main(int argc, char **argv, char **env) {
-  (void)env;
+int main(int argc, char **argv) {
   std::vector<Socket> sockets;
   /*  Input check */
   if (argc != 2) {

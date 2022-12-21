@@ -1,7 +1,5 @@
 #include "Multiplexer.hpp"
 
-#include <algorithm>
-
 #include "Logger.hpp"
 
 Multiplexer::Multiplexer(std::vector<Socket> sockets)
