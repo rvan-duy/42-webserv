@@ -66,13 +66,17 @@ class GetRequest : public HttpRequest {
   std::string _getErrorPageIndex(const Route &route,
                                  HTTPStatusCode errorCode) const;
   std::vector<std::string> _getPossiblePaths(
-      const std::string &path, const std::vector<std::string> &index_files);
+      const std::string &path,
+      const std::vector<std::string> &index_files) const;
   std::vector<std::string> _getAcceptedTypesFromHeader() const;
   std::string _constructPath(const std::string &root) const;
   FileType _fileExists(const std::string &path) const;
 
   HttpResponse _handleCgiRequest(std::string const &path,
                                  Route const &route) const;
+
+  HttpResponse _handleFileRequest(std::string const &path,
+                                  Route const &route) const;
 };
 
 // DELETE

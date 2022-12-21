@@ -99,6 +99,6 @@ class Server {
   PageData _defaultErrorPage;
 };
 
-std::ostream& operator<<(std::ostream& os, const Server& ob);
+std::ostream &operator<<(std::ostream &os, const Server &ob);
 
 #endif

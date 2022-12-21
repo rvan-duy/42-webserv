@@ -21,6 +21,8 @@ class HttpResponse : public HttpMessage {
   // Methods
   std::string toStr() const;
 
+  void setHeader(std::string const &key, std::string const &value);
+
   // Setters
   void _setResponse(const std::string &path, HTTPStatusCode statusCode,
                     const std::string &status_message,

@@ -14,10 +14,10 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
 }
 
 static bool isCgiRequest(std::string path) {
-  if (path.substr(path.length() - 3) != ".py") {
-    return false;
+  if (path.substr(path.length() - 3) == ".py") {
+    return true;
   }
-  return true;
+  return false;
 }
 
 // TODO: add redirection support, with return ? 301 and 302
@@ -33,41 +33,7 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
   if (isCgiRequest(path)) {
     return _handleCgiRequest(path, routeOfResponse);
   }
-
-  switch (_fileExists(path)) {
-    case FileType::IS_DIR: {
-      if (_typeIsAccepted() == false) {
-        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE,
-                                     routeOfResponse);
-      }
-      std::vector<std::string> possible_paths =
-          _getPossiblePaths(path, routeOfResponse.indexFiles);
-      for (std::vector<std::string>::const_iterator it = possible_paths.begin();
-           it != possible_paths.end(); ++it) {
-        if (_fileExists(*it) == FileType::IS_REG_FILE) {
-          return _createResponseObject(*it, HTTPStatusCode::OK,
-                                       routeOfResponse);
-        }
-      }
-      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND,
-                                   routeOfResponse);
-    }
-    case FileType::IS_REG_FILE: {
-      if (_typeIsAccepted() == false) {
-        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE,
-                                     routeOfResponse);
-      }
-      return _createResponseObject(path, HTTPStatusCode::OK, routeOfResponse);
-    }
-    case FileType::IS_UNKNOWN: {
-      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND,
-                                   routeOfResponse);
-    }
-    default: {
-      return _createResponseObject(path, HTTPStatusCode::INTERNAL_SERVER_ERROR,
-                                   routeOfResponse);
-    }
-  }
+  return _handleFileRequest(path, routeOfResponse);
 }
 
 HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
@@ -78,6 +44,41 @@ HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
   HTTPStatusCode status = CGI::executeFile(&body, &headers, path, "");
   if (status != HTTPStatusCode::OK) {
     return _createResponseObject(path, status, route);
+  }
+}
+
+HttpResponse GetRequest::_handleFileRequest(std::string const &path,
+                                            Route const &route) const {
+  switch (_fileExists(path)) {
+    case FileType::IS_DIR: {
+      if (_typeIsAccepted() == false) {
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE,
+                                     route);
+      }
+      std::vector<std::string> possible_paths =
+          _getPossiblePaths(path, route.indexFiles);
+      for (std::vector<std::string>::const_iterator it = possible_paths.begin();
+           it != possible_paths.end(); ++it) {
+        if (_fileExists(*it) == FileType::IS_REG_FILE) {
+          return _createResponseObject(*it, HTTPStatusCode::OK, route);
+        }
+      }
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, route);
+    }
+    case FileType::IS_REG_FILE: {
+      if (_typeIsAccepted() == false) {
+        return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE,
+                                     route);
+      }
+      return _createResponseObject(path, HTTPStatusCode::OK, route);
+    }
+    case FileType::IS_UNKNOWN: {
+      return _createResponseObject(path, HTTPStatusCode::NOT_FOUND, route);
+    }
+    default: {
+      return _createResponseObject(path, HTTPStatusCode::INTERNAL_SERVER_ERROR,
+                                   route);
+    }
   }
 }
 
@@ -149,7 +150,8 @@ std::string GetRequest::_getErrorPageIndex(const Route &route,
 }
 
 std::vector<std::string> GetRequest::_getPossiblePaths(
-    const std::string &path, const std::vector<std::string> &index_files) {
+    const std::string &path,
+    const std::vector<std::string> &index_files) const {
   std::vector<std::string> possible_paths;
 
   for (std::vector<std::string>::const_iterator it = index_files.begin();
