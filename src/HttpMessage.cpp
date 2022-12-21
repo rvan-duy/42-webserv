@@ -25,7 +25,13 @@ HttpVersion HttpMessage::getVersion() const {
 }
 
 /*
+ * Getter for the HTTP version of the message as a string
+ */
+std::string HttpMessage::getVersionToStr() const {
   switch (_version) {
+    case HTTP_1_1:
+      return "HTTP/1.1";
+    case HTTP_2_0:
       return "HTTP/2.0";
     case HTTP_3_0:
       return "HTTP/3.0";
@@ -33,7 +39,6 @@ HttpVersion HttpMessage::getVersion() const {
       return "HTTP/1.1";
   }
 }
-
 /*
  * Getter for the headers of the message
  */
