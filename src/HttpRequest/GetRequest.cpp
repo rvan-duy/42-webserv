@@ -58,7 +58,7 @@ HttpResponse GetRequest::_handleFileRequest(std::string const &path,
       for (std::vector<std::string>::const_iterator it = possible_paths.begin();
            it != possible_paths.end(); ++it) {
         if (_getFileType(*it) == FileType::IS_REG_FILE) {
-          return _createResponseWithFile(*it);
+          return _createResponseWithFile(*it, HTTPStatusCode::OK);
         }
       }
       return HttpResponse(HTTPStatusCode::NOT_FOUND);
@@ -67,7 +67,7 @@ HttpResponse GetRequest::_handleFileRequest(std::string const &path,
       if (_typeIsAccepted() == false) {
         return HttpResponse(HTTPStatusCode::NOT_ACCEPTABLE);
       }
-      return _createResponseWithFile(path);
+      return _createResponseWithFile(path, HTTPStatusCode::OK);
     }
     case FileType::IS_UNKNOWN: {
       return HttpResponse(HTTPStatusCode::NOT_FOUND);
@@ -122,12 +122,12 @@ static std::string getContentType(const std::string &path) {
 }
 
 HttpResponse GetRequest::_createResponseWithFile(
-    std::string const &path) const {
+    std::string const &path, HTTPStatusCode statusCode) const {
   std::ifstream file(path.c_str());
   if (!file.is_open()) {
     return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
   }
-  HttpResponse response(HTTPStatusCode::OK);
+  HttpResponse response(statusCode);
   std::string test = fileToStr(file);
   response.setBody(fileToStr(file));
   response.setHeader("Content-Length", getFileSize(file));
