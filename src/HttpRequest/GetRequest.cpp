@@ -15,10 +15,11 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
 
 // TODO: add redirection support, with return ? 301 and 302
 // auto index
-// images
+// - if auto index is on and the path is a directory, look for index files and return it
+// - if auto index is off and the path is a directory, return 403
 
 HttpResponse GetRequest::constructResponse(const Server &server) {
-  const Route       routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const Route      &routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path            = _constructPath(routeOfResponse.rootDirectory);
   HttpResponse      response;
 
@@ -58,14 +59,16 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
  * Private methods
  */
 
-HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const {
+HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStatusCode statusCode,
+                                               const Route &route) const {
   HttpResponse response;
 
   if (statusCode == HTTPStatusCode::OK) {
     response._setResponse(path, statusCode, getMessageByStatusCode(statusCode), getVersion());
     return response;
   } else {
-    response._setResponse(_getErrorPageIndex(route, statusCode), statusCode, getMessageByStatusCode(statusCode), getVersion());
+    response._setResponse(_getErrorPageIndex(route, statusCode), statusCode, getMessageByStatusCode(statusCode),
+                          getVersion());
     return response;
   }
 }
