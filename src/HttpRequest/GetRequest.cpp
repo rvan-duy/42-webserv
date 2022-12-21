@@ -22,7 +22,7 @@ static bool isCgiRequest(std::string path) {
 
 // TODO: add redirection support, with return ? 301 and 302
 HttpResponse GetRequest::constructResponse(const Server &server) {
-  const Route routeOfResponse = server.getRoute(HttpRequest::_uri);
+  Route const &routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path = _constructPath(routeOfResponse.rootDirectory);
 
   if (_isMethodAllowed(routeOfResponse.allowedMethods) == false) {
@@ -138,6 +138,9 @@ HttpResponse GetRequest::_responseWithFile(std::string const &path,
   response.setHeader("Content-Type", getContentType(path));
   return response;
 }
+
+HttpResponse GetRequest::_responseWithBody(
+    std::map<std::string, std::string> headers, std::string body) const {}
 
 bool GetRequest::_typeIsAccepted() const {
   // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the

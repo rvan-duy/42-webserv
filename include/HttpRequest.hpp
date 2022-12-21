@@ -78,6 +78,9 @@ class GetRequest : public HttpRequest {
                                       Route const &route) const;
   HttpResponse _responseWithFile(std::string const &path,
                                  HTTPStatusCode statusCode) const;
+
+  HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
+                                 std::string body) const;
 };
 
 // DELETE
