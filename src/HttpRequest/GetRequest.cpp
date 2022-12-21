@@ -14,6 +14,8 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
 }
 
 // TODO: add redirection support, with return ? 301 and 302
+// auto index
+// images
 
 HttpResponse GetRequest::constructResponse(const Server &server) {
   const Route       routeOfResponse = server.getRoute(HttpRequest::_uri);
@@ -70,11 +72,11 @@ HttpResponse GetRequest::_createResponseObject(const std::string &path, HTTPStat
 
 bool GetRequest::_typeIsAccepted() const {
   // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the server can accept
-  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css", "application/javascript"};
+  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css", "application/javascript", "image/jpg"};
   const std::string              ACCEPT_HEADER   = getHeader("Accept");
   std::vector<std::string>       acceptedTypes;
 
-  if (ACCEPT_HEADER.empty() || ACCEPT_HEADER == "*/*") {
+  if (ACCEPT_HEADER.empty() || ACCEPT_HEADER.find("*/*") != std::string::npos) {
     return true;
   } else {
     std::size_t pos  = 0;
