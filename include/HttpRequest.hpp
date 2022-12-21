@@ -58,10 +58,6 @@ class GetRequest : public HttpRequest {
   HttpResponse constructResponse(const Server &server);
 
  private:
-  // Private methods
-  HttpResponse _createResponseObject(const std::string &path,
-                                     HTTPStatusCode statusCode,
-                                     const Route &route) const;
   bool _typeIsAccepted() const;
   std::string _getErrorPageIndex(const Route &route,
                                  HTTPStatusCode errorCode) const;
@@ -70,13 +66,15 @@ class GetRequest : public HttpRequest {
       const std::vector<std::string> &index_files) const;
   std::vector<std::string> _getAcceptedTypesFromHeader() const;
   std::string _constructPath(const std::string &root) const;
-  FileType _fileExists(const std::string &path) const;
+  FileType _getFileType(const std::string &path) const;
 
   HttpResponse _handleCgiRequest(std::string const &path,
                                  Route const &route) const;
 
   HttpResponse _handleFileRequest(std::string const &path,
                                   Route const &route) const;
+
+  HttpResponse _createResponseWithFile(std::string const &path) const;
 };
 
 // DELETE

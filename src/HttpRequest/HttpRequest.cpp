@@ -6,7 +6,7 @@
  *  Canonical
  */
 HttpRequest::HttpRequest(HttpHeaderData const &data)
-    : HttpMessage(data.headers, data.httpVersion, data.body),
+    : HttpMessage(data.httpVersion, data.headers, data.body),
       _method(data.method),
       _uri(data.url),
       _chunked(data.chunked) {}

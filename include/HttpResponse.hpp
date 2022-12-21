@@ -14,6 +14,10 @@
 
 class HttpResponse : public HttpMessage {
  public:
+  HttpResponse(HTTPStatusCode status);
+  HttpResponse(HTTPStatusCode status,
+               std::map<std::string, std::string> const &headers,
+               std::string const &body);
   HttpResponse();
   HttpResponse(const HttpResponse &obj);
   ~HttpResponse();
@@ -21,18 +25,9 @@ class HttpResponse : public HttpMessage {
   // Methods
   std::string toStr() const;
 
-  void setHeader(std::string const &key, std::string const &value);
-
-  // Setters
-  void _setResponse(const std::string &path, HTTPStatusCode statusCode,
-                    const std::string &status_message,
-                    const HttpVersion version);
-
  private:
   HTTPStatusCode _statusCode;  // status code of response
   std::string _statusMessage;  // status message of response
-
-  std::string _getContentType(const std::string &path) const;
 };
 
 #endif  // HTTP_RESPONSE_HPP

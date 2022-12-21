@@ -2,7 +2,19 @@
 
 #include "Logger.hpp"
 
-HttpResponse::HttpResponse() {}
+HttpResponse::HttpResponse(HTTPStatusCode status)
+    : HttpMessage(HttpVersion::HTTP_1_1),
+      _statusCode(status),
+      _statusMessage(getMessageByStatusCode(status)) {}
+
+HttpResponse::HttpResponse(HTTPStatusCode status,
+                           std::map<std::string, std::string> const &headers,
+                           std::string const &body)
+    : HttpMessage(HttpVersion::HTTP_1_1, headers, body),
+      _statusCode(status),
+      _statusMessage(getMessageByStatusCode(status)) {}
+
+HttpResponse::HttpResponse() : HttpMessage(HttpVersion::HTTP_1_1) {}
 
 HttpResponse::HttpResponse(const HttpResponse &obj) : HttpMessage(obj) {
   _statusCode = obj._statusCode;
@@ -46,71 +58,4 @@ std::string HttpResponse::toStr() const {
     response_string += _body;
   }
   return response_string;
-}
-
-/*
- * Sets the HttpResponse Class attributes to the given values
- */
-void HttpResponse::_setResponse(const std::string &path,
-                                HTTPStatusCode statusCode,
-                                const std::string &status_message,
-                                const HttpVersion version) {
-  Logger &logger = Logger::getInstance();
-
-  std::ifstream file(path.c_str());  // Open the file
-  logger.log("Requested path: " + path);
-
-  file.seekg(0, std::ios::end);  // Seek to the end of the file
-  std::stringstream ss;  // Create a stringstream to store the file contents in
-  ss << file.tellg();    // Get the file size
-  _statusCode = statusCode;               // Set the status code
-  _statusMessage = status_message;        // Set the status message
-  _version = version;                     // Set the version
-  _headers["Content-Length"] = ss.str();  // Set the content length header
-  _headers["Content-Type"] = _getContentType(path);
-  file.seekg(0, std::ios::beg);  // Seek back to the beginning of the file
-  if (file.is_open()) {
-    std::string body(
-        (std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>());  // Read the file into a string
-    file.close();
-    _body = body;
-  }
-}
-
-/*
- * Get the file type of a file
- * @param path The path to the file to check
- * @return The content type of the file
- */
-std::string HttpResponse::_getContentType(const std::string &path) const {
-  /**************************************************/
-  /* The map of file extensions to content types    */
-  /**************************************************/
-
-  std::map<std::string, std::string> file_types;
-
-  file_types["html"] = "text/html";
-  file_types["css"] = "text/css";
-  file_types["js"] = "application/javascript";
-  file_types["png"] = "image/png";
-
-  // add more file types here if needed
-
-  /**************************************************/
-  /* Get the file extension                         */
-  /**************************************************/
-
-  std::string file_extension = path.substr(path.find_last_of(".") + 1);
-
-  /**************************************************/
-  /* Check if the file extension is in the map, if  */
-  /* it is, return the file type, otherwise return  */
-  /* text/plain                                     */
-  /**************************************************/
-
-  if (file_types.find(file_extension) != file_types.end()) {
-    return file_types[file_extension];
-  }
-  return "text/plain";
 }
