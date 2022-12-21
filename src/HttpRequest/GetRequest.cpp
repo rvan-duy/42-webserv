@@ -31,6 +31,8 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
     case FileType::IS_DIR: {
       if (_typeIsAccepted() == false) {
         return _createResponseObject(path, HTTPStatusCode::NOT_ACCEPTABLE, routeOfResponse);
+      } else if (routeOfResponse.autoIndex == false) {
+        return _createResponseObject(path, HTTPStatusCode::FORBIDDEN, routeOfResponse);
       }
       std::vector<std::string> possible_paths = _getPossiblePaths(path, routeOfResponse.indexFiles);
       for (std::vector<std::string>::const_iterator it = possible_paths.begin(); it != possible_paths.end(); ++it) {

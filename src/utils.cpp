@@ -18,6 +18,8 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode)
         return "OK";
     case HTTPStatusCode::BAD_REQUEST:
         return "Bad request";
+    case HTTPStatusCode::FORBIDDEN:
+        return "Forbidden";
     case HTTPStatusCode::NOT_FOUND:
         return "Not found";
     case HTTPStatusCode::METHOD_NOT_ALLOWED:
