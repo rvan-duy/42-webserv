@@ -37,13 +37,15 @@ HttpResponse GetRequest::constructResponse(const Server &server) {
 
 HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
                                            Route const &route) const {
-  std::vector<std::string> headers;
+  std::map<std::string, std::string> headers;
   std::string body;
 
   HTTPStatusCode status = CGI::executeFile(&body, &headers, path, "");
   if (status != HTTPStatusCode::OK) {
+    Logger::getInstance().error(getMessageByStatusCode(status));
     return _errorResponseWithFile(status, route);
   }
+  return _responseWithBody(headers, body);
 }
 
 HttpResponse GetRequest::_handleFileRequest(std::string const &path,
@@ -93,10 +95,7 @@ static std::string fileToStr(std::ifstream &file) {
 
   std::string body((std::istreambuf_iterator<char>(file)),
                    std::istreambuf_iterator<char>());
-  return body;  // Read
-  // std::ostringstream ss;
-  // std::cout << file.rdbuf();
-  // return ss.str();
+  return body;
 }
 
 /*
@@ -140,7 +139,17 @@ HttpResponse GetRequest::_responseWithFile(std::string const &path,
 }
 
 HttpResponse GetRequest::_responseWithBody(
-    std::map<std::string, std::string> headers, std::string body) const {}
+    std::map<std::string, std::string> headers, std::string body) const {
+  HttpResponse response(HTTPStatusCode::OK);
+  response.setBody(body);
+  Logger::getInstance().debug(body);
+  for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+       it != headers.end(); ++it) {
+    Logger::getInstance().debug(it->first);
+    response.setHeader(it->first, it->second);
+  }
+  return response;
+}
 
 bool GetRequest::_typeIsAccepted() const {
   // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the

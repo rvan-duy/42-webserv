@@ -6,7 +6,10 @@ def main():
     print("test: hi\r")
     print("test : no\r")
     print("\r")
-    print("body")
+    json = {
+        "message": "hi"
+    }
+    print(json)
     exit(0)
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@
 #include <StatusCodes.hpp>
 #include <Webserver.hpp>
 #include <fstream>
+#include <map>
 #include <string>
 
 /* Piping and forking variables */
@@ -22,10 +23,9 @@
 
 class CGI {
  public:
-  static HTTPStatusCode executeFile(std::string *pBody,
-                                    std::vector<std::string> *pHeaders,
-                                    std::string const &filePath,
-                                    std::string const &body);
+  static HTTPStatusCode executeFile(
+      std::string *pBody, std::map<std::string, std::string> *pHeaders,
+      std::string const &filePath, std::string const &body);
 
  protected:
   static int _forkCgiFile(int fd[2], std::string const &filePath,

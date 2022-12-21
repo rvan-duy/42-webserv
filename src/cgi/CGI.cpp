@@ -99,36 +99,54 @@ static HTTPStatusCode checkFileAccess(std::string const &filePath) {
   return HTTPStatusCode::OK;
 }
 
-static bool areHeadersValid(std::vector<std::string> const &headers) {
+static int makeHeaders(std::map<std::string, std::string> *dest,
+                       std::vector<std::string> headers) {
   Logger &logger = Logger::getInstance();
+  size_t semiColLocation;
+  std::string key;
+  std::string value;
 
   for (std::vector<std::string>::const_iterator it = headers.begin();
        it != headers.end(); it++) {
-    if (it->find(':') == std::string::npos) {
+    semiColLocation = it->find(':');
+    if (semiColLocation == std::string::npos) {
       logger.error("No semicolon found in header from CGI output");
-      return false;
+      return 1;
     }
     if (it->substr(it->length() - 2) != "\r\n") {
-      return false;
+      return 1;
     }
+    key = it->substr(0, semiColLocation);
+    value = it->substr(semiColLocation + 1, it->length());
+    (*dest)[key] = value;
   }
-  return true;
+  return 0;
 }
 
-static HTTPStatusCode parseCgiOutput(std::string *pBody,
-                                     std::vector<std::string> *pHeaders,
-                                     std::string &src) {
+static int splitHeaderFromBody(std::string *pBody,
+                               std::vector<std::string> *pHeaders,
+                               std::string src) {
   Logger &logger = Logger::getInstance();
   size_t endOfHeader = src.find("\r\n\r\n");
   if (endOfHeader == std::string::npos) {
     logger.error("Incorrect end of header found -> returning new BadRequest()");
-    return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+    return 1;
   }
   *pBody = src.substr(endOfHeader + 4, src.length() - endOfHeader);
   *pHeaders = splitHeader(src.substr(0, endOfHeader + 2), true);
-  if (areHeadersValid(*pHeaders) == false) {
-    pBody->clear();
+  return 0;
+}
+
+static HTTPStatusCode parseCgiOutput(
+    std::string *pBody, std::map<std::string, std::string> *pHeaders,
+    std::string &src) {
+  std::vector<std::string> headers;
+  if (splitHeaderFromBody(pBody, &headers, src)) {
+    return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+  }
+  if (makeHeaders(pHeaders, headers)) {
     pHeaders->clear();
+    pBody->clear();
     return HTTPStatusCode::INTERNAL_SERVER_ERROR;
   }
   return HTTPStatusCode::OK;
@@ -136,7 +154,7 @@ static HTTPStatusCode parseCgiOutput(std::string *pBody,
 
 /* CGI control flow */
 HTTPStatusCode CGI::executeFile(std::string *pBody,
-                                std::vector<std::string> *pHeaders,
+                                std::map<std::string, std::string> *pHeaders,
                                 std::string const &filePath,
                                 std::string const &body) {
   Logger &logger = Logger::getInstance();
