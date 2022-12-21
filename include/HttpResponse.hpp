@@ -26,8 +26,6 @@ class HttpResponse : public HttpMessage {
  private:
   HTTPStatusCode _statusCode;     // status code of response
   std::string    _statusMessage;  // status message of response
-
-  std::string    _getContentType(const std::string &path) const;
 };
 
 #endif  // HTTP_RESPONSE_HPP
