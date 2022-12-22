@@ -66,6 +66,9 @@ static int parseFirstLine(HttpHeaderData *dest, std::string const &line) {
   retValue = parseMethod(splittedString[0]);
   if (retValue == -1) return 1;
   dest->method = static_cast<EHttpMethods>(retValue);
+  if (dest->method != EHttpMethods::POST) {
+    dest->body = "";
+  }
   retValue = parseHttpVersion(splittedString[2]);
   if (retValue == -1) return 1;
   dest->httpVersion = static_cast<HttpVersion>(retValue);
@@ -129,12 +132,14 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
   }
   headerData.body =
       rawRequest.substr(endOfHeader + 4, rawRequest.length() - endOfHeader);
-  headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), false);
+  headerLines =
+      splitHeader(rawRequest.substr(0, endOfHeader + 2), false, "\r\n");
   if (parseFirstLine(&headerData, headerLines[0])) {
     logger.error(
         "Incorrect first line of request -> returning new BadRequest()");
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
+
   if (makeHeaderMap(&headerData.headers, headerLines)) {
     logger.error(
         "Incorrect header added to request -> returning new BadRequest()");

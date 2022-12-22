@@ -6,9 +6,9 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
     case HTTPStatusCode::OK:
       return "OK";
     case HTTPStatusCode::BAD_REQUEST:
-        return "Bad request";
+      return "Bad request";
     case HTTPStatusCode::FORBIDDEN:
-        return "Forbidden";
+      return "Forbidden";
     case HTTPStatusCode::NOT_FOUND:
       return "Not found";
     case HTTPStatusCode::METHOD_NOT_ALLOWED:
@@ -26,21 +26,22 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
   }
 }
 
-std::vector<std::string> splitHeader(std::string headerString,
-                                     bool withNewline) {
+std::vector<std::string> splitHeader(const std::string &headerString,
+                                     bool withNewline,
+                                     const std::string &delimiter) {
   std::vector<std::string> headerLines;
   std::string currentLine;
   size_t lastLocation = 0;  // last location of \n\r
   size_t nextLocation = 0;  // next location of \n\r
 
   do {
-    nextLocation = headerString.find("\r\n", nextLocation);
+    nextLocation = headerString.find(delimiter, nextLocation);
     if (nextLocation == std::string::npos) break;
-    if (withNewline) nextLocation += 2;
+    if (withNewline) nextLocation += delimiter.length();
     currentLine =
         headerString.substr(lastLocation, nextLocation - lastLocation);
     headerLines.push_back(currentLine);
-    if (!withNewline) nextLocation += 2;
+    if (!withNewline) nextLocation += delimiter.length();
     lastLocation = nextLocation;
   } while (true);
   return headerLines;

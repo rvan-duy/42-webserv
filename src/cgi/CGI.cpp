@@ -61,7 +61,7 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
     return 1;
   }
 
-  std::string output("");
+  std::string output;
   std::string buffer[BUFFER_SIZE + 1];
   int bytesRead;
 
@@ -113,7 +113,7 @@ static int makeHeaders(std::map<std::string, std::string> *dest,
       logger.error("No semicolon found in header from CGI output");
       return 1;
     }
-    if (it->substr(it->length() - 2) != "\r\n") {
+    if ((*it)[it->length() - 1] != '\n') {
       return 1;
     }
     key = it->substr(0, semiColLocation);
@@ -127,13 +127,14 @@ static int splitHeaderFromBody(std::string *pBody,
                                std::vector<std::string> *pHeaders,
                                std::string src) {
   Logger &logger = Logger::getInstance();
-  size_t endOfHeader = src.find("\r\n\r\n");
+  size_t endOfHeader = src.find("\n\n");
+  logger.debug(src);
   if (endOfHeader == std::string::npos) {
     logger.error("Incorrect end of header found -> returning new BadRequest()");
     return 1;
   }
-  *pBody = src.substr(endOfHeader + 4, src.length() - endOfHeader);
-  *pHeaders = splitHeader(src.substr(0, endOfHeader + 2), true);
+  *pBody = src.substr(endOfHeader + 2, src.length() - endOfHeader);
+  *pHeaders = splitHeader(src.substr(0, endOfHeader + 1), true, "\n");
   return 0;
 }
 
@@ -166,6 +167,7 @@ HTTPStatusCode CGI::executeFile(std::string *pBody,
   logger.log("[STARTING] CGI ", VERBOSE);
   status = checkFileAccess(filePath);
   if (status != HTTPStatusCode::OK) {
+    logger.error("No file access for cgi request");
     return status;
   }
 
