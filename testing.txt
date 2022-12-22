@@ -10,12 +10,14 @@ Features missing acording to PFD:
 
 
 not succesfull:
-  Removed GET from methods in parseFirstLine
-    expected 403;
+  Removed GET from methods in parseFirstLine [FIXED]
+    expected 405;
     found    404;
     PDF: Your HTTP response status codes must be accurate.
-  
-  Setup the server_names or not.
+  FIX:
+    405 page was missing made a simple page and it now works!
+
+  Setup the server_names or not. [FIXED] (see solution)
     while not setting servername:
       parser: worked;
       found: no response send out
