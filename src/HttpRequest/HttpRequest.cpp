@@ -173,6 +173,7 @@ HttpResponse HttpRequest::_responseWithBody(
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); ++it) {
     Logger::getInstance().debug(it->first);
+    Logger::getInstance().debug(it->second);
     response.setHeader(it->first, it->second);
   }
   return response;

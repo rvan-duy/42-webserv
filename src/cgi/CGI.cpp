@@ -99,6 +99,14 @@ static HTTPStatusCode checkFileAccess(std::string const &filePath) {
   return HTTPStatusCode::OK;
 }
 
+static std::string trimString(std::string const &string) {
+  size_t i = 0;
+  while (string[i] == ' ') {
+    i++;
+  }
+  return string.substr(i);
+}
+
 static int makeHeaders(std::map<std::string, std::string> *dest,
                        std::vector<std::string> headers) {
   Logger &logger = Logger::getInstance();
@@ -117,7 +125,7 @@ static int makeHeaders(std::map<std::string, std::string> *dest,
       return 1;
     }
     key = it->substr(0, semiColLocation);
-    value = it->substr(semiColLocation + 1, it->length());
+    value = trimString(it->substr(semiColLocation + 1, it->length()));
     (*dest)[key] = value;
   }
   return 0;
@@ -128,12 +136,12 @@ static int splitHeaderFromBody(std::string *pBody,
                                std::string src) {
   Logger &logger = Logger::getInstance();
   size_t endOfHeader = src.find("\n\n");
-  logger.debug(src);
+  // logger.debug(src);
   if (endOfHeader == std::string::npos) {
     logger.error("Incorrect end of header found -> returning new BadRequest()");
     return 1;
   }
-  *pBody = src.substr(endOfHeader + 2, src.length() - endOfHeader);
+  *pBody = src.substr(endOfHeader + 2);
   *pHeaders = splitHeader(src.substr(0, endOfHeader + 1), true, "\n");
   return 0;
 }

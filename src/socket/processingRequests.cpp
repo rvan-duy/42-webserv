@@ -1,5 +1,7 @@
 #include <Multiplexer.hpp>
 
+#define MAX_REQUEST_SIZE 1000000
+
 /*
  * Reads data from a client and stores it in the buffer
  * @param result The string to store the data in
@@ -8,20 +10,20 @@
  */
 static int readFromClientFd(std::string *result, const int clientFd) {
   Logger &logger = Logger::getInstance();
-  const int bufferSize = 1000000;  // 1MB buffer, is this enough?
-  char buffer[bufferSize];
-  bzero(buffer, bufferSize);
-
-  // TODO: make loop?
+  char buffer[MAX_REQUEST_SIZE + 2];
+  bzero(buffer, MAX_REQUEST_SIZE + 2);
   logger.log("[READING] Multiplexer: Reading data from client " +
                  std::to_string(clientFd),
              VERBOSE);
-  int bytesReceived = read(clientFd, buffer, bufferSize);
+  ssize_t bytesReceived = read(clientFd, buffer, MAX_REQUEST_SIZE + 1);
   if (bytesReceived == -1) {
     logger.error("[READING] Multiplexer: Failed to read data from client " +
                  std::to_string(clientFd) + ": " +
                  std::string(strerror(errno)));
     return -1;
+  } else if (bytesReceived == MAX_REQUEST_SIZE + 1) {
+    logger.error("[READING] Socket: request too large");
+    return -2;
   }
   *result = std::string(buffer, bytesReceived);
   logger.log("[READING] Multiplexer: Read " + std::to_string(bytesReceived) +
@@ -85,7 +87,9 @@ int Socket::processRequest(int const &clientFd) {
 
   bytesRead = readFromClientFd(&rawRequest, clientFd);
   if (bytesRead < 0) {
-    _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
+    _addBadRequestToClient(clientFd, bytesRead == -1
+                                         ? HTTPStatusCode::INTERNAL_SERVER_ERROR
+                                         : HTTPStatusCode::CONTENT_TOO_LARGE);
     return 1;
   } else if (bytesRead == 0) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
