@@ -9,7 +9,7 @@ Features missing acording to PFD:
   - alowing IP instead of servername while building requests
 
 
-not succesfull:
+not succesful:
   Removed GET from methods in parseFirstLine [FIXED]
     expected 405;
     found    404;
@@ -91,10 +91,10 @@ List from clack
     cgi must handle uploaded files, cgi param?
     POST, DELETE
   oswin:
+    server_name die niet klopt (bad request) -> status of 71790808 [FIXED] When no servername found the first server on socket accepts.
     chunked (done)
-    tests
+    tests (underway)
     
   Not asigned:
-    server_name die niet klopt (bad request) -> status of 71790808
     Zijn er nog meer gevallen?
     alleen localhost of 0.0.0.0 werkend maken
