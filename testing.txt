@@ -3,32 +3,15 @@ this file contains tests and their results
 Features missing acording to PFD:
   - Limit client body size {Rutger}
   - HTTP redirection (3XX) {Ruben}
-  - Clients must be able to upload files.
+  - Clients must be able to upload files. -> see unsure
   - You need at least GET, POST, and DELETE methods. [WIP] GET works.
   - Stress tests your server. It must stay available at all cost. [WIP] script in the making with curl
-  - alowing IP instead of servername while building requests
-
-
-not succesful:
-  Removed GET from methods in parseFirstLine [FIXED]
-    expected 405;
-    found    404;
-    PDF: Your HTTP response status codes must be accurate.
-  FIX:
-    405 page was missing made a simple page and it now works!
-
-  Setup the server_names or not. [FIXED] (see solution)
-    while not setting servername:
-      parser: worked;
-      found: no response send out
-      expected: response on request
-    Solution:
-      The first server for a host:port will be the default for this host:port
-        (that means it will answer to all the requests that don’t belong to an other server).
 
 
 Unsure:
-  - Make the route able to accept uploaded files and configure where they should be saved. (CGI)
+  - Make the route able to accept uploaded files and configure where they should be saved. (CGI) [WIP] (oswin, rutger)
+      basic python cript is created
+
 
 Succesfull:
   - Your program has to take a configuration file as argument, or use a default path. [SUCCES] as argument
@@ -53,6 +36,26 @@ Succesfull:
   - Your server must be able to listen to multiple ports (see Configuration file). [SUCCES] parser is GOAT
   - Choose the port and host of each ’server’. [SUCCES]
   - Setup default error pages. [SUCCES]
+
+
+Solved:
+  - alowing IP instead of servername while building requests {is this needed?} [cannot find this in pdf] [SOLVED] as not needed
+
+  Removed GET from methods in parseFirstLine [FIXED]
+    expected 405;
+    found    404;
+    PDF: Your HTTP response status codes must be accurate.
+  FIX:
+    405 page was missing made a simple page and it now works!
+
+  Setup the server_names or not. [FIXED] (see solution)
+    while not setting servername:
+      parser: worked;
+      found: no response send out
+      expected: response on request
+    Solution:
+      The first server for a host:port will be the default for this host:port
+        (that means it will answer to all the requests that don’t belong to an other server).
 
 
  weird bottom part of subject PFD:
@@ -80,7 +83,7 @@ Succesfull:
         ∗ Your server should work with one CGI (php-CGI, Python, and so forth).
 
 
-List from clack
+List from slack
  ruben:
     auto index -> overzicht
     return (redirection)
