@@ -54,7 +54,6 @@ static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string con
         }
     }
     return allServers.front();
-    // throw std::runtime_error("No matching server found");
 }
 
 /**
@@ -63,19 +62,8 @@ static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string con
 void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
 {
   std::string hostWithoutPort = getHostWithoutPort(request);
-
-  // if (hostWithoutPort.length() == 0)
-  // {
-  //     // delete request;
-  //     // return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  // }
-  // try {
-      Server& result = matchBasedOnHost(_servers, hostWithoutPort);
-      return _addRequestToClient(clientFd, request, &result);
-  // } catch (std::runtime_error error) {
-  //     delete request;
-  //     return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  // }
+  Server& result = matchBasedOnHost(_servers, hostWithoutPort);
+  return _addRequestToClient(clientFd, request, &result);
 }
 
 int Socket::processRequest(int const &clientFd) {
