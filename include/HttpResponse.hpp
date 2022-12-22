@@ -15,9 +15,7 @@
 class HttpResponse : public HttpMessage {
  public:
   HttpResponse(HTTPStatusCode status);
-  HttpResponse(HTTPStatusCode status,
-               std::map<std::string, std::string> const &headers,
-               std::string const &body);
+  HttpResponse(HTTPStatusCode status, std::map<std::string, std::string> const &headers, std::string const &body);
   HttpResponse();
   HttpResponse(const HttpResponse &obj);
   ~HttpResponse();
@@ -26,8 +24,8 @@ class HttpResponse : public HttpMessage {
   std::string toStr() const;
 
  private:
-  HTTPStatusCode _statusCode;  // status code of response
-  std::string _statusMessage;  // status message of response
+  HTTPStatusCode _statusCode;     // status code of response
+  std::string    _statusMessage;  // status message of response
 };
 
 #endif  // HTTP_RESPONSE_HPP

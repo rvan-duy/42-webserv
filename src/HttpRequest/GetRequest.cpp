@@ -13,6 +13,10 @@ HTTPStatusCode GetRequest::executeRequest(const Server &server) {
   return HTTPStatusCode::OK;
 }
 
+// TODO: add redirection support, with return ? 301 and 302
+// auto index
+// - if auto index is on and the path is a directory, look for index files and return it
+// - if auto index is off and the path is a directory, return 403
 static bool isCgiRequest(std::string path) {
   if (path.substr(path.length() - 3) == ".py") {
     return true;
@@ -20,7 +24,6 @@ static bool isCgiRequest(std::string path) {
   return false;
 }
 
-// TODO: add redirection support, with return ? 301 and 302
 HttpResponse GetRequest::constructResponse(const Server &server) {
   Route const &routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path = _constructPath(routeOfResponse.rootDirectory);
@@ -152,14 +155,12 @@ HttpResponse GetRequest::_responseWithBody(
 }
 
 bool GetRequest::_typeIsAccepted() const {
-  // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the
-  // server can accept
-  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css",
-                                                    "application/javascript"};
-  const std::string ACCEPT_HEADER = getHeader("Accept");
-  std::vector<std::string> acceptedTypes;
+  // TYPES_TO_ACCEPT is a vector of strings that contains all the types that the server can accept
+  const std::vector<std::string> TYPES_TO_ACCEPT = {"text/html", "text/css", "application/javascript", "image/jpg"};
+  const std::string              ACCEPT_HEADER   = getHeader("Accept");
+  std::vector<std::string>       acceptedTypes;
 
-  if (ACCEPT_HEADER.empty() || ACCEPT_HEADER == "*/*") {
+  if (ACCEPT_HEADER.empty() || ACCEPT_HEADER.find("*/*") != std::string::npos) {
     return true;
   } else {
     std::size_t pos = 0;

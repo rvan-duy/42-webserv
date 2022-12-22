@@ -6,9 +6,8 @@
 /**************************************************/
 
 t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
-    {"root", &Parser::parseRoot},           {"index", &Parser::parseIndex},
-    {"autoIndex", &Parser::parsePort},      {"methods", &Parser::parseMethods},
-    {"errorPage", &Parser::parseErrorPage}, {"cgi", &Parser::parseCgi},
+    {"root", &Parser::parseRoot},       {"index", &Parser::parseIndex},         {"autoIndex", &Parser::parseAutoIndex},
+    {"methods", &Parser::parseMethods}, {"errorPage", &Parser::parseErrorPage}, {"cgi", &Parser::parseCgi},
 };
 
 int Parser::parseErrorPage(void *dest, t_dataLine line) {
@@ -21,11 +20,10 @@ int Parser::parseErrorPage(void *dest, t_dataLine line) {
   try {
     int errorCode = std::stoi(line.at(1));
     if (errorCode < 400 || errorCode > 599) {
-      Logger::getInstance().error(
-          "[CONFIG PARSER]: Invalid error code for error page");
+      Logger::getInstance().error("[CONFIG PARSER]: Invalid error code for error page");
       return 1;
     }
-    HTTPStatusCode code = static_cast<HTTPStatusCode>(errorCode);
+    HTTPStatusCode code     = static_cast<HTTPStatusCode>(errorCode);
     route->errorPages[code] = line.at(2);
   } catch (std::exception &e) {
     Logger::getInstance().error("[CONFIG PARSER]: errorPage is not a number");
@@ -39,9 +37,9 @@ int Parser::parseMethods(void *dest, t_dataLine line) {
   if (!dest || line.size() < 2 || line.size() > 4) {
     return 1;
   }
-  Route *route = static_cast<Route *>(dest);
-  route->allowedMethods[GET] = false;
-  route->allowedMethods[POST] = false;
+  Route *route                  = static_cast<Route *>(dest);
+  route->allowedMethods[GET]    = false;
+  route->allowedMethods[POST]   = false;
   route->allowedMethods[DELETE] = false;
   for (size_t i = 1; i < line.size(); i++) {
     if (line.at(i) == "GET") {
@@ -70,8 +68,7 @@ int Parser::parseRoot(void *dest, t_dataLine line) {
   Route *route = static_cast<Route *>(dest);
 
   if (route->rootDirectory.length() != 0) {
-    Logger::getInstance().error(
-        "[CONFIG PARSER]: Root directory for route already set");
+    Logger::getInstance().error("[CONFIG PARSER]: Root directory for route already set");
     return 1;
   }
   route->rootDirectory = line.at(1);
@@ -87,8 +84,7 @@ int Parser::parseIndex(void *dest, t_dataLine line) {
   Route *route = static_cast<Route *>(dest);
 
   for (std::size_t i = 1; i < line.size(); i++) {
-    if (std::find(route->indexFiles.begin(), route->indexFiles.end(),
-                  line.at(i)) == route->indexFiles.end()) {
+    if (std::find(route->indexFiles.begin(), route->indexFiles.end(), line.at(i)) == route->indexFiles.end()) {
       route->indexFiles.push_back(line.at(i));
     }
   }
@@ -101,7 +97,7 @@ int Parser::parseCgi(void *dest, t_dataLine line) {
     Logger::getInstance().error("Cgi route invalid");
     return 1;
   }
-  Route *route = static_cast<Route *>(dest);
+  Route      *route   = static_cast<Route *>(dest);
   std::string enabled = line.at(1);
   if (enabled == "true") {
     route->cgiEnabled = true;
@@ -109,6 +105,24 @@ int Parser::parseCgi(void *dest, t_dataLine line) {
     route->cgiEnabled = false;
   } else {
     Logger::getInstance().error("Invalid cgi param given");
+    return 1;
+  }
+  return 0;
+}
+
+int Parser::parseAutoIndex(void *dest, t_dataLine line) {
+  if (!dest || line.size() != 2) {
+    Logger::getInstance().error("Auto index invalid");
+    return 1;
+  }
+  Route      *route   = static_cast<Route *>(dest);
+  std::string enabled = line.at(1);
+  if (enabled == "on") {
+    route->autoIndex = true;
+  } else if (enabled == "off") {
+    route->autoIndex = false;
+  } else {
+    Logger::getInstance().error("Auto index param given");
     return 1;
   }
   return 0;

@@ -26,17 +26,16 @@ class HttpRequest : public HttpMessage {
   virtual ~HttpRequest();
 
   // Abstract
-  virtual HTTPStatusCode executeRequest(const Server &server) = 0;
-  virtual HttpResponse constructResponse(const Server &server) = 0;
+  virtual HTTPStatusCode executeRequest(const Server &server)    = 0;
+  virtual HttpResponse   constructResponse(const Server &server) = 0;
 
  protected:
   EHttpMethods _method;
-  std::string _uri;
-  bool _chunked;
+  std::string  _uri;
+  bool         _chunked;
 
   // Protected methods
-  bool _isMethodAllowed(
-      const std::map<EHttpMethods, bool> allowedMethods) const;
+  bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
 };
 
 // GET
@@ -55,32 +54,27 @@ class GetRequest : public HttpRequest {
 
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse   constructResponse(const Server &server);
 
  private:
-  bool _typeIsAccepted() const;
-  std::string _getErrorPageIndex(const Route &route,
-                                 HTTPStatusCode errorCode) const;
-  std::vector<std::string> _getPossiblePaths(
-      const std::string &path,
-      const std::vector<std::string> &index_files) const;
+  // Private methods
+  HttpResponse             _createAutoIndexResponse(const std::string &path) const;
+  bool                     _typeIsAccepted() const;
+  std::string              _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
+  std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
   std::vector<std::string> _getAcceptedTypesFromHeader() const;
-  std::string _constructPath(const std::string &root) const;
-  FileType _getFileType(const std::string &path) const;
-
-  HttpResponse _handleCgiRequest(std::string const &path,
-                                 Route const &route) const;
-
-  HttpResponse _handleFileRequest(std::string const &path,
-                                  Route const &route) const;
-
-  HttpResponse _errorResponseWithFile(HTTPStatusCode const &statusCode,
-                                      Route const &route) const;
-  HttpResponse _responseWithFile(std::string const &path,
-                                 HTTPStatusCode statusCode) const;
-
-  HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
-                                 std::string body) const;
+  std::string              _constructPath(const std::string &root) const;
+  FileType                 _fileExists(const std::string &path) const;
+  HttpResponse _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
+  bool         _checkIfIndexFileExists(const std::vector<std::string> &indexFiles, const std::string &path) const;
+  std::vector<std::string> _getPossiblePaths(const std::string              &path,
+                                             const std::vector<std::string> &index_files) const;
+  FileType                 _getFileType(const std::string &path) const;
+  HttpResponse             _handleCgiRequest(std::string const &path, Route const &route) const;
+  HttpResponse             _handleFileRequest(std::string const &path, Route const &route) const;
+  HttpResponse             _errorResponseWithFile(HTTPStatusCode const &statusCode, Route const &route) const;
+  HttpResponse             _responseWithFile(std::string const &path, HTTPStatusCode statusCode) const;
+  HttpResponse             _responseWithBody(std::map<std::string, std::string> headers, std::string body) const;
 };
 
 // DELETE
@@ -93,7 +87,7 @@ class DeleteRequest : public HttpRequest {
 
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse   constructResponse(const Server &server);
 };
 
 // POST
@@ -106,7 +100,7 @@ class PostRequest : public HttpRequest {
 
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse   constructResponse(const Server &server);
 };
 
 // BAD
@@ -119,7 +113,7 @@ class BadRequest : public HttpRequest {
 
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse   constructResponse(const Server &server);
 
  private:
   HTTPStatusCode _statusCode;
