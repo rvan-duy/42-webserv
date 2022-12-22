@@ -93,6 +93,7 @@ int Socket::processRequest(int const &clientFd) {
   }
   if (isChunked(clientFd))
   {
+    Logger::getInstance().debug("receiving not first chunk");
     request = RequestParser::processChunk(rawRequest);
     addChunk(request, clientFd);
     delete request; // the body or header data has been added to og request
@@ -100,7 +101,10 @@ int Socket::processRequest(int const &clientFd) {
   }
   request = RequestParser::parseHeader(rawRequest);
   if(request->isFirstChunk()) // trailing headers will be caught by above ischunked already
+  {
+    Logger::getInstance().debug("receiving first chunk");
     request->unChunkBody();
+  }
   _matchRequestToServer(clientFd, request);
   return 0;
 }
