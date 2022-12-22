@@ -17,14 +17,20 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode)
     {
     case HTTPStatusCode::OK:
         return "OK";
-    case HTTPStatusCode::INTERNAL_SERVER_ERROR:
-        return "Internal server error";
+    case HTTPStatusCode::BAD_REQUEST:
+        return "Bad request";
+    case HTTPStatusCode::NOT_FOUND:
+        return "Not found";
     case HTTPStatusCode::METHOD_NOT_ALLOWED:
         return "Method not allowed";
+    case HTTPStatusCode::NOT_ACCEPTABLE:
+        return "Not acceptable";
     case HTTPStatusCode::CONTENT_TOO_LARGE:
-        return "Content too lage";
+        return "Content too large";
     case HTTPStatusCode::I_AM_A_TEAPOT:
         return "I am a teapot";
+    case HTTPStatusCode::INTERNAL_SERVER_ERROR:
+        return "Internal server error";
     default:
         return "Bad request";
     }
