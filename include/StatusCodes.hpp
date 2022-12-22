@@ -4,6 +4,7 @@
 
 enum class HTTPStatusCode
 {
+    NOT_SET = 0,
     OK = 200,
     BAD_REQUEST = 400,
     NOT_FOUND = 404,

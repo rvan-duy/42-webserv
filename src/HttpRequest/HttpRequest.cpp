@@ -4,15 +4,14 @@
 /*
  *  Canonical
  */
-HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url), _chunked(data.chunked) {}
+HttpRequest::HttpRequest(HttpHeaderData const &data) : HttpMessage(data.headers, data.httpVersion, data.body), _method(data.method), _uri(data.url) {}
 
-HttpRequest::HttpRequest() : _chunked(false) {}
+HttpRequest::HttpRequest() {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj)
 {
   _method = obj._method;
   _uri = obj._uri;
-  _chunked = obj._chunked;
 }
 
 HttpRequest::~HttpRequest() {}
@@ -35,36 +34,24 @@ bool HttpRequest::_isMethodAllowed(const std::map<EHttpMethods, bool> allowedMet
   return false;
 }
 
-/*
-//  * Parse the method string into the method enum
-//  * @param method the method string
-//  * @return the method enum
-//  */
-// EHttpMethods _parseMethod(const std::string &method) {
-//   Logger &logger = Logger::getInstance();
-//   std::map<std::string, EHttpMethods> method_map;
+HttpRequest *HttpRequest::operator+(const HttpRequest& chunk) {
+  if (chunk._statusCode != HTTPStatusCode::NOT_SET)
+  {
+    delete this;
+    return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+  }
+  _body += chunk._body;
+  _headers.insert(std::begin(chunk._headers), std::end(chunk._headers));
+  return this;
+}
 
-//   method_map["GET"]    = GET;
-//   method_map["POST"]   = POST;
-//   method_map["DELETE"] = DELETE;
+void  HttpRequest::unChunkBody() {
+  _body = unChunk(_body);
+}
 
-//   try {
-//     return method_map.at(method);
-//   } catch (std::exception& e) {
-//     // _status_code = 400;
-//     logger.error("bad request: method unsupported ( " + method + " )");
-//     return NONE;
-//   }
-// }
-
-// /* This needs to include all the response statuses used in executeRequest */
-// std::string _parseResponseStatus(const int &status) {
-//   std::map<int, std::string> response_map;
-
-//   response_map[403]   = "Forbidden";
-//   response_map[404]   = "Not found";
-//   response_map[405]   = "Method not alowed";
-//   response_map[409]   = "Conflict";
-
-//   return response_map.at(status);
-// }
+/**
+ * Determines whether a given HTTP request uses chunked transfer encoding.
+ */
+bool  HttpRequest::isFirstChunk() {
+  return "chunked" == getHeader("Transfer-Encoding");
+}
