@@ -4,7 +4,7 @@ import shutil
 import sys
 
 # Check if the correct number of arguments were provided
-if len(sys.argv) != 3:
+if len(sys.argv) != 2:
     print("Usage: python3 upload_file.py <URI> <file_data>")
     sys.exit(1)
 

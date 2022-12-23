@@ -54,11 +54,11 @@ void Logger::log(std::string const &message, ELogVerbosity lvl) {
 }
 
 void Logger::error(std::string const &message, ELogVerbosity lvl) {
-  if (lvl <= VERBOSITY) log(message);
+  if (lvl <= VERBOSITY) error(message);
 }
 
 void Logger::debug(std::string const &message, ELogVerbosity lvl) {
-  if (lvl <= VERBOSITY) log(message);
+  if (lvl <= VERBOSITY) debug(message);
 }
 
 // Logs restart message to logfile

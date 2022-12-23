@@ -6,6 +6,7 @@
 #include <Server.hpp>
 #include <StatusCodes.hpp>
 #include <Webserver.hpp>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,8 @@ class HttpResponse;
 struct Route;
 struct HttpHeaderData;
 
+enum class FileType { DIR, FILE, NOT_FOUND };
+
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
@@ -25,99 +28,81 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
-  HttpRequest *operator+(const HttpRequest& other);
-  void  unChunkBody();
-  bool  isFirstChunk();
+  HttpRequest *operator+(const HttpRequest &other);
+  void unChunkBody();
+  bool isFirstChunk();
 
   // Abstract
-  virtual HTTPStatusCode executeRequest(const Server &server)    = 0;
-  virtual HttpResponse   constructResponse(const Server &server) = 0;
+  virtual HttpResponse executeRequest(const Server &server);
 
  protected:
   EHttpMethods _method;
   std::string _uri;
-  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
+  bool _chunked;
 
-  // Protected methods
-  bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
+  /* Request handling */
+  virtual HttpResponse _handleCgiRequest(std::string const &path,
+                                         Route const &route) const;
+  HttpResponse _handleFileRequest(std::string const &path, const Route &route,
+                                  const FileType &type) const;
+
+  /* Response constructors */
+  virtual HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
+                                      Route const &route) const;
+  HttpResponse _responseWithFile(std::string const &path,
+                                 HTTPStatusCode statusCode) const;
+  HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
+                                 std::string body) const;
+
+  /* Helpers */
+  FileType _getFileType(const std::string &path) const;
+  bool _isTypeAccepted() const;
+  std::vector<std::string> _getPossiblePaths(
+      const std::string &path,
+      const std::vector<std::string> &index_files) const;
+  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 };
 
 // GET
-
-enum class FileType { IS_DIR, IS_REG_FILE, IS_UNKNOWN };
-
-// # define IS_DIR      0
-// # define IS_REG_FILE 1
-// # define IS_UNKNOWN  2
-
 class GetRequest : public HttpRequest {
  public:
   GetRequest(HttpHeaderData const &data);
   GetRequest(const GetRequest &ref);
   ~GetRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse   constructResponse(const Server &server);
-
  private:
   // Private methods
-  HttpResponse             _createAutoIndexResponse(const std::string &path) const;
-  bool                     _typeIsAccepted() const;
-  std::string              _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
-  std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
-  std::vector<std::string> _getAcceptedTypesFromHeader() const;
-  std::string              _constructPath(const std::string &root) const;
-  FileType                 _fileExists(const std::string &path) const;
-  HttpResponse _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
-  bool         _checkIfIndexFileExists(const std::vector<std::string> &indexFiles, const std::string &path) const;
-  std::vector<std::string> _getPossiblePaths(const std::string              &path,
-                                             const std::vector<std::string> &index_files) const;
-  FileType                 _getFileType(const std::string &path) const;
-  HttpResponse             _handleCgiRequest(std::string const &path, Route const &route) const;
-  HttpResponse             _handleFileRequest(std::string const &path, Route const &route) const;
-  HttpResponse             _errorResponseWithFile(HTTPStatusCode const &statusCode, Route const &route) const;
-  HttpResponse             _responseWithFile(std::string const &path, HTTPStatusCode statusCode) const;
-  HttpResponse             _responseWithBody(std::map<std::string, std::string> headers, std::string body) const;
+  HttpResponse _handleCgiRequest(std::string const &path,
+                                 Route const &route) const;
+  HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
+                              Route const &route) const;
+  std::string _getErrorPage(const Route &route, HTTPStatusCode errorCode) const;
 };
 
 // DELETE
-
 class DeleteRequest : public HttpRequest {
  public:
   DeleteRequest(HttpHeaderData const &data);
   DeleteRequest(const DeleteRequest &ref);
   ~DeleteRequest();
-
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse   constructResponse(const Server &server);
 };
 
 // POST
-
 class PostRequest : public HttpRequest {
  public:
   PostRequest(HttpHeaderData const &data);
   PostRequest(const PostRequest &ref);
   ~PostRequest();
-
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse   constructResponse(const Server &server);
 };
 
 // BAD
-
 class BadRequest : public HttpRequest {
  public:
   BadRequest(HTTPStatusCode statusCode);
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse executeRequest(const Server &server);
 };
 
 #endif  // HTTP_REQUEST_HPP

@@ -1,5 +1,6 @@
 #include <StatusCodes.hpp>
 #include <regex>
+
 #include "Logger.hpp"
 
 std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
@@ -7,9 +8,9 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
     case HTTPStatusCode::OK:
       return "OK";
     case HTTPStatusCode::BAD_REQUEST:
-        return "Bad request";
+      return "Bad request";
     case HTTPStatusCode::FORBIDDEN:
-        return "Forbidden";
+      return "Forbidden";
     case HTTPStatusCode::NOT_FOUND:
       return "Not found";
     case HTTPStatusCode::METHOD_NOT_ALLOWED:
@@ -27,54 +28,54 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
   }
 }
 
-std::vector<std::string> splitHeader(std::string headerString,
-                                     bool withNewline) {
+std::vector<std::string> splitHeader(const std::string &headerString,
+                                     const std::string &delimiter) {
   std::vector<std::string> headerLines;
   std::string currentLine;
-  size_t lastLocation = 0;  // last location of \n\r
-  size_t nextLocation = 0;  // next location of \n\r
+  size_t lastLocation = 0;  // last location of delimiter
+  size_t nextLocation = 0;  // next location of delimiter
 
   do {
-    nextLocation = headerString.find("\r\n", nextLocation);
-    if (nextLocation == std::string::npos) break;
-    if (withNewline) nextLocation += 2;
+    nextLocation = headerString.find(delimiter, nextLocation);
+    if (nextLocation == std::string::npos) {
+      break;
+    }
     currentLine =
         headerString.substr(lastLocation, nextLocation - lastLocation);
     headerLines.push_back(currentLine);
-    if (!withNewline) nextLocation += 2;
+    nextLocation += delimiter.length();
     lastLocation = nextLocation;
   } while (true);
   return headerLines;
 }
 
 /**
- * @brief Decodes a chunked HTTP message body by concatenating the chunk data into a single string.
+ * @brief Decodes a chunked HTTP message body by concatenating the chunk data
+ * into a single string.
  *
- * This function searches for the chunk size indicator and chunk data within the message body,
- * converts the chunk size indicator from a hexadecimal string to a long integer, and appends the
- * chunk data to a new string. The function repeats this process until the entire message body has
- * been processed. If the message body is not properly formatted or if the chunk size indicator is
- * not a valid hexadecimal string, the function returns an empty string.
+ * This function searches for the chunk size indicator and chunk data within the
+ * message body, converts the chunk size indicator from a hexadecimal string to
+ * a long integer, and appends the chunk data to a new string. The function
+ * repeats this process until the entire message body has been processed. If the
+ * message body is not properly formatted or if the chunk size indicator is not
+ * a valid hexadecimal string, the function returns an empty string.
  *
  * @param[in] body The chunked HTTP message body to be decoded.
  * @return The concatenated chunk data, or an empty string if an error occurred.
  */
-std::string unChunk(std::string body)
-{
+std::string unChunk(std::string body) {
   Logger &logger = Logger::getInstance();
   std::string newBody = "";
-  while (body.size())
-  {
+  while (body.size()) {
     size_t sub = body.find("\r\n");
-    if (sub == std::string::npos)
-    {
+    if (sub == std::string::npos) {
       logger.error("[CHUNK]: No \\r\\n pair found to indicate chunkSize end");
       return "";
     }
     std::string sizeStr = body.substr(sub);
 
-    char  *check = NULL;
-    long  chunkSize = strtoul(sizeStr.c_str(), &check, 16);
+    char *check = NULL;
+    long chunkSize = strtoul(sizeStr.c_str(), &check, 16);
     if (check != NULL) {
       logger.error("[CHUNK]: chunkSize is not hexadecimal");
       return "";
