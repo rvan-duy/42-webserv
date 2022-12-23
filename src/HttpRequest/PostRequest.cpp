@@ -6,13 +6,12 @@ PostRequest::PostRequest(const PostRequest &ref) : HttpRequest(ref) {}
 
 PostRequest::~PostRequest() {}
 
-HTTPStatusCode PostRequest::executeRequest(const Server &server)
-{
+HTTPStatusCode PostRequest::executeRequest(const Server &server) {
   (void)server;
   return HTTPStatusCode::OK;
 }
 
-HttpResponse PostRequest::constructResponse(const Server& server) {
+HttpResponse PostRequest::constructResponse(const Server &server) {
   HTTPStatusCode responseStatus = executeRequest(server);
   (void)responseStatus;
   return HttpResponse();

@@ -14,7 +14,8 @@ static int readFromClientFd(std::string *result, const int clientFd) {
 
   // TODO: make loop?
   logger.log("[READING] Multiplexer: Reading data from client " +
-             std::to_string(clientFd));
+                 std::to_string(clientFd),
+             VERBOSE);
   int bytesReceived = read(clientFd, buffer, bufferSize);
   if (bytesReceived == -1) {
     logger.error("[READING] Multiplexer: Failed to read data from client " +
@@ -24,7 +25,8 @@ static int readFromClientFd(std::string *result, const int clientFd) {
   }
   *result = std::string(buffer, bytesReceived);
   logger.log("[READING] Multiplexer: Read " + std::to_string(bytesReceived) +
-             " bytes from client " + std::to_string(clientFd));
+                 " bytes from client " + std::to_string(clientFd),
+             VERBOSE);
   return bytesReceived;
 }
 
@@ -44,16 +46,15 @@ static std::string getHostWithoutPort(HttpRequest *request) {
 }
 
 /* Checks which servers are listening to the host from the request*/
-static Server &matchBasedOnHost(std::vector<Server> &allServers, std::string const &host)
-{
-    for (std::vector<Server>::iterator it = allServers.begin(); it != allServers.end(); ++it)
-    {
-        if (it->getServerName() == host)
-        {
-            return *it;
-        }
+static Server &matchBasedOnHost(std::vector<Server> &allServers,
+                                std::string const &host) {
+  for (std::vector<Server>::iterator it = allServers.begin();
+       it != allServers.end(); ++it) {
+    if (it->getServerName() == host) {
+      return *it;
     }
-    return allServers.front();
+  }
+  return allServers.front();
 }
 
 /**
@@ -75,8 +76,7 @@ int Socket::processRequest(int const &clientFd) {
   if (bytesRead < 0) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
     return 1;
-  } else if (bytesRead == 0)
-  {
+  } else if (bytesRead == 0) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     return 1;
   }

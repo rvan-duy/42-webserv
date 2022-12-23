@@ -1,4 +1,5 @@
 #include <RequestParser.hpp>
+#include "Webserver.hpp"
 
 RequestParser::RequestParser() {}
 
@@ -72,24 +73,6 @@ static int parseFirstLine(HttpHeaderData *dest, std::string const &line) {
   return 0;
 }
 
-static std::vector<std::string> splitHeader(std::string headerString) {
-  std::vector<std::string> headerLines;
-  std::string currentLine;
-  size_t lastLocation = 0;  // last location of \n\r
-  size_t nextLocation = 0;  // next location of \n\r
-
-  do {
-    nextLocation = headerString.find("\r\n", nextLocation);
-    if (nextLocation == std::string::npos) break;
-    currentLine =
-        headerString.substr(lastLocation, nextLocation - lastLocation);
-    headerLines.push_back(currentLine);
-    nextLocation += 2;
-    lastLocation = nextLocation;
-  } while (true);
-  return headerLines;
-}
-
 /* Splits header based on \n\r */
 static int makeHeaderMap(std::map<std::string, std::string> *pHeadersMap,
                          std::vector<std::string> headerLines) {
@@ -147,7 +130,7 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
   }
   headerData.body =
       rawRequest.substr(endOfHeader + 4, rawRequest.length() - endOfHeader);
-  headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2));
+  headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), false);
   if (parseFirstLine(&headerData, headerLines[0])) {
     logger.error(
         "Incorrect first line of request -> returning new BadRequest()");
@@ -188,7 +171,7 @@ HttpRequest *RequestParser::processChunk(std::string &rawRequest)
       logger.error("[CHUNK]: Incorrect end of header found -> returning new BadRequest()");
       return new BadRequest(HTTPStatusCode::BAD_REQUEST);
     }
-    std::vector<std::string> headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2));
+    std::vector<std::string> headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), false);
     makeHeaderMap(&headerData.headers, headerLines);
     return new PostRequest(headerData);
   }
