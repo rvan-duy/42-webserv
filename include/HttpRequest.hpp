@@ -18,7 +18,7 @@ class HttpResponse;
 struct Route;
 struct HttpHeaderData;
 
-enum class FileType { IS_DIR, IS_REG_FILE, IS_UNKNOWN };
+enum class FileType { DIR, FILE, NOT_FOUND };
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
@@ -38,8 +38,8 @@ class HttpRequest : public HttpMessage {
   /* Request handling */
   virtual HttpResponse _handleCgiRequest(std::string const &path,
                                          Route const &route) const;
-  HttpResponse _handleFileRequest(std::string const &path,
-                                  Route const &route) const;
+  HttpResponse _handleFileRequest(std::string const &path, const Route &route,
+                                  const FileType &type) const;
 
   /* Response constructors */
   virtual HttpResponse _errorResponse(HTTPStatusCode const &statusCode,

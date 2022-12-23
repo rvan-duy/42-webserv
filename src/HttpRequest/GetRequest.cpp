@@ -29,7 +29,7 @@ std::string GetRequest::_getErrorPage(const Route &route,
                                       HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
     std::string page = route.errorPages.at(errorCode);
-    if (_getFileType(page) == FileType::IS_REG_FILE) {
+    if (_getFileType(page) == FileType::FILE) {
       return route.rootDirectory + page;
     }
   }

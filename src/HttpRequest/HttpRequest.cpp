@@ -35,7 +35,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
         "(" +
             path + ")",
         VERBOSE);
-    return FileType::IS_UNKNOWN;
+    return FileType::NOT_FOUND;
   }
   if (buffer.st_mode & S_IFDIR) {
     logger.log(
@@ -43,7 +43,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
         "(" +
             path + ")",
         VERBOSE);
-    return FileType::IS_DIR;
+    return FileType::DIR;
   }
   if (buffer.st_mode & S_IFREG) {
     logger.log(
@@ -52,7 +52,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
         "(" +
             path + ")",
         VERBOSE);
-    return FileType::IS_REG_FILE;
+    return FileType::FILE;
   }
   logger.log(
       "[RESPONSE-BUILDING]: _fileExists -> File is something else "
@@ -60,7 +60,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
           path + ")",
       VERBOSE);
   logger.error("WARNING: logic probably not implemented yet");
-  return FileType::IS_UNKNOWN;
+  return FileType::NOT_FOUND;
 }
 
 static std::string constructPath(const std::string &root,
@@ -95,7 +95,7 @@ static bool isCgiRequest(std::string path) {
 }
 
 HttpResponse HttpRequest::executeRequest(const Server &server) {
-  Route const &routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const Route &routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path = constructPath(routeOfResponse.rootDirectory, _uri);
 
   if (isMethodAllowed(routeOfResponse.allowedMethods, _method) == false) {
@@ -103,10 +103,16 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
 
+  FileType type = HttpRequest::_getFileType(path);
+  if (type == FileType::NOT_FOUND) {
+    // hier Oswin troep
+    return _errorResponse(HTTPStatusCode::NOT_FOUND, routeOfResponse);
+  }
+
   if (isCgiRequest(path)) {
     return _handleCgiRequest(path, routeOfResponse);
   }
-  return _handleFileRequest(path, routeOfResponse);
+  return _handleFileRequest(path, routeOfResponse, type);
 }
 
 // TODO: add redirection support, with return ? 301 and 302
@@ -138,9 +144,10 @@ HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
 }
 
 HttpResponse HttpRequest::_handleFileRequest(std::string const &path,
-                                             Route const &route) const {
-  switch (_getFileType(path)) {
-    case FileType::IS_DIR: {
+                                             Route const &route,
+                                             const FileType &type) const {
+  switch (type) {
+    case FileType::DIR: {
       if (_isTypeAccepted() == false) {
         return _errorResponse(HTTPStatusCode::NOT_ACCEPTABLE, route);
       }
@@ -148,19 +155,19 @@ HttpResponse HttpRequest::_handleFileRequest(std::string const &path,
           _getPossiblePaths(path, route.indexFiles);
       for (std::vector<std::string>::const_iterator it = possiblePaths.begin();
            it != possiblePaths.end(); ++it) {
-        if (_getFileType(*it) == FileType::IS_REG_FILE) {
+        if (_getFileType(*it) == FileType::FILE) {
           return _responseWithFile(*it, HTTPStatusCode::OK);
         }
       }
       return HttpResponse(HTTPStatusCode::NOT_FOUND);
     }
-    case FileType::IS_REG_FILE: {
+    case FileType::FILE: {
       if (_isTypeAccepted() == false) {
         return _errorResponse(HTTPStatusCode::NOT_ACCEPTABLE, route);
       }
       return _responseWithFile(path, HTTPStatusCode::OK);
     }
-    case FileType::IS_UNKNOWN: {
+    case FileType::NOT_FOUND: {
       return _errorResponse(HTTPStatusCode::NOT_FOUND, route);
     }
     default: {
