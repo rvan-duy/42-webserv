@@ -12,6 +12,8 @@
 #include "HttpMessage.hpp"
 #include "HttpRequest.hpp"
 
+struct Route;
+
 class HttpResponse : public HttpMessage {
  public:
   HttpResponse(HTTPStatusCode status);
@@ -21,6 +23,7 @@ class HttpResponse : public HttpMessage {
   ~HttpResponse();
 
   // Methods
+  int buildRedirection(Route route);
   std::string toStr() const;
 
  private:

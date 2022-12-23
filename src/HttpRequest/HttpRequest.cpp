@@ -103,7 +103,9 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
 
   FileType type = HttpRequest::_getFileType(path);
   if (type == FileType::NOT_FOUND) {
-    // hier Oswin troep
+    HttpResponse redirection;
+    if (redirection.buildRedirection(routeOfResponse))
+      return (redirection);
     return _errorResponse(HTTPStatusCode::NOT_FOUND, routeOfResponse);
   }
 
