@@ -58,7 +58,7 @@ static int matchValue(const std::string& option, const std::string& uri) {
 // Possible TODO: look for longest matching route
 const Route &Server::getRoute(const std::string &uri) const {
   const Route  *match = &_routes[0];
-  int     value = 0;
+  int           value = 0;
   for (std::vector<Route>::const_iterator it = _routes.begin(); it != _routes.end(); it++) {
     const Route &route = *it;
     if (matchValue(route.route, uri) > value)
