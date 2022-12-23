@@ -6,11 +6,6 @@ GetRequest::GetRequest(const GetRequest &ref) : HttpRequest(ref) {}
 
 GetRequest::~GetRequest() {}
 
-HTTPStatusCode GetRequest::executeRequest(const Server &server) {
-  (void)server;
-  return HTTPStatusCode::OK;
-}
-
 // TODO: add redirection support, with return ? 301 and 302
 // auto index
 // - if auto index is on and the path is a directory, look for index files and

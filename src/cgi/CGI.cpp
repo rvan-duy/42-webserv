@@ -76,7 +76,6 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
       output += buffer->c_str();
       buffer->clear();
     }
-
   } while (bytesRead > 0);
   close(fd);
   *pDest = output;
@@ -136,7 +135,6 @@ static int splitHeaderFromBody(std::string *pBody,
                                std::string src) {
   Logger &logger = Logger::getInstance();
   size_t endOfHeader = src.find("\n\n");
-  // logger.debug(src);
   if (endOfHeader == std::string::npos) {
     logger.error("Incorrect end of header found -> returning new BadRequest()");
     return 1;

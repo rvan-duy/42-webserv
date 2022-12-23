@@ -6,11 +6,6 @@ PostRequest::PostRequest(const PostRequest &ref) : HttpRequest(ref) {}
 
 PostRequest::~PostRequest() {}
 
-HTTPStatusCode PostRequest::executeRequest(const Server &server) {
-  (void)server;
-  return HTTPStatusCode::OK;
-}
-
 HttpResponse PostRequest::constructResponse(const Server &server) {
   Route const &routeOfResponse = server.getRoute(HttpRequest::_uri);
   const std::string path = _constructPath(routeOfResponse.rootDirectory);

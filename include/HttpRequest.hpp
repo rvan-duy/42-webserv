@@ -28,8 +28,6 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
-  // Abstract
-  virtual HTTPStatusCode executeRequest(const Server &server) = 0;
   virtual HttpResponse constructResponse(const Server &server) = 0;
 
  protected:
@@ -53,8 +51,8 @@ class HttpRequest : public HttpMessage {
   HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
                                  std::string body) const;
   std::string _constructPath(const std::string &root) const;
-  HttpResponse _handleCgiRequest(std::string const &path,
-                                 Route const &route) const;
+  virtual HttpResponse _handleCgiRequest(std::string const &path,
+                                         Route const &route) const;
   bool _isCgiRequest(std::string path) const;
   HttpResponse _handleFileRequest(std::string const &path,
                                   Route const &route) const;
@@ -67,8 +65,6 @@ class GetRequest : public HttpRequest {
   GetRequest(const GetRequest &ref);
   ~GetRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
   HttpResponse constructResponse(const Server &server);
 
  private:
@@ -86,8 +82,6 @@ class DeleteRequest : public HttpRequest {
   DeleteRequest(const DeleteRequest &ref);
   ~DeleteRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
   HttpResponse constructResponse(const Server &server);
 };
 
@@ -98,8 +92,6 @@ class PostRequest : public HttpRequest {
   PostRequest(const PostRequest &ref);
   ~PostRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
   HttpResponse constructResponse(const Server &server);
 };
 
@@ -110,8 +102,6 @@ class BadRequest : public HttpRequest {
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
-  // Concrete
-  HTTPStatusCode executeRequest(const Server &server);
   HttpResponse constructResponse(const Server &server);
 
  private:
