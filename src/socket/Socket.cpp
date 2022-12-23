@@ -88,14 +88,14 @@ void Socket::addClient(const int &socket)
 }
 
 // TODO: fix segfault when printing request, might be done
-void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)
+void Socket::_addRequestToClient(int const &clientFd, HttpRequest *request, Server *server)//TODO: CHUNKED support
 {
     Logger::getInstance().log("Adding response to client with fd: " + std::to_string(clientFd));
     std::pair<HttpRequest *, Server *> newPair(request, server);
     _clients[clientFd] = newPair;
 }
 
-void Socket::_addBadRequestToClient(const int &fd, HTTPStatusCode statusCode)
+void Socket::_addBadRequestToClient(const int &fd, HTTPStatusCode statusCode)   //TODO: CHUNKED support
 {
     std::pair<HttpRequest *, Server *> newPair(nullptr, nullptr);
     newPair.first = new BadRequest(statusCode);

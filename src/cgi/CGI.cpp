@@ -145,9 +145,6 @@ static int makeHeaders(std::map<std::string, std::string> *dest,
       logger.error("No semicolon found in header from CGI output");
       return 1;
     }
-    if ((*it)[it->length() - 1] != '\n') {
-      return 1;
-    }
     key = it->substr(0, semiColLocation);
     value = trimString(it->substr(semiColLocation + 1, it->length()));
     (*dest)[key] = value;
@@ -165,7 +162,7 @@ static int splitHeaderFromBody(std::string *pBody,
     return 1;
   }
   *pBody = src.substr(endOfHeader + 2);
-  *pHeaders = splitHeader(src.substr(0, endOfHeader + 1), true, "\n");
+  *pHeaders = splitHeader(src.substr(0, endOfHeader + 1), "\n");
   return 0;
 }
 

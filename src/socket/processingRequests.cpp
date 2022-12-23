@@ -56,28 +56,17 @@ static Server &matchBasedOnHost(std::vector<Server> &allServers,
       return *it;
     }
   }
-  throw std::runtime_error("No matching server found");
+  return allServers.front();
 }
 
 /**
  * Finds server that matches the sent request, then adds it to matching client
  */
-void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request) {
-  Logger &logger = Logger::getInstance();
+void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request)
+{
   std::string hostWithoutPort = getHostWithoutPort(request);
-
-  if (hostWithoutPort.length() == 0) {
-    logger.error("No host found in request -> adding bad request");
-    delete request;
-    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  }
-  try {
-    Server &result = matchBasedOnHost(_servers, hostWithoutPort);
-    return _addRequestToClient(clientFd, request, &result);
-  } catch (std::runtime_error error) {
-    delete request;
-    return _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-  }
+  Server& result = matchBasedOnHost(_servers, hostWithoutPort);
+  return _addRequestToClient(clientFd, request, &result);
 }
 
 int Socket::processRequest(int const &clientFd) {
@@ -95,7 +84,20 @@ int Socket::processRequest(int const &clientFd) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     return 1;
   }
+  if (isChunked(clientFd))
+  {
+    Logger::getInstance().debug("receiving not first chunk");
+    request = RequestParser::processChunk(rawRequest);
+    addChunk(request, clientFd);
+    delete request; // the body or header data has been added to og request
+    return 0;
+  }
   request = RequestParser::parseHeader(rawRequest);
+  if(request->isFirstChunk()) // trailing headers will be caught by above ischunked already
+  {
+    Logger::getInstance().debug("receiving first chunk");
+    request->unChunkBody();
+  }
   _matchRequestToServer(clientFd, request);
   return 0;
 }

@@ -5,12 +5,25 @@ import sys
 def main():
     import json
     input = json.loads(sys.argv[1])
-    output = input["first_name"].upper() + " " + input["last_name"].upper()
+    try:
+        firstname = input["first_name"].upper()
+    except KeyError as error:
+        firstname = "none"
+    try:
+        lastname = input["last_name"].upper()
+    except KeyError as error:
+        lastname = "none"
+    output = firstname + " " + lastname
 
+    # Headers
     print("Content-Type: text/plain")
-    print("Content-Length: 15")
-    # print("Content-Length: 3",len(sys.argv[1]))
-    print("\n")
+    print("Content-Length:" + str(len(output)))
+
+    # Split body from headers
+    print("")
+    
+    # Body
+
     print(output)
     exit(0)
 

@@ -28,6 +28,11 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
+  HttpRequest *operator+(const HttpRequest &other);
+  void unChunkBody();
+  bool isFirstChunk();
+
+  // Abstract
   virtual HttpResponse executeRequest(const Server &server);
 
  protected:
@@ -55,6 +60,7 @@ class HttpRequest : public HttpMessage {
   std::vector<std::string> _getPossiblePaths(
       const std::string &path,
       const std::vector<std::string> &index_files) const;
+  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 };
 
 // GET
@@ -97,9 +103,6 @@ class BadRequest : public HttpRequest {
   ~BadRequest();
 
   HttpResponse executeRequest(const Server &server);
-
- private:
-  HTTPStatusCode _statusCode;
 };
 
 #endif  // HTTP_REQUEST_HPP

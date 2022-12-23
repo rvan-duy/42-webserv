@@ -13,11 +13,7 @@ button.addEventListener('click', async _ => {
         "last_name": lastNameInput.value
       })
     });
-    console.log(response)
-    var body = await response.text(); 
-    var text = document.createTextNode(body.first_name + ' ' + body.last_name);
-
-    output.appendChild(text);
+    output.textContent = await response.text();
   } catch(err) {
     console.error(`Error: ${err}`);
   }
