@@ -8,7 +8,7 @@ BadRequest::BadRequest(const BadRequest &ref) : HttpRequest(ref) {}
 
 BadRequest::~BadRequest() {}
 
-HttpResponse BadRequest::constructResponse(const Server &server) {
+HttpResponse BadRequest::executeRequest(const Server &server) {
   (void)server;
-  return HttpResponse();
+  return HttpResponse(_statusCode);
 }

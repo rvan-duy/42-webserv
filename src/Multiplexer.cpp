@@ -50,7 +50,7 @@ int Multiplexer::evaluateClient(pollfd *client) {
       HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
 
       if (clientRequest) {
-        HttpResponse clientResponse = clientRequest->constructResponse(
+        HttpResponse clientResponse = clientRequest->executeRequest(
             clientSocket.getServerForClient(clientFd));
         send(clientFd, (void *)clientResponse.toStr().c_str(),
              clientResponse.toStr().size(), 0);

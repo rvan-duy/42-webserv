@@ -28,34 +28,33 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
-  virtual HttpResponse constructResponse(const Server &server) = 0;
+  virtual HttpResponse executeRequest(const Server &server);
 
  protected:
   EHttpMethods _method;
   std::string _uri;
   bool _chunked;
 
-  bool _isMethodAllowed(
-      const std::map<EHttpMethods, bool> allowedMethods) const;
-  bool _isTypeAccepted() const;
-  std::vector<std::string> _getPossiblePaths(
-      const std::string &path,
-      const std::vector<std::string> &index_files) const;
-  FileType _getFileType(const std::string &path) const;
-  std::string _getErrorPageIndex(const Route &route,
-                                 HTTPStatusCode errorCode) const;
-  HttpResponse _errorResponseWithFile(HTTPStatusCode const &statusCode,
+  /* Request handling */
+  virtual HttpResponse _handleCgiRequest(std::string const &path,
+                                         Route const &route) const;
+  HttpResponse _handleFileRequest(std::string const &path,
+                                  Route const &route) const;
+
+  /* Response constructors */
+  virtual HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
                                       Route const &route) const;
   HttpResponse _responseWithFile(std::string const &path,
                                  HTTPStatusCode statusCode) const;
   HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
                                  std::string body) const;
-  std::string _constructPath(const std::string &root) const;
-  virtual HttpResponse _handleCgiRequest(std::string const &path,
-                                         Route const &route) const;
-  bool _isCgiRequest(std::string path) const;
-  HttpResponse _handleFileRequest(std::string const &path,
-                                  Route const &route) const;
+
+  /* Helpers */
+  FileType _getFileType(const std::string &path) const;
+  bool _isTypeAccepted() const;
+  std::vector<std::string> _getPossiblePaths(
+      const std::string &path,
+      const std::vector<std::string> &index_files) const;
 };
 
 // GET
@@ -65,14 +64,13 @@ class GetRequest : public HttpRequest {
   GetRequest(const GetRequest &ref);
   ~GetRequest();
 
-  HttpResponse constructResponse(const Server &server);
-
  private:
   // Private methods
   HttpResponse _handleCgiRequest(std::string const &path,
                                  Route const &route) const;
-  HttpResponse _handleFileRequest(std::string const &path,
-                                  Route const &route) const;
+  HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
+                              Route const &route) const;
+  std::string _getErrorPage(const Route &route, HTTPStatusCode errorCode) const;
 };
 
 // DELETE
@@ -81,8 +79,6 @@ class DeleteRequest : public HttpRequest {
   DeleteRequest(HttpHeaderData const &data);
   DeleteRequest(const DeleteRequest &ref);
   ~DeleteRequest();
-
-  HttpResponse constructResponse(const Server &server);
 };
 
 // POST
@@ -91,8 +87,6 @@ class PostRequest : public HttpRequest {
   PostRequest(HttpHeaderData const &data);
   PostRequest(const PostRequest &ref);
   ~PostRequest();
-
-  HttpResponse constructResponse(const Server &server);
 };
 
 // BAD
@@ -102,7 +96,7 @@ class BadRequest : public HttpRequest {
   BadRequest(const BadRequest &ref);
   ~BadRequest();
 
-  HttpResponse constructResponse(const Server &server);
+  HttpResponse executeRequest(const Server &server);
 
  private:
   HTTPStatusCode _statusCode;
