@@ -17,6 +17,20 @@ int startWebserver(std::vector<Socket> sockets) {
   return 0;
 }
 
+void testCgi() {
+  std::string body;
+  std::map<std::string, std::string> headers;
+  std::string input =
+      "{\"first_name\":\"firstNameInput.value\",\"last_name\":\"lastNameInput."
+      "value\"}";
+  HTTPStatusCode status =
+      CGI::executeFile(&body, &headers, "root/cgi/to_upper.py", input);
+  Logger &logger = Logger::getInstance();
+
+  logger.log(getMessageByStatusCode(status));
+  logger.debug(body);
+}
+
 int main(int argc, char **argv) {
   std::vector<Socket> sockets;
   /*  Input check */
@@ -24,6 +38,7 @@ int main(int argc, char **argv) {
     std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
     return 1;
   }
+  // testCgi();
   if (initWebserver(&sockets, argv[1])) return 1;
   return startWebserver(sockets);
 }

@@ -34,7 +34,10 @@ int Multiplexer::evaluateClient(pollfd *client) {
         _addClient(clientFd);
       else {
         Socket &matchingSocket = _getSocketForClient(clientFd);
-        matchingSocket.processRequest(clientFd);
+        if (matchingSocket.processRequest(clientFd)) {
+          // shutdown(clientFd, SHUT_RD);
+          // client->revents = POLLOUT;
+        }
         return 0;  // return 0 because we do no want to remove the clientFd
       }
       break;
@@ -47,7 +50,7 @@ int Multiplexer::evaluateClient(pollfd *client) {
       HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
 
       if (clientRequest) {
-        HttpResponse clientResponse = clientRequest->constructResponse(
+        HttpResponse clientResponse = clientRequest->executeRequest(
             clientSocket.getServerForClient(clientFd));
         send(clientFd, (void *)clientResponse.toStr().c_str(),
              clientResponse.toStr().size(), 0);

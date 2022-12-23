@@ -31,31 +31,32 @@ std::string HttpResponse::toStr() const {
   Logger &logger = Logger::getInstance();
 
   logger.log("< Started creating response string", VERBOSE);
-  std::string response_string;
+  std::string responseString;
 
   {
     logger.log("1. Adding status line", VERBOSE);
     std::ostringstream ss;
     ss << getVersionToStr() << " " << static_cast<int>(_statusCode) << " "
        << _statusMessage << "\r\n";
-    response_string += ss.str();
+    responseString += ss.str();
   }
 
   logger.log("2. Adding headers", VERBOSE);
   {
     std::map<std::string, std::string>::const_iterator it;
 
-    for (it = _headers.begin(); it != _headers.end(); ++it) {
-      response_string += it->first + ": " + it->second + "\r\n";
+    for (it = _headers.begin(); it != _headers.end(); it++) {
+      responseString += it->first + ": " + it->second + "\r\n";
     }
 
-    response_string +=
+    responseString +=
         "\r\n";  // Add an extra CRLF to separate headers from body
   }
 
   logger.log("3. Adding body", VERBOSE);
   if (_body.length() > 0) {
-    response_string += _body;
+    responseString += _body;
   }
-  return response_string;
+  logger.debug(responseString);
+  return responseString;
 }
