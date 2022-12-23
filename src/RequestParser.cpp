@@ -1,4 +1,5 @@
 #include <RequestParser.hpp>
+#include "Webserver.hpp"
 
 RequestParser::RequestParser() {}
 
@@ -135,10 +136,50 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
         "Incorrect first line of request -> returning new BadRequest()");
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
-  if (makeHeaderMap(&headerData.headers, headerLines)) {
+  if (makeHeaderMap(&headerData.headers, headerLines)) { // headermap always returns 0
     logger.error(
         "Incorrect header added to request -> returning new BadRequest()");
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
   return createRequest(headerData);
+}
+
+HttpRequest *RequestParser::processChunk(std::string &rawRequest)
+{
+  Logger &logger = Logger::getInstance();
+  size_t sub = rawRequest.find("\r\n");
+  if (sub == std::string::npos)
+  {
+    logger.error("[CHUNK]: No \\r\\n pair found");
+    return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+  }
+  std::string sizeStr = rawRequest.substr(sub);
+
+  char  *check = NULL;
+  size_t  chunkSize = strtoul(sizeStr.c_str(), &check, 16);
+  if (check != NULL)
+    return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+
+  HttpHeaderData headerData;
+
+  // last chunk found so there may be extra headers
+  if (!chunkSize)
+  {
+    size_t endOfHeader = rawRequest.find("\r\n\r\n");
+    if (endOfHeader == std::string::npos)
+    {
+      logger.error("[CHUNK]: Incorrect end of header found -> returning new BadRequest()");
+      return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+    }
+    std::vector<std::string> headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), false);
+    makeHeaderMap(&headerData.headers, headerLines);
+    return new PostRequest(headerData);
+  }
+
+  // could add a check for \r\n at the end; if not (single pair) badRequest
+  std::string body = unChunk(rawRequest);
+  if (body.size() == 0)
+    return new BadRequest(HTTPStatusCode::BAD_REQUEST);
+  headerData.body = body;
+  return new PostRequest(headerData);
 }

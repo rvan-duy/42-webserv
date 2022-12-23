@@ -14,4 +14,9 @@ std::vector<std::string> splitHeader(std::string headerString,
 /* All env variables for execve */
 extern char **environ;
 
+/**
+ * Utils
+ */
+std::string unChunk(std::string body);
+
 #endif

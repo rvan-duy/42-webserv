@@ -20,9 +20,11 @@ public:
     void sendResponse(const HttpResponse &response) const;
     void addClient(const int &fd);
     void removeClient(const int socket);
+    void addChunk(HttpRequest *request, int const &clientFd);
 
     // Hassers
     bool hasClient(const int &fd) const;
+    bool isChunked(const int& clientFd);
 
     // Getters
     int getPort() const;

@@ -25,14 +25,18 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
+  HttpRequest *operator+(const HttpRequest& other);
+  void  unChunkBody();
+  bool  isFirstChunk();
+
   // Abstract
   virtual HTTPStatusCode executeRequest(const Server &server)    = 0;
   virtual HttpResponse   constructResponse(const Server &server) = 0;
 
  protected:
   EHttpMethods _method;
-  std::string  _uri;
-  bool         _chunked;
+  std::string _uri;
+  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 
   // Protected methods
   bool _isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods) const;
@@ -113,10 +117,7 @@ class BadRequest : public HttpRequest {
 
   // Concrete
   HTTPStatusCode executeRequest(const Server &server);
-  HttpResponse   constructResponse(const Server &server);
-
- private:
-  HTTPStatusCode _statusCode;
+  HttpResponse constructResponse(const Server &server);
 };
 
 #endif  // HTTP_REQUEST_HPP
