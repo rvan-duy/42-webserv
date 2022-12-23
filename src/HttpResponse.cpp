@@ -59,3 +59,12 @@ std::string HttpResponse::toStr() const {
   }
   return response_string;
 }
+
+// int HttpResponse::buildRedirection(Route route) {
+//   if (route.first == 0)
+//     return 0;
+//   HttpResponse redirect((HTTPStatusCode)route.redirection.first);
+//   redirect.setHeader("location", route.redirection.second);
+//   *this = redirect;
+//   return 1;
+// }

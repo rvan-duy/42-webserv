@@ -1,7 +1,7 @@
 this file contains tests and their results
 
 Features missing acording to PFD:
-  - Limit client body size {Rutger}
+  - Limit client body size {Rutger} [dynamic limit]
   - HTTP redirection (3XX) {Ruben}
   - Clients must be able to upload files. -> see unsure
   - You need at least GET, POST, and DELETE methods. [WIP] GET works.
