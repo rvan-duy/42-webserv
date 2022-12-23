@@ -40,6 +40,7 @@ Succesfull:
 
 Solved:
   - alowing IP instead of servername while building requests {is this needed?} [cannot find this in pdf] [SOLVED] as not needed
+        alleen localhost of 0.0.0.0 werkend maken [SOLVED] (from unasigned)
 
   Removed GET from methods in parseFirstLine [FIXED]
     expected 405;
@@ -66,9 +67,9 @@ Solved:
     ◦ Define a directory or a file from where the file should be searched (for example,
         if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is
         /tmp/www/pouic/toto/pouet).
-    ◦ Turn on or off directory listing.
-    ◦ Set a default file to answer if the request is a directory.
-    ◦ Execute CGI based on certain file extension (for example .php).
+    ◦ Turn on or off directory listing. [WIP or DONE] (Ruben)
+    ◦ Set a default file to answer if the request is a directory. [DONE]
+    ◦ Execute CGI based on certain file extension (for example .php). [WIP]
     ◦ Make the route able to accept uploaded files and configure where they should
           be saved.
 
@@ -85,19 +86,18 @@ Solved:
 
 List from slack
  ruben:
-    auto index -> overzicht
+    [LOOKED DONE] auto index -> overzicht
     return (redirection)
     images
   rutger:
-    GET Request rector, (CGI)
-    limit client body size
-    cgi must handle uploaded files, cgi param?
-    POST, DELETE
+    [DONE?] GET Request rector, (CGI)
+    [WIP] limit client body size
+    [WIP] cgi must handle uploaded files, cgi param?
+    [WIP] POST, DELETE
   oswin:
-    server_name die niet klopt (bad request) -> status of 71790808 [FIXED] When no servername found the first server on socket accepts.
-    chunked (done)
-    tests (underway)
+    [SOLVED] server_name die niet klopt (bad request) -> status of 71790808 [FIXED] When no servername found the first server on socket accepts.
+    [DONE] chunked (done)
+    [INDEFINITE WIP] tests (underway)
     
   Not asigned:
     Zijn er nog meer gevallen?
-    alleen localhost of 0.0.0.0 werkend maken
