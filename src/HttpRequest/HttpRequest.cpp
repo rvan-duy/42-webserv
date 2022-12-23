@@ -31,7 +31,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
 
   if (stat(path.c_str(), &buffer) == -1) {
     logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File doesn't exist "
+        "[RESPONSE-BUILDING]: _fileExists -> File doesn't exist "
         "(" +
             path + ")",
         VERBOSE);
@@ -39,7 +39,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
   }
   if (buffer.st_mode & S_IFDIR) {
     logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a directory "
+        "[RESPONSE-BUILDING]: _fileExists -> File is a directory "
         "(" +
             path + ")",
         VERBOSE);
@@ -47,7 +47,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
   }
   if (buffer.st_mode & S_IFREG) {
     logger.log(
-        "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is a regular "
+        "[RESPONSE-BUILDING]: _fileExists -> File is a regular "
         "file "
         "(" +
             path + ")",
@@ -55,7 +55,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
     return FileType::IS_REG_FILE;
   }
   logger.log(
-      "[RESPONSE-BUILDING] GetRequest: _fileExists -> File is something else "
+      "[RESPONSE-BUILDING]: _fileExists -> File is something else "
       "(" +
           path + ")",
       VERBOSE);
@@ -99,6 +99,7 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
   const std::string path = constructPath(routeOfResponse.rootDirectory, _uri);
 
   if (isMethodAllowed(routeOfResponse.allowedMethods, _method) == false) {
+    Logger::getInstance().error("Method for request not allowed");
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
 
@@ -115,19 +116,24 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
 // - if auto index is off and the path is a directory, return 403
 HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
                                             Route const &route) const {
+  Logger &logger = Logger::getInstance();
   std::map<std::string, std::string> headers;
   std::string body;
 
+  logger.log("starting cgi request", VERBOSE);
   if (!route.cgiEnabled) {
+    logger.error("CGI not allowed on this route");
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
-  HTTPStatusCode status = CGI::executeFile(&body, &headers, path, _body);
 
+  HTTPStatusCode status = CGI::executeFile(&body, &headers, path, _body);
   if (status != HTTPStatusCode::OK) {
     Logger::getInstance().error("Executing cgi: " +
                                 getMessageByStatusCode(status));
     return HttpResponse(status);
   }
+
+  logger.log("CGI request successful", VERBOSE);
   return _responseWithBody(headers, body);
 }
 
@@ -272,5 +278,8 @@ bool HttpRequest::_isTypeAccepted() const {
 HttpResponse HttpRequest::_errorResponse(HTTPStatusCode const &statusCode,
                                          Route const &route) const {
   (void)route;
+  Logger::getInstance().error(
+      "Making error with message:" + getMessageByStatusCode(statusCode),
+      VERBOSE);
   return HttpResponse(statusCode);
 }

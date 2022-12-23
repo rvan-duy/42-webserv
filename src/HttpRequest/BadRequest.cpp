@@ -10,5 +10,9 @@ BadRequest::~BadRequest() {}
 
 HttpResponse BadRequest::executeRequest(const Server &server) {
   (void)server;
+  Logger::getInstance().error(
+      "[Bad request] -> sending response with statuscode: " +
+          getMessageByStatusCode(_statusCode),
+      VERBOSE);
   return HttpResponse(_statusCode);
 }
