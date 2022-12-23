@@ -4,6 +4,7 @@
 /* Parsing abstract syntax tree lines	          */
 /**************************************************/
 
+// TODO: add root parsing on server level
 t_parseFuncPair Parser::lineParsingFuncs[PARSER_FUNC_N] = {
     {"listen", &Parser::parsePort},
     {"serverName", &Parser::parseServerName},
@@ -14,9 +15,9 @@ int Parser::parseServerName(void *dest, t_dataLine line) {
   if (!dest || line.size() < 2) {
     return 1;
   }
-  Server                            *server     = static_cast<Server *>(dest);
-  std::string                        serverName = "";
-  std::vector<std::string>::iterator it         = line.begin();
+  Server *server = static_cast<Server *>(dest);
+  std::string serverName = "";
+  std::vector<std::string>::iterator it = line.begin();
   it++;
   while (it != line.end()) {
     if (serverName.length() != 0) {
@@ -42,9 +43,9 @@ int Parser::parsePort(void *dest, t_dataLine line) {
   if (!dest || line.size() != 2) {
     return 1;
   }
-  Server     *server  = static_cast<Server *>(dest);
+  Server *server = static_cast<Server *>(dest);
   std::string rawLine = line.at(1);
-  size_t      port    = 0;
+  size_t port = 0;
   /* In case only port is entered */
   if (!isAllNumbers(rawLine)) {
     return 1;
@@ -57,7 +58,7 @@ int Parser::parseMaxBodySize(void *dest, t_dataLine line) {
   if (!dest || line.size() != 2) {
     return 1;
   }
-  Server     *server = static_cast<Server *>(dest);
+  Server *server = static_cast<Server *>(dest);
   std::string maxBodySize;
 
   maxBodySize = line.at(1);

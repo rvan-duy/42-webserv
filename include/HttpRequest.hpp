@@ -1,6 +1,7 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
+#include <CGI.hpp>
 #include <RequestParser.hpp>
 #include <Server.hpp>
 #include <StatusCodes.hpp>
@@ -61,13 +62,23 @@ class GetRequest : public HttpRequest {
 
  private:
   // Private methods
-  HttpResponse             _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
+  HttpResponse             _createAutoIndexResponse(const std::string &path) const;
   bool                     _typeIsAccepted() const;
   std::string              _getErrorPageIndex(const Route &route, HTTPStatusCode errorCode) const;
   std::vector<std::string> _getPossiblePaths(const std::string &path, const std::vector<std::string> &index_files);
   std::vector<std::string> _getAcceptedTypesFromHeader() const;
   std::string              _constructPath(const std::string &root) const;
   FileType                 _fileExists(const std::string &path) const;
+  HttpResponse _createResponseObject(const std::string &path, HTTPStatusCode statusCode, const Route &route) const;
+  bool         _checkIfIndexFileExists(const std::vector<std::string> &indexFiles, const std::string &path) const;
+  std::vector<std::string> _getPossiblePaths(const std::string              &path,
+                                             const std::vector<std::string> &index_files) const;
+  FileType                 _getFileType(const std::string &path) const;
+  HttpResponse             _handleCgiRequest(std::string const &path, Route const &route) const;
+  HttpResponse             _handleFileRequest(std::string const &path, Route const &route) const;
+  HttpResponse             _errorResponseWithFile(HTTPStatusCode const &statusCode, Route const &route) const;
+  HttpResponse             _responseWithFile(std::string const &path, HTTPStatusCode statusCode) const;
+  HttpResponse             _responseWithBody(std::map<std::string, std::string> headers, std::string body) const;
 };
 
 // DELETE
