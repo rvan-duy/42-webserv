@@ -47,11 +47,12 @@ struct Route {
   Route()
       : route("/"),
         defaultFile("index.html"),
-        httpRedirection(""),
+        // httpRedirection(""),
         cgiEnabled(false) {
     allowedMethods[GET] = true;
     allowedMethods[POST] = true;
     allowedMethods[DELETE] = true;
+    redirection.first = 0;
   }
   // Vector for bonus
   std::string route;
@@ -60,7 +61,9 @@ struct Route {
   std::map<HTTPStatusCode, std::string> errorPages;
   std::map<EHttpMethods, bool> allowedMethods;
   std::vector<std::string> indexFiles;
-  std::string httpRedirection;
+  // std::string httpRedirection;
+  std::pair<int, std::string> redirection;
+  std::string uploadStore;
   bool autoIndex;
   bool cgiEnabled;
 };

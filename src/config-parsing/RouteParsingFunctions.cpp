@@ -6,9 +6,33 @@
 /**************************************************/
 
 t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
-    {"root", &Parser::parseRoot},       {"index", &Parser::parseIndex},         {"autoIndex", &Parser::parseAutoIndex},
-    {"methods", &Parser::parseMethods}, {"errorPage", &Parser::parseErrorPage}, {"cgi", &Parser::parseCgi},
+    {"root", &Parser::parseRoot},           {"index", &Parser::parseIndex},             {"autoIndex", &Parser::parseAutoIndex},
+    {"methods", &Parser::parseMethods},     {"errorPage", &Parser::parseErrorPage},     {"cgi", &Parser::parseCgi},
+    {"return", &Parser::parseRedirection},  {"upload_store", &Parser::parseUploadStore},
 };
+
+int Parser::parseUploadStore(void *dest, t_dataLine line) {
+  if (!dest || line.size() != 2) {
+    return 1;
+  }
+  Route *route = static_cast<Route *>(dest);
+  route->uploadStore = line[1];
+  return 0;
+}
+
+int Parser::parseRedirection(void *dest, t_dataLine line) {
+  if (!dest || line.size() != 3) {
+    return 1;
+  }
+  int redirCode = stoi(line[1]);
+  if (redirCode < 300 || redirCode >= 400)
+    return 1;
+  Route *route = static_cast<Route *>(dest);
+  std::pair<int, std::string> *result = &route->redirection;
+  result->first = redirCode;
+  result->second = line[2];
+  return 0;
+}
 
 int Parser::parseErrorPage(void *dest, t_dataLine line) {
   if (!dest || line.size() != 3) {

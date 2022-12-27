@@ -1,5 +1,4 @@
 #include "HttpResponse.hpp"
-
 #include "Logger.hpp"
 
 HttpResponse::HttpResponse(HTTPStatusCode status)
@@ -59,4 +58,13 @@ std::string HttpResponse::toStr() const {
   }
   logger.debug(responseString);
   return responseString;
+}
+
+int HttpResponse::buildRedirection(Route route) {
+  if (route.redirection.first == 0)
+    return 0;
+  HttpResponse redirect((HTTPStatusCode)route.redirection.first);
+  redirect.setHeader("location", route.redirection.second);
+  *this = redirect;
+  return 1;
 }
