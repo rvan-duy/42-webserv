@@ -76,7 +76,7 @@ prod: $(NAME)
 	@echo $(CFLAGS)
 	./$(NAME) $(ARGS)
 
-run: $(NAME)
+run: $(NAME) deletelogs
 	./$(NAME) $(ARGS)
 
 lldb: $(NAME)

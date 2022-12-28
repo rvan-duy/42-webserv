@@ -11,7 +11,9 @@ if len(sys.argv) != 3:
     print("")
     # Print body
     print(output)
-    sys.exit(0)
+    sys.exit(1)
+
+
 
 # Get the URI and file data from the command-line arguments
 uri = sys.argv[1]
