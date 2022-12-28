@@ -85,7 +85,13 @@ int Socket::processRequest(int const &clientFd) {
     return 1;
   }
   if (isChunked(clientFd)) {
-    request = RequestParser::processChunk(rawRequest);
+    if (_clients[clientFd].first->isFirstChunk())
+      request = RequestParser::processChunk(rawRequest);
+    else
+    {
+      Logger::getInstance().debug("no chunk chunk");
+      request = RequestParser::parseHeader(rawRequest);
+    }
     addChunk(request, clientFd);
     delete request;  // the body or header data has been added to og request
     return 0;

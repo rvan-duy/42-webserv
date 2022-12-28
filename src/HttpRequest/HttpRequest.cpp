@@ -301,6 +301,6 @@ void HttpRequest::unChunkBody() { _body = unChunk(_body); }
  */
 bool HttpRequest::isFirstChunk() {
   bool chunkHeader = "chunked" == getHeader("Transfer-Encoding");
-  Logger::getInstance().debug("is First Chunk: " + chunkHeader, VERBOSE);
+  Logger::getInstance().debug("is First Chunk: " + std::to_string(chunkHeader), VERBOSE);
   return chunkHeader;
 }
