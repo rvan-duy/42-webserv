@@ -13,7 +13,7 @@ t_parseFuncPair Parser::blockParsingFuncs[BLOCK_FUNC_N] = {
     {"errorPage", &Parser::parseErrorPage},
     {"cgi", &Parser::parseCgi},
     {"return", &Parser::parseRedirection},
-    {"cgi_param", &Parser::parseCgiParam},
+    {"cgi_params", &Parser::parseCgiParam},
 };
 
 int Parser::parseCgiParam(void *dest, t_dataLine line) {
@@ -36,7 +36,7 @@ int Parser::parseRedirection(void *dest, t_dataLine line) {
   int redirCode = stoi(line[1]);
   if (redirCode < 300 || redirCode >= 400) {
     return 1;
-  } 
+  }
   Route *route = static_cast<Route *>(dest);
   std::pair<int, std::string> *result = &route->redirection;
   result->first = redirCode;

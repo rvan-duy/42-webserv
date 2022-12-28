@@ -4,13 +4,13 @@ import uuid
 
 # Check if the correct number of arguments were provided
 if len(sys.argv) != 3:
-    output = "Usage: python3 upload.py <path> <file_data>"
-    print("Content-Type: text/plain")
-    print("Content-Length:" + str(len(output)))
-    # Split body from headers
-    print("")
-    # Print body
-    print(output)
+    # output = "Usage: python3 upload.py <path> <file_data>"
+    # print("Content-Type: text/plain")
+    # print("Content-Length:" + str(len(output)))
+    # # Split body from headers
+    # print("")
+    # # Print body
+    # print(output)
     sys.exit(1)
 
 
@@ -18,6 +18,7 @@ if len(sys.argv) != 3:
 # Get the URI and file data from the command-line arguments
 uri = sys.argv[1]
 filename = str(uuid.uuid4())
+uri += "/"
 uri += filename
 uri += ".txt"
 file_data = sys.argv[2]
