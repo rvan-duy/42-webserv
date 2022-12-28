@@ -9,13 +9,12 @@
 class HttpRequest;
 
 struct HttpHeaderData {
-  HttpHeaderData() : chunked(false) {}
+  HttpHeaderData() {}
   HttpVersion                        httpVersion;
   std::string                        url;
   EHttpMethods                       method;
   std::string                        body;
   std::map<std::string, std::string> headers;
-  bool                               chunked;
 };
 
 class RequestParser {
