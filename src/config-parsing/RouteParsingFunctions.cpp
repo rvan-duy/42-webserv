@@ -34,7 +34,9 @@ int Parser::parseRedirection(void *dest, t_dataLine line) {
     return 1;
   }
   int redirCode = stoi(line[1]);
-  if (redirCode < 300 || redirCode >= 400) return 1;
+  if (redirCode < 300 || redirCode >= 400) {
+    return 1;
+  } 
   Route *route = static_cast<Route *>(dest);
   std::pair<int, std::string> *result = &route->redirection;
   result->first = redirCode;

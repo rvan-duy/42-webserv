@@ -109,7 +109,6 @@ void Multiplexer::waitForEvents(const int timeout) {
 }
 
 /*
- * TODO: move this to socket class ?
  * Send data to a client
  * @param clientSocket The socket of the client
  * @param data The data to send

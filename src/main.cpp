@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
     return 1;
   }
   // testCgi();
-  if (initWebserver(&sockets, argv[1])) return 1;
+  if (initWebserver(&sockets, argv[1])) {
+    return 1;
+  } 
   return startWebserver(sockets);
 }
