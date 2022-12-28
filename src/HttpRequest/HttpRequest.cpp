@@ -31,16 +31,14 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
     logger.log(
         "[RESPONSE-BUILDING]: _fileExists -> File doesn't exist "
         "(" +
-            path + ")",
-        VERBOSE);
+        path + ")");
     return FileType::NOT_FOUND;
   }
   if (buffer.st_mode & S_IFDIR) {
     logger.log(
         "[RESPONSE-BUILDING]: _fileExists -> File is a directory "
         "(" +
-            path + ")",
-        VERBOSE);
+        path + ")");
     return FileType::DIR;
   }
   if (buffer.st_mode & S_IFREG) {
@@ -48,15 +46,13 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
         "[RESPONSE-BUILDING]: _fileExists -> File is a regular "
         "file "
         "(" +
-            path + ")",
-        VERBOSE);
+        path + ")");
     return FileType::FILE;
   }
   logger.log(
       "[RESPONSE-BUILDING]: _fileExists -> File is something else "
       "(" +
-          path + ")",
-      VERBOSE);
+      path + ")");
   logger.error("WARNING: logic probably not implemented yet");
   return FileType::NOT_FOUND;
 }
@@ -104,8 +100,7 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
   FileType type = HttpRequest::_getFileType(path);
   if (type == FileType::NOT_FOUND) {
     HttpResponse redirection;
-    if (redirection.buildRedirection(routeOfResponse))
-      return (redirection);
+    if (redirection.buildRedirection(routeOfResponse)) return (redirection);
     return _errorResponse(HTTPStatusCode::NOT_FOUND, routeOfResponse);
   }
 
@@ -132,7 +127,8 @@ HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
 
-  HTTPStatusCode status = CGI::executeFile(&body, &headers, path, _body);
+  HTTPStatusCode status =
+      CGI::executeFileWithBody(&body, &headers, route.cgiParams, path, _body);
   if (status != HTTPStatusCode::OK) {
     Logger::getInstance().error("Executing cgi: " +
                                 getMessageByStatusCode(status));
@@ -231,11 +227,8 @@ HttpResponse HttpRequest::_responseWithBody(
     std::map<std::string, std::string> headers, std::string body) const {
   HttpResponse response(HTTPStatusCode::OK);
   response.setBody(body);
-  Logger::getInstance().debug(body);
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); ++it) {
-    Logger::getInstance().debug(it->first);
-    Logger::getInstance().debug(it->second);
     response.setHeader(it->first, it->second);
   }
   return response;
