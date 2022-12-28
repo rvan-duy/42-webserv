@@ -1,5 +1,8 @@
 this file contains tests and their results
 
+
+What happens when there is no "/" loctionblock in the config, where are errorpages constructed from?
+
 Features missing acording to PFD:
   - Limit client body size {Rutger} [dynamic limit]
   - HTTP redirection (3XX) {Ruben} [FIXED]

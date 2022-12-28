@@ -4,7 +4,7 @@
 REQUESTS=1000
 
 # Set the base URL of the web server
-BASE_URL=http://localhost:8083
+BASE_URL=http://localhost:8090
 
 # Send the requests
 for i in $(seq 1 $REQUESTS)
