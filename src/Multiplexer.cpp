@@ -83,7 +83,8 @@ void Multiplexer::waitForEvents(const int timeout) {
   std::vector<int> markForRemoval;
 
   logger.log("[POLLING] Multiplexer: Starting poll() loop with timeout of " +
-             std::to_string(timeout) + " milliseconds");
+                 std::to_string(timeout) + " milliseconds",
+             VERBOSE);
   do {
     if (_pollSockets(timeout) == -1) break;
     logger.log(
@@ -151,7 +152,8 @@ void Multiplexer::_addClient(const int socket) {
     return;
   }
   logger.log("[POLLING] Multiplexer: New connection accepted: " +
-             std::to_string(newSocket));
+                 std::to_string(newSocket),
+             VERBOSE);
   pollfd client = {newSocket, POLLIN | POLLOUT, 0};
   _clients.push_back(client);
 
@@ -165,7 +167,8 @@ void Multiplexer::_addClient(const int socket) {
   logger.log(
       "[POLLING] Multiplexer: New connection added to multiplexer, total "
       "number of stored sockets: " +
-      std::to_string(_clients.size()));
+          std::to_string(_clients.size()),
+      VERBOSE);
 }
 
 /*
@@ -213,23 +216,28 @@ int Multiplexer::_getEvent(const pollfd &fd) {
     return 0;
   } else if (fd.revents & POLLIN) {
     logger.log("[POLLING] Multiplexer: POLLIN event on socket " +
-               std::to_string(fd.fd));
+                   std::to_string(fd.fd),
+               VERBOSE);
     return POLLIN;
   } else if (fd.revents & POLLOUT) {
     logger.log("[POLLING] Multiplexer: POLLOUT event on socket " +
-               std::to_string(fd.fd));
+                   std::to_string(fd.fd),
+               VERBOSE);
     return POLLOUT;
   } else if (fd.revents & POLLERR) {
     logger.log("[POLLING] Multiplexer: POLLERR event on socket " +
-               std::to_string(fd.fd));
+                   std::to_string(fd.fd),
+               VERBOSE);
     return POLLERR;
   } else if (fd.revents & POLLHUP) {
     logger.log("[POLLING] Multiplexer: POLLHUP event on socket " +
-               std::to_string(fd.fd));
+                   std::to_string(fd.fd),
+               VERBOSE);
     return POLLHUP;
   } else {
     logger.log("[POLLING] Multiplexer: Unknown event on socket " +
-               std::to_string(fd.fd));
+                   std::to_string(fd.fd),
+               VERBOSE);
     return -1;
   }
 }
@@ -244,20 +252,24 @@ int Multiplexer::_pollSockets(const int timeout) {
   pollfd *fds = &_clients[0];
 
   logger.log("[POLLING] Multiplexer: Polling for events on " +
-             std::to_string(_clients.size()) + " sockets...");
+                 std::to_string(_clients.size()) + " sockets...",
+             VERBOSE);
   int pollResult = poll(fds, _clients.size(), timeout);
   switch (pollResult) {
     case -1:
       logger.error(
           "[POLLING] Multiplexer: poll() returned -1, error occurred: " +
-          std::string(strerror(errno)));
+              std::string(strerror(errno)),
+          VERBOSE);
       return -1;
     case 0:
-      logger.log("[POLLING] Multiplexer: poll() returned 0, timeout occurred");
+      logger.log("[POLLING] Multiplexer: poll() returned 0, timeout occurred",
+                 VERBOSE);
       return -1;
     default:
       logger.log("[POLLING] Multiplexer: " + std::to_string(_clients.size()) +
-                 " sockets are ready");
+                     " sockets are ready",
+                 VERBOSE);
       return 0;
   }
 }
