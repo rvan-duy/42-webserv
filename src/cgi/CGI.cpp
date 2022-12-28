@@ -6,6 +6,15 @@ CGI::CGI() {}
 
 CGI::~CGI() {}
 
+void logCharPointer(char **headers) {
+  size_t i = 0;
+
+  while (headers[i]) {
+    Logger::getInstance().debug(headers[i]);
+    i++;
+  }
+}
+
 static char *const *strlist(const std::vector<const std::string> &input) {
   char **result = new char *[input.size() + 1];
   std::size_t storage_size = 0;
@@ -22,7 +31,7 @@ static char *const *strlist(const std::vector<const std::string> &input) {
       p += s.size() + 1;
     }
     *q = nullptr;  // terminate the list
-
+    logCharPointer(result);
     return result;
   } catch (...) {
     delete[] result;
@@ -160,7 +169,8 @@ static int splitHeaderFromBody(std::string *pBody,
   Logger &logger = Logger::getInstance();
   size_t endOfHeader = src.find("\n\n");
   if (endOfHeader == std::string::npos) {
-    logger.error("Incorrect end of header found -> returning new BadRequest()");
+    logger.error(
+        "[CGI]: Incorrect end of header found -> returning new BadRequest");
     return 1;
   }
   *pBody = src.substr(endOfHeader + 2);

@@ -38,7 +38,6 @@ class HttpRequest : public HttpMessage {
  protected:
   EHttpMethods _method;
   std::string _uri;
-  bool _chunked;
 
   /* Request handling */
   virtual HttpResponse _handleCgiRequest(std::string const &path,

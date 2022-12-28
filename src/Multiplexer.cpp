@@ -35,8 +35,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
       else {
         Socket &matchingSocket = _getSocketForClient(clientFd);
         if (matchingSocket.processRequest(clientFd)) {
-          // shutdown(clientFd, SHUT_RD);
-          // client->revents = POLLOUT;
+          Logger::getInstance().debug("shutdown");
+          shutdown(clientFd, SHUT_RD);
+          client->revents = POLLOUT;
         }
         return 0;  // return 0 because we do no want to remove the clientFd
       }
@@ -192,7 +193,9 @@ void Multiplexer::_removeClient(const int socket) {
   for (std::vector<Socket>::iterator it = _sockets.begin();
        it != _sockets.end(); ++it) {
     // removes the client for all the sockets even thoug
-    if (it->hasClient(socket)) it->removeClient(socket);
+    if (it->hasClient(socket)) {
+      it->removeClient(socket);
+    }
   }
 }
 

@@ -8,8 +8,7 @@
 HttpRequest::HttpRequest(HttpHeaderData const &data)
     : HttpMessage(data.httpVersion, data.headers, data.body),
       _method(data.method),
-      _uri(data.url),
-      _chunked(false) {}
+      _uri(data.url) {}
 
 HttpRequest::HttpRequest() {}
 

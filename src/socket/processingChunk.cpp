@@ -2,8 +2,11 @@
 #include "Socket.hpp"
 
 bool Socket::isChunked(const int &clientFd) {
-  // return _clients[clientFd].first != NULL;
-  return false;
+  Logger::getInstance().debug("is chunked");
+  if (_clients[clientFd].first != NULL) {
+    Logger::getInstance().debug(_clients[clientFd].first->getHeader("Referer"));
+  }
+  return _clients[clientFd].first != NULL;
 }
 
 /**

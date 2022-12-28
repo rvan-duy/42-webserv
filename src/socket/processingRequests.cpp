@@ -16,6 +16,7 @@ static int readFromClientFd(std::string *result, const int clientFd) {
                  std::to_string(clientFd),
              VERBOSE);
   ssize_t bytesReceived = read(clientFd, buffer, MAX_REQUEST_SIZE + 1);
+  logger.debug(std::to_string(bytesReceived));
   if (bytesReceived == -1) {
     logger.error("[READING] Multiplexer: Failed to read data from client " +
                  std::to_string(clientFd) + ": " +

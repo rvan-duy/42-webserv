@@ -30,8 +30,6 @@ static int parseMethod(std::string method) {
 
 // TODO: check if strings are correct
 static int parseHttpVersion(std::string httpVersion) {
-  // Logger::getInstance().debug(httpVersion);
-
   if (httpVersion == "HTTP/1.1")
     return HTTP_1_1;
   else if (httpVersion == "HTTP/2.0")
@@ -143,8 +141,11 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
 
   logger.log("Starting to parse request");
   endOfHeader = rawRequest.find("\r\n\r\n");
+  logger.debug(rawRequest);
   if (endOfHeader == std::string::npos) {
-    logger.error("Incorrect end of header found -> returning new BadRequest()");
+    logger.error(
+        "[REQUESTPARSER] Incorrect end of header found -> returning new "
+        "BadRequest()");
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
   headerData.body =
