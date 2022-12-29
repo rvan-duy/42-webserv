@@ -79,4 +79,4 @@ void HttpMessage::setHeader(std::string const &key, std::string const &value) {
   _headers[key] = value;
 }
 
-void HttpMessage::setBody(std::string const &body) { _body = body; }
+void HttpMessage::addBody(std::string const &body) { _body += body; }

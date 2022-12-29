@@ -24,7 +24,7 @@ class HttpMessage {
   bool hasHeader(const std::string key) const;
 
   std::string getBody() const;
-  void setBody(std::string const &body);
+  void addBody(std::string const &body);
   void setHeader(std::string const &key, std::string const &value);
 
  protected:
