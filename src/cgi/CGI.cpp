@@ -98,11 +98,11 @@ static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
   }
 
   std::string output;
-  std::string buffer[BUFFER_SIZE + 1];
+  std::string buffer[CGI_BUFF_SIZE + 1];
   int bytesRead;
 
   do {
-    bytesRead = read(fd, &buffer, BUFFER_SIZE);
+    bytesRead = read(fd, &buffer, CGI_BUFF_SIZE);
     if (bytesRead == -1) {
       Logger::getInstance().error("[EXECUTING] CGI: read: " +
                                   std::string(strerror(errno)));

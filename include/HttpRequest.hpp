@@ -28,6 +28,8 @@ class HttpRequest : public HttpMessage {
   HttpRequest(const HttpRequest &obj);
   virtual ~HttpRequest();
 
+  EHttpMethods getMethod() const;
+
   HttpRequest *operator+(const HttpRequest &other);
   void unChunkBody();
   bool isFirstChunk();

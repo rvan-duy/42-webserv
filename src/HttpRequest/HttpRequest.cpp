@@ -217,7 +217,7 @@ HttpResponse HttpRequest::_responseWithFile(std::string const &path,
   }
   HttpResponse response(statusCode);
   std::string test = fileToStr(file);
-  response.setBody(fileToStr(file));
+  response.addBody(fileToStr(file));
   response.setHeader("Content-Length", getFileSize(file));
   response.setHeader("Content-Type", getContentType(path));
   return response;
@@ -226,13 +226,15 @@ HttpResponse HttpRequest::_responseWithFile(std::string const &path,
 HttpResponse HttpRequest::_responseWithBody(
     std::map<std::string, std::string> headers, std::string body) const {
   HttpResponse response(HTTPStatusCode::OK);
-  response.setBody(body);
+  response.addBody(body);
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); ++it) {
     response.setHeader(it->first, it->second);
   }
   return response;
 }
+
+EHttpMethods HttpRequest::getMethod() const { return _method; }
 
 std::vector<std::string> HttpRequest::_getPossiblePaths(
     const std::string &path, const std::vector<std::string> &indexFiles) const {
