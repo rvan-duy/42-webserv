@@ -7,7 +7,7 @@
 #include <Webserver.hpp>
 #include <vector>
 
-/* backlog number of connections allowed on the incoming queue */
+/* number of connections allowed on the incoming queue */
 #define BACKLOG 10
 
 class Socket {
@@ -22,7 +22,6 @@ class Socket {
   void removeClient(const int socket);
   void addChunk(HttpRequest *request, int const &clientFd);
 
-  // Hassers
   bool hasClient(const int &fd) const;
   bool isChunked(const int &clientFd);
 
