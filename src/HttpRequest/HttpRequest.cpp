@@ -70,6 +70,8 @@ static std::string constructPath(const std::string &root,
   }
 }
 
+HTTPStatusCode HttpRequest::getStatus() const { return _statusCode; }
+
 static bool isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods,
                             EHttpMethods method) {
   for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin();

@@ -10,6 +10,15 @@
 /* number of connections allowed on the incoming queue */
 #define BACKLOG 10
 
+enum class RequestStatus { NONE, RAW, UNFINISHED_REQUEST, FINISHED };
+
+struct UnfinishedRequest {
+  RequestStatus status;
+  std::string rawRequest;
+  HttpRequest *request;
+  Server *server;
+};
+
 class Socket {
  public:
   Socket(int const &port);
@@ -39,13 +48,22 @@ class Socket {
   std::vector<Server> _servers;
   // key: client FD, value: request, server pair
   std::map<int, std::pair<HttpRequest *, Server *>> _clients;
+  std::map<int, UnfinishedRequest> _unfinishedRequest;
   int _fd;
   int _port;
   int _accepted;
   struct sockaddr_in6 _servaddr;
 
-  void _matchRequestToServer(int const &clientFd, HttpRequest *request);
+  Server *_matchRequestToServer(HttpRequest *request);
   void _addRequestToClient(int const &clientFd, HttpRequest *request,
                            Server *server);
   void _addBadRequestToClient(const int &fd, HTTPStatusCode statusCode);
+
+  RequestStatus getRequestStatus(const int &clientFd) const;
+  void _processRawRequest(const int &fd, const std::string &rawRequest);
+  int processUnfinishedRequest(const int &fd, const std::string &rawRequest);
+  std::string _addRawRequest(const int &fd, std::string const &rawRequest);
+  void _addUnfinishedRequest(const int &fd, HttpRequest *request,
+                             Server *match);
+  void _removeUnfinishedRequest(const int &fd);
 };

@@ -59,7 +59,11 @@ std::string HttpMessage::getHeader(const std::string &key) const {
 
 int HttpMessage::getIntHeader(const std::string &key) const {
   std::string header = _headers.at(key);
-  return std::stoi(header);
+  try {
+    return std::stoi(header);
+  } catch (std::exception e) {
+    return -1;
+  }
 }
 
 bool HttpMessage::hasHeader(const std::string key) const {
@@ -79,4 +83,5 @@ void HttpMessage::setHeader(std::string const &key, std::string const &value) {
   _headers[key] = value;
 }
 
+// TODO: check max body size
 void HttpMessage::addBody(std::string const &body) { _body += body; }

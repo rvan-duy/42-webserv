@@ -20,7 +20,6 @@ struct HttpHeaderData;
 
 enum class FileType { DIR, FILE, NOT_FOUND };
 
-// HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
@@ -29,17 +28,19 @@ class HttpRequest : public HttpMessage {
   virtual ~HttpRequest();
 
   EHttpMethods getMethod() const;
+  HTTPStatusCode getStatus() const;
 
   HttpRequest *operator+(const HttpRequest &other);
   void unChunkBody();
   bool isFirstChunk();
 
-  // Abstract
   virtual HttpResponse executeRequest(const Server &server);
 
  protected:
   EHttpMethods _method;
   std::string _uri;
+  // TODO: remove default value
+  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 
   /* Request handling */
   virtual HttpResponse _handleCgiRequest(std::string const &path,
@@ -61,7 +62,6 @@ class HttpRequest : public HttpMessage {
   std::vector<std::string> _getPossiblePaths(
       const std::string &path,
       const std::vector<std::string> &index_files) const;
-  HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 };
 
 // GET
