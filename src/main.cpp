@@ -19,10 +19,13 @@ int startWebserver(std::vector<Socket> sockets) {
 
 int main(int argc, char **argv) {
   std::vector<Socket> sockets;
+  std::string configPath = DEFAULT_CONFIG_PATH;
   /*  Input check */
-  if (argc != 2) {
-    std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
+  if (argc == 2) {
+    configPath = argv[1];
     return 1;
+  } else if (argc > 2) {
+    std::cerr << "Usage: ./webserver [optional: path_to_config]" << std::endl;
   }
   // testCgi();
   if (initWebserver(&sockets, argv[1])) {
