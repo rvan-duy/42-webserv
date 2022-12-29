@@ -35,7 +35,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
       else {
         Socket &matchingSocket = _getSocketForClient(clientFd);
         if (matchingSocket.processRequest(clientFd)) {
-          Logger::getInstance().debug("shutdown");
+          Logger::getInstance().error(
+              "[MULTIPLEXER] shutting down client with fd: " +
+              std::to_string(clientFd));
           shutdown(clientFd, SHUT_RD);
           client->revents = POLLOUT;
         }

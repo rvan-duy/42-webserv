@@ -1,35 +1,22 @@
 #include <Multiplexer.hpp>
 
 #define MAX_REQUEST_SIZE 1000000
+#define BUFFER_SIZE 10
 
-/*
- * Reads data from a client and stores it in the buffer
- * @param result The string to store the data in
- * @param clientSocket The client socket to read from
- * @return The number of bytes read
- */
 static int readFromClientFd(std::string *result, const int clientFd) {
-  Logger &logger = Logger::getInstance();
-  char buffer[MAX_REQUEST_SIZE + 2];
-  bzero(buffer, MAX_REQUEST_SIZE + 2);
-  logger.log("[READING] Multiplexer: Reading data from client " +
-                 std::to_string(clientFd),
-             VERBOSE);
-  ssize_t bytesReceived = read(clientFd, buffer, MAX_REQUEST_SIZE + 1);
-  logger.debug(std::to_string(bytesReceived));
+  char buffer[BUFFER_SIZE + 1];
+  memset(buffer, 0, BUFFER_SIZE + 1);
+
+  ssize_t bytesReceived = read(clientFd, buffer, BUFFER_SIZE);
   if (bytesReceived == -1) {
-    logger.error("[READING] Multiplexer: Failed to read data from client " +
-                 std::to_string(clientFd) + ": " +
-                 std::string(strerror(errno)));
+    Logger::getInstance().error(
+        "[SOCKET]: read failed: " + std::to_string(clientFd) + ": " +
+        std::string(strerror(errno)));
     return -1;
-  } else if (bytesReceived == MAX_REQUEST_SIZE + 1) {
-    logger.error("[READING] Socket: request too large");
-    return -2;
   }
   *result = std::string(buffer, bytesReceived);
-  logger.log("[READING] Multiplexer: Read " + std::to_string(bytesReceived) +
-                 " bytes from client " + std::to_string(clientFd),
-             VERBOSE);
+  Logger::getInstance().log(
+      "[READING] Multiplexer: Read " + std::to_string(bytesReceived), VERBOSE);
   return bytesReceived;
 }
 
@@ -70,20 +57,21 @@ void Socket::_matchRequestToServer(int const &clientFd, HttpRequest *request) {
 }
 
 int Socket::processRequest(int const &clientFd) {
+  Logger &logger = Logger::getInstance();
   std::string rawRequest;
   HttpRequest *request;
   int bytesRead = 0;
 
+  logger.log("Starting to read from client", VERBOSE);
   bytesRead = readFromClientFd(&rawRequest, clientFd);
   if (bytesRead < 0) {
-    _addBadRequestToClient(clientFd, bytesRead == -1
-                                         ? HTTPStatusCode::INTERNAL_SERVER_ERROR
-                                         : HTTPStatusCode::CONTENT_TOO_LARGE);
+    _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
     return 1;
   } else if (bytesRead == 0) {
     _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
     return 1;
   }
+
   if (isChunked(clientFd)) {
     request = RequestParser::processChunk(rawRequest);
     addChunk(request, clientFd);

@@ -141,7 +141,6 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
 
   logger.log("Starting to parse request");
   endOfHeader = rawRequest.find("\r\n\r\n");
-  logger.debug(rawRequest);
   if (endOfHeader == std::string::npos) {
     logger.error(
         "[REQUESTPARSER] Incorrect end of header found -> returning new "
