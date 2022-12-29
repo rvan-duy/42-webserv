@@ -15,7 +15,6 @@ class Socket {
   Socket(int const &port);
   ~Socket();
 
-  // Methods
   void prepare();
   void sendResponse(const HttpResponse &response) const;
   void addClient(const int &fd);
