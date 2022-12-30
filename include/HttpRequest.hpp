@@ -18,64 +18,61 @@ class HttpResponse;
 struct Route;
 struct HttpHeaderData;
 
-enum class FileType { DIR, FILE, NOT_FOUND };
+enum class FileType { DIRECTORY, PYTHON_SCRIPT, REGULAR_FILE, NOT_FOUND };
+#define MethodMap std::map<EHttpMethods, bool>
+#define HeaderMap std::map<std::string, std::string>
 
 // HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
-  HttpRequest(HttpHeaderData const &data);
-  HttpRequest(const HttpRequest &obj);
+  HttpRequest(const HttpHeaderData &data);
+  HttpRequest(const HttpRequest &ref);
+  HttpRequest &operator=(const HttpRequest &ref);
   virtual ~HttpRequest();
 
-  HttpRequest *operator+(const HttpRequest &other);
-  void unChunkBody();
-  bool isFirstChunk();
-
-  // Abstract
   virtual HttpResponse executeRequest(const Server &server);
 
+  HttpRequest         *operator+(const HttpRequest &chunk);
+  void                 unChunkBody();
+  bool                 isFirstChunk();
+
  protected:
-  EHttpMethods _method;
-  std::string _uri;
+  bool           isMethodAllowed(const MethodMap allowedMethods, const EHttpMethods &method) const;
+  FileType       getFileType(const std::string &path) const;
+  std::string    constructFullPath(const std::string &rootDirectory, const std::string &uri) const;
+  std::string    fileToStr(std::ifstream &file) const;
+  std::string    getContentType(const std::string &path) const;
+  std::string    getFileSize(std::ifstream &file) const;
+  HttpResponse   createCGIResponse(const Route &route, const std::string &path) const;
+  HttpResponse   responseWithBody(HeaderMap headers, std::string body) const;
+  HttpResponse   responseWithFile(const std::string &path, HTTPStatusCode statusCode) const;
 
-  /* Request handling */
-  virtual HttpResponse _handleCgiRequest(std::string const &path,
-                                         Route const &route) const;
-  HttpResponse _handleFileRequest(std::string const &path, const Route &route,
-                                  const FileType &type) const;
-
-  /* Response constructors */
-  virtual HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
-                                      Route const &route) const;
-  HttpResponse _responseWithFile(std::string const &path,
-                                 HTTPStatusCode statusCode) const;
-  HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
-                                 std::string body) const;
-
-  /* Helpers */
-  FileType _getFileType(const std::string &path) const;
-  bool _isTypeAccepted() const;
-  std::vector<std::string> _getPossiblePaths(
-      const std::string &path,
-      const std::vector<std::string> &index_files) const;
+  std::string    _uri;
+  EHttpMethods   _method;
   HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
 };
 
 // GET
 class GetRequest : public HttpRequest {
  public:
-  GetRequest(HttpHeaderData const &data);
+  GetRequest();
+  GetRequest(const HttpHeaderData &data);
   GetRequest(const GetRequest &ref);
+  GetRequest &operator=(const GetRequest &ref);
   ~GetRequest();
 
+  HttpResponse executeRequest(const Server &server);
+
  private:
-  // Private methods
-  HttpResponse _handleCgiRequest(std::string const &path,
-                                 Route const &route) const;
-  HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
-                              Route const &route) const;
-  std::string _getErrorPage(const Route &route, HTTPStatusCode errorCode) const;
+  bool                     _isTypeAccepted() const;
+  std::string              _getErrorPage(const Route &route, HTTPStatusCode errorCode) const;
+  HttpResponse             _createRedirectionResponse(const Route &route) const;
+  HttpResponse             _createDirectoryResponse(const Route &route, const std::string &path) const;
+  HttpResponse             _createFileResponse(const Route &route, const std::string &path) const;
+  HttpResponse             _errorResponseWithHtml(HTTPStatusCode statusCode, Route const &route) const;
+  std::vector<std::string> _constructPossiblePaths(const std::string              &path,
+                                                   const std::vector<std::string> &indexFiles) const;
 };
 
 // DELETE

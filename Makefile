@@ -84,7 +84,6 @@ lldb: $(NAME)
 
 clean:
 	@rm -rf $(OBJ_DIR)
-	@$(MAKE) -C $(TEST_DIR) clean
 
 fclean:	clean
 	@rm -f $(NAME)
@@ -97,13 +96,13 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	@mkdir -p $(LOG_DIR)
 
-compiletest: export LOG_ENABLED=0
-compiletest: fclean $(OBJ_DIR) $(OBJS)
-	@$(MAKE) -C $(TEST_DIR)
+# compiletest: export LOG_ENABLED=0
+# compiletest: fclean $(OBJ_DIR) $(OBJS)
+# 	@$(MAKE) -C $(TEST_DIR)
 
-runtest: export LOG_ENABLED=0
-runtest: fclean $(OBJ_DIR) $(OBJS)
-	@$(MAKE) -C $(TEST_DIR) run
+# runtest: export LOG_ENABLED=0
+# runtest: fclean $(OBJ_DIR) $(OBJS)
+# 	@$(MAKE) -C $(TEST_DIR) run
 
 deletelogs:
 	@rm -rf $(LOG_DIR)
@@ -114,7 +113,8 @@ deletelogs:
 echo: export LOG_ENABLED=0
 echo:
 	@echo $(CFLAGS)
-	@$(MAKE) -C $(TEST_DIR) echo
+
+	# @$(MAKE) -C $(TEST_DIR) echo
 
 
 .PHONY: all clean fclean re lldb
