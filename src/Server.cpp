@@ -31,7 +31,7 @@ int Server::getPort() const {
   return _port;
 }
 
-int Server::getMaxBody() const {
+size_t Server::getMaxBody() const {
   return _maxBodySize;
 }
 

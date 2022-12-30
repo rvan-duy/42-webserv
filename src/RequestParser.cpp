@@ -166,6 +166,7 @@ HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
 
 HttpRequest *RequestParser::processChunk(std::string &rawRequest) {
   Logger &logger = Logger::getInstance();
+  logger.debug("processing chunked request");
   size_t sub = rawRequest.find("\r\n");
   if (sub == std::string::npos) {
     logger.error("[CHUNK]: No \\r\\n pair found");

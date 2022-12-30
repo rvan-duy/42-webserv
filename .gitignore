@@ -42,6 +42,7 @@ webserver
 
 # logs
 logs/*.log
+*.log
 
 # Test output
 test/tester

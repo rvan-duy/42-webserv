@@ -104,8 +104,8 @@ bool isRequestFinished(const HttpRequest &request) {
   if (!request.hasHeader("Content-Length")) {
     return true;
   }
-  int contentLength = request.getIntHeader("Content-Length");
-  if (contentLength < 0) {
+  size_t contentLength = request.getIntHeader("Content-Length");
+  if (contentLength == SIZE_MAX) {
     return true;
   }
   if (request.getBody().length() < contentLength) {
@@ -122,6 +122,18 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   if (isRawRequestFinished(fullRequest) == false) {
     return 0;
   }
+  // if (isChunked(clientFd)) {
+  //   if (_clients[clientFd].first->isFirstChunk())
+  //     request = RequestParser::processChunk(rawRequest);
+  //   else
+  //   {
+  //     Logger::getInstance().debug("no chunk chunk");
+  //     request = RequestParser::parseHeader(rawRequest);
+  //   }
+  //   addChunk(request, clientFd);
+  //   delete request;  // the body or header data has been added to og request
+  //   return 0;
+  // }
   HttpRequest *request = RequestParser::parseHeader(fullRequest);
   // TODO: check if this is correct
   if (request->getStatus() != HTTPStatusCode::NOT_SET) {

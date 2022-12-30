@@ -304,5 +304,7 @@ void HttpRequest::unChunkBody() { _body = unChunk(_body); }
  * Determines whether a given HTTP request uses chunked transfer encoding.
  */
 bool HttpRequest::isFirstChunk() {
-  return "chunked" == getHeader("Transfer-Encoding");
+  bool chunkHeader = "chunked" == getHeader("Transfer-Encoding");
+  Logger::getInstance().debug("is First Chunk: " + std::to_string(chunkHeader), VERBOSE);
+  return chunkHeader;
 }

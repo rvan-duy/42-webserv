@@ -76,7 +76,7 @@ class Server {
   std::string getServerName() const;
   std::vector<Route> getRoutes() const;
   PageData getErrorPage() const;
-  int getMaxBody() const;
+  size_t getMaxBody() const;
   int getPort() const;
   int setPort(int const &value);
   int setErrorPage(int const &statusCode, std::string const &filePath);
