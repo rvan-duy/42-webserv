@@ -96,7 +96,7 @@ bool HttpRequest::isMethodAllowed(const MethodMap allowedMethods, const EHttpMet
 FileType HttpRequest::getFileType(const std::string &path) const {
   struct stat buf;
   if (stat(path.c_str(), &buf) == -1) {
-    Logger::getInstance().error("File not found");
+    Logger::getInstance().log("File not found");
     return FileType::NOT_FOUND;
   }
   if (S_ISDIR(buf.st_mode)) {

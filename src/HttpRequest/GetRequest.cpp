@@ -61,7 +61,7 @@ HttpResponse GetRequest::_createRedirectionResponse(const Route &route) const {
     return (redirection);
   } else {
     Logger::getInstance().log("Failed to build redirection response, returning 404", VERBOSE);
-    return HttpResponse(HTTPStatusCode::NOT_FOUND);
+    return _errorResponseWithHtml(HTTPStatusCode::NOT_FOUND, route);
   }
 }
 
