@@ -75,6 +75,7 @@ int Socket::processRequest(int const &clientFd) {
   int bytesRead = 0;
 
   bytesRead = readFromClientFd(&rawRequest, clientFd);
+  Logger::getInstance().debug("RAW: " + rawRequest);
   if (bytesRead < 0) {
     _addBadRequestToClient(clientFd, bytesRead == -1
                                          ? HTTPStatusCode::INTERNAL_SERVER_ERROR
@@ -89,7 +90,6 @@ int Socket::processRequest(int const &clientFd) {
       request = RequestParser::processChunk(rawRequest);
     else
     {
-      Logger::getInstance().debug("no chunk chunk");
       request = RequestParser::parseHeader(rawRequest);
     }
     addChunk(request, clientFd);

@@ -77,15 +77,18 @@ int CGI::_forkCgiFile(int fd[2], char *const *argv) {
   return 1;
 }
 
+#include <stdlib.h>
+
 static int waitForChildProcess(pid_t const &pid) {
   int status = 0;
 
-  if (waitpid(pid, &status, 0) < 0) {
+  if (waitpid(pid, &status, 0) < 0) {   // WNOHANG
     Logger::getInstance().error("[EXECUTING] waitpid: " +
                                 std::string(strerror(errno)));
     return 1;
   }
   if (WIFEXITED(status)) {
+    std::cerr << WEXITSTATUS(status) << " " << WTERMSIG(status) << std::endl;
     return WEXITSTATUS(status);
   }
   return 0;

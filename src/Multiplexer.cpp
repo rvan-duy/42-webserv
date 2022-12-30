@@ -37,8 +37,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
         if (matchingSocket.processRequest(clientFd)) {
           Logger::getInstance().debug("shutdown");
           shutdown(clientFd, SHUT_RD);
-          client->revents = POLLOUT;
+          client->events = POLLOUT;
         }
+        client->events = POLLOUT | POLLIN; // addition
         return 0;  // return 0 because we do no want to remove the clientFd
       }
       break;
@@ -49,6 +50,7 @@ int Multiplexer::evaluateClient(pollfd *client) {
                  std::to_string(client->fd));
       Socket &clientSocket = _getSocketForClient(clientFd);
       HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
+      // logger.log(clientRequest->getBody(), VERBOSE);
 
       if (clientRequest) {
         HttpResponse clientResponse = clientRequest->executeRequest(
@@ -94,7 +96,8 @@ void Multiplexer::waitForEvents(const int timeout) {
         VERBOSE);
 
     /* Loop over clients and evaluate */
-    for (size_t i = 0; i < _clients.size(); i++) {
+    size_t total_clients = _clients.size();
+    for (size_t i = 0; i < total_clients; i++) {
       int toRemove = evaluateClient(&_clients[i]);
       if (toRemove > 0) {
         markForRemoval.push_back(toRemove);
@@ -154,7 +157,7 @@ void Multiplexer::_addClient(const int socket) {
   logger.log("[POLLING] Multiplexer: New connection accepted: " +
                  std::to_string(newSocket),
              VERBOSE);
-  pollfd client = {newSocket, POLLIN | POLLOUT, 0};
+  pollfd client = {newSocket, POLLIN, 0};// | POLLOUT
   _clients.push_back(client);
 
   for (std::vector<Socket>::iterator it = _sockets.begin();

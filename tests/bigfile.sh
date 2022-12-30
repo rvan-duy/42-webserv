@@ -18,3 +18,6 @@ FILE_PATH=resource/large.txt
 
 # kill the webserv program so it does not linger in the background
 pkill webserv
+
+
+# curl -X POST --data-binary "Hello world\!" http://localhost:8090/cgi/upload.py 
