@@ -6,15 +6,13 @@
  *  Canonical
  */
 HttpRequest::HttpRequest(HttpHeaderData const &data)
-    : HttpMessage(data.httpVersion, data.headers, data.body),
-      _method(data.method),
-      _uri(data.url) {}
+    : HttpMessage(data.httpVersion, data.headers, data.body), _method(data.method), _uri(data.url) {}
 
 HttpRequest::HttpRequest() {}
 
 HttpRequest::HttpRequest(const HttpRequest &obj) : HttpMessage(obj) {
   _method = obj._method;
-  _uri = obj._uri;
+  _uri    = obj._uri;
 }
 
 HttpRequest::~HttpRequest() {}
@@ -23,7 +21,7 @@ HttpRequest::~HttpRequest() {}
  * Protected methods
  */
 FileType HttpRequest::_getFileType(const std::string &path) const {
-  Logger &logger = Logger::getInstance();
+  Logger     &logger = Logger::getInstance();
 
   struct stat buffer;
 
@@ -61,8 +59,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
   return FileType::NOT_FOUND;
 }
 
-static std::string constructPath(const std::string &root,
-                                 const std::string &uri) {
+static std::string constructPath(const std::string &root, const std::string &uri) {
   std::string fullPath;
 
   // eg: root = "root/", _uri = "/index.html"
@@ -74,10 +71,8 @@ static std::string constructPath(const std::string &root,
   }
 }
 
-static bool isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods,
-                            EHttpMethods method) {
-  for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin();
-       it != allowedMethods.end(); it++) {
+static bool isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods, EHttpMethods method) {
+  for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++) {
     if (it->first == method) {
       return it->second;
     }
@@ -93,8 +88,8 @@ static bool isCgiRequest(std::string path) {
 }
 
 HttpResponse HttpRequest::executeRequest(const Server &server) {
-  const Route &routeOfResponse = server.getRoute(HttpRequest::_uri);
-  const std::string path = constructPath(routeOfResponse.rootDirectory, _uri);
+  const Route      &routeOfResponse = server.getRoute(HttpRequest::_uri);
+  const std::string path            = constructPath(routeOfResponse.rootDirectory, _uri);
 
   if (isMethodAllowed(routeOfResponse.allowedMethods, _method) == false) {
     Logger::getInstance().error("Method for request not allowed");
@@ -104,8 +99,7 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
   FileType type = HttpRequest::_getFileType(path);
   if (type == FileType::NOT_FOUND) {
     HttpResponse redirection;
-    if (redirection.buildRedirection(routeOfResponse))
-      return (redirection);
+    if (redirection.buildRedirection(routeOfResponse)) return (redirection);
     return _errorResponse(HTTPStatusCode::NOT_FOUND, routeOfResponse);
   }
 
@@ -120,11 +114,10 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
 // - if auto index is on and the path is a directory, look for index files and
 // return it
 // - if auto index is off and the path is a directory, return 403
-HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
-                                            Route const &route) const {
-  Logger &logger = Logger::getInstance();
+HttpResponse HttpRequest::_handleCgiRequest(std::string const &path, Route const &route) const {
+  Logger                            &logger = Logger::getInstance();
   std::map<std::string, std::string> headers;
-  std::string body;
+  std::string                        body;
 
   logger.log("starting cgi request", VERBOSE);
   if (!route.cgiEnabled) {
@@ -134,8 +127,7 @@ HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
 
   HTTPStatusCode status = CGI::executeFile(&body, &headers, path, _body);
   if (status != HTTPStatusCode::OK) {
-    Logger::getInstance().error("Executing cgi: " +
-                                getMessageByStatusCode(status));
+    Logger::getInstance().error("Executing cgi: " + getMessageByStatusCode(status));
     return HttpResponse(status);
   }
 
@@ -143,18 +135,14 @@ HttpResponse HttpRequest::_handleCgiRequest(std::string const &path,
   return _responseWithBody(headers, body);
 }
 
-HttpResponse HttpRequest::_handleFileRequest(std::string const &path,
-                                             Route const &route,
-                                             const FileType &type) const {
+HttpResponse HttpRequest::_handleFileRequest(std::string const &path, Route const &route, const FileType &type) const {
   switch (type) {
     case FileType::DIR: {
       if (_isTypeAccepted() == false) {
         return _errorResponse(HTTPStatusCode::NOT_ACCEPTABLE, route);
       }
-      std::vector<std::string> possiblePaths =
-          _getPossiblePaths(path, route.indexFiles);
-      for (std::vector<std::string>::const_iterator it = possiblePaths.begin();
-           it != possiblePaths.end(); ++it) {
+      std::vector<std::string> possiblePaths = _getPossiblePaths(path, route.indexFiles);
+      for (std::vector<std::string>::const_iterator it = possiblePaths.begin(); it != possiblePaths.end(); ++it) {
         if (_getFileType(*it) == FileType::FILE) {
           return _responseWithFile(*it, HTTPStatusCode::OK);
         }
@@ -188,8 +176,7 @@ static std::string getFileSize(std::ifstream &file) {
 static std::string fileToStr(std::ifstream &file) {
   file.seekg(0, std::ios::beg);
 
-  std::string body((std::istreambuf_iterator<char>(file)),
-                   std::istreambuf_iterator<char>());
+  std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
   return body;
 }
 
@@ -201,10 +188,10 @@ static std::string fileToStr(std::ifstream &file) {
 static std::string getContentType(const std::string &path) {
   std::map<std::string, std::string> file_types;
 
-  file_types["html"] = "text/html";
-  file_types["css"] = "text/css";
-  file_types["js"] = "application/javascript";
-  file_types["png"] = "image/png";
+  file_types["html"]         = "text/html";
+  file_types["css"]          = "text/css";
+  file_types["js"]           = "application/javascript";
+  file_types["png"]          = "image/png";
 
   std::string file_extension = path.substr(path.find_last_of(".") + 1);
   if (file_types.find(file_extension) != file_types.end()) {
@@ -213,27 +200,24 @@ static std::string getContentType(const std::string &path) {
   return "text/plain";
 }
 
-HttpResponse HttpRequest::_responseWithFile(std::string const &path,
-                                            HTTPStatusCode statusCode) const {
+HttpResponse HttpRequest::_responseWithFile(std::string const &path, HTTPStatusCode statusCode) const {
   std::ifstream file(path.c_str());
   if (!file.is_open()) {
     return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
   }
   HttpResponse response(statusCode);
-  std::string test = fileToStr(file);
+  std::string  test = fileToStr(file);
   response.setBody(fileToStr(file));
   response.setHeader("Content-Length", getFileSize(file));
   response.setHeader("Content-Type", getContentType(path));
   return response;
 }
 
-HttpResponse HttpRequest::_responseWithBody(
-    std::map<std::string, std::string> headers, std::string body) const {
+HttpResponse HttpRequest::_responseWithBody(std::map<std::string, std::string> headers, std::string body) const {
   HttpResponse response(HTTPStatusCode::OK);
   response.setBody(body);
   Logger::getInstance().debug(body);
-  for (std::map<std::string, std::string>::const_iterator it = headers.begin();
-       it != headers.end(); ++it) {
+  for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
     Logger::getInstance().debug(it->first);
     Logger::getInstance().debug(it->second);
     response.setHeader(it->first, it->second);
@@ -241,12 +225,11 @@ HttpResponse HttpRequest::_responseWithBody(
   return response;
 }
 
-std::vector<std::string> HttpRequest::_getPossiblePaths(
-    const std::string &path, const std::vector<std::string> &indexFiles) const {
+std::vector<std::string> HttpRequest::_getPossiblePaths(const std::string              &path,
+                                                        const std::vector<std::string> &indexFiles) const {
   std::vector<std::string> possiblePaths;
 
-  for (std::vector<std::string>::const_iterator it = indexFiles.begin();
-       it != indexFiles.end(); ++it) {
+  for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it) {
     possiblePaths.push_back(path + "/" + *it);
   }
 
@@ -255,16 +238,15 @@ std::vector<std::string> HttpRequest::_getPossiblePaths(
 
 bool HttpRequest::_isTypeAccepted() const {
   // All types the server accepts
-  const std::array<std::string, 4> typesToAccept = {
-      "text/html", "text/css", "application/javascript", "image/jpg"};
-  const std::string acceptHeader = getHeader("Accept");
-  std::vector<std::string> acceptedTypes;
+  const std::array<std::string, 4> typesToAccept = {"text/html", "text/css", "application/javascript", "image/jpg"};
+  const std::string                acceptHeader  = getHeader("Accept");
+  std::vector<std::string>         acceptedTypes;
 
   if (acceptHeader.empty() || acceptHeader.find("*/*") != std::string::npos) {
     return true;
   } else {
     // TODO: replace with splitheader function
-    std::size_t pos = 0;
+    std::size_t pos  = 0;
     std::size_t prev = 0;
     while ((pos = acceptHeader.find(',', prev)) != std::string::npos) {
       acceptedTypes.push_back(acceptHeader.substr(prev, pos - prev));
@@ -274,20 +256,16 @@ bool HttpRequest::_isTypeAccepted() const {
   }
 
   for (size_t i = 0; i < typesToAccept.size(); i++) {
-    if (std::find(acceptedTypes.begin(), acceptedTypes.end(),
-                  typesToAccept[i]) != acceptedTypes.end()) {
+    if (std::find(acceptedTypes.begin(), acceptedTypes.end(), typesToAccept[i]) != acceptedTypes.end()) {
       return true;
     }
   }
   return false;
 }
 
-HttpResponse HttpRequest::_errorResponse(HTTPStatusCode const &statusCode,
-                                         Route const &route) const {
+HttpResponse HttpRequest::_errorResponse(HTTPStatusCode const &statusCode, Route const &route) const {
   (void)route;
-  Logger::getInstance().error(
-      "Making error with message:" + getMessageByStatusCode(statusCode),
-      VERBOSE);
+  Logger::getInstance().error("Making error with message:" + getMessageByStatusCode(statusCode), VERBOSE);
   return HttpResponse(statusCode);
 }
 
@@ -301,7 +279,9 @@ HttpRequest *HttpRequest::operator+(const HttpRequest &chunk) {
   return this;
 }
 
-void HttpRequest::unChunkBody() { _body = unChunk(_body); }
+void HttpRequest::unChunkBody() {
+  _body = unChunk(_body);
+}
 
 /**
  * Determines whether a given HTTP request uses chunked transfer encoding.
