@@ -8,7 +8,6 @@ static int readFromClientFd(std::string *result, const int clientFd) {
   memset(buffer, 0, REQPARSER_BUFF_SIZE + 1);
 
   ssize_t bytesReceived = read(clientFd, buffer, REQPARSER_BUFF_SIZE);
-  Logger::getInstance().debug(std::to_string(bytesReceived));
   if (bytesReceived == -1) {
     Logger::getInstance().error(
         "[SOCKET]: read failed: " + std::to_string(clientFd) + ": " +
@@ -170,37 +169,3 @@ int Socket::processRequest(int const &fd) {
   }
   return 0;
 }
-
-/*
-int Socket::processRequest(int const &clientFd) {
-  Logger &logger = Logger::getInstance();
-  std::string rawRequest;
-  HttpRequest *request;
-  int bytesRead = 0;
-
-  logger.log("Starting to read from client", VERBOSE);
-  bytesRead = readFromClientFd(&rawRequest, clientFd);
-  if (bytesRead < 0) {
-    _addBadRequestToClient(clientFd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
-    return 1;
-  } else if (bytesRead == 0) {
-    _addBadRequestToClient(clientFd, HTTPStatusCode::BAD_REQUEST);
-    return 1;
-  }
-
-  if (isChunked(clientFd)) {
-    request = RequestParser::processChunk(rawRequest);
-    addChunk(request, clientFd);
-    delete request;  // the body or header data has been added to og request
-    return 0;
-  }
-  request = RequestParser::parseHeader(rawRequest);
-  if (request->isFirstChunk())  // trailing headers will be caught by above
-                                // ischunked already
-  {
-    request->unChunkBody();
-  }
-  _matchRequestToServer(clientFd, request);
-  return 0;
-}
-*/

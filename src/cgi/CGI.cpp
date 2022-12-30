@@ -6,32 +6,22 @@ CGI::CGI() {}
 
 CGI::~CGI() {}
 
-void logCharPointer(char **headers) {
-  size_t i = 0;
-
-  while (headers[i]) {
-    Logger::getInstance().debug(headers[i]);
-    i++;
-  }
-}
-
 static char *const *strlist(const std::vector<const std::string> &input) {
   char **result = new char *[input.size() + 1];
-  std::size_t storage_size = 0;
+  std::size_t storageSize = 0;
   for (auto const &s : input) {
-    storage_size += s.size() + 1;
+    storageSize += s.size() + 1;
   }
 
   try {
-    char *storage = new char[storage_size];
+    char *storage = new char[storageSize];
     char *p = storage;
     char **q = result;
     for (auto const &s : input) {
       *q++ = std::strcpy(p, s.c_str());
       p += s.size() + 1;
     }
-    *q = nullptr;  // terminate the list
-    logCharPointer(result);
+    *q = nullptr;
     return result;
   } catch (...) {
     delete[] result;
@@ -93,10 +83,6 @@ static int waitForChildProcess(pid_t const &pid) {
 
 /* Waits for input from child process and puts it in pDest */
 static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
-  if (waitForChildProcess(pid) != 0) {
-    return 1;
-  }
-
   std::string output;
   std::string buffer[CGI_BUFF_SIZE + 1];
   int bytesRead;
@@ -215,6 +201,10 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
     _forkCgiFile(fd, argv);
   } else {
     close(fd[WRITE]);
+    int exitStatus = waitForChildProcess(pid);
+    if (exitStatus != 0) {
+      return intToHttpStatus(exitStatus);
+    }
     if (readFromChildProcess(&buffer, pid, fd[READ])) {
       return HTTPStatusCode::INTERNAL_SERVER_ERROR;
     }
@@ -228,10 +218,10 @@ HTTPStatusCode CGI::executeFile(std::string *pBody,
                                 std::string const &filePath) {
   Logger &logger = Logger::getInstance();
 
-  HTTPStatusCode status = checkFileAccess(filePath);
-  if (status != HTTPStatusCode::OK) {
+  HTTPStatusCode access = checkFileAccess(filePath);
+  if (access != HTTPStatusCode::OK) {
     logger.error("No file access for cgi request");
-    return status;
+    return access;
   }
 
   std::vector<std::string> notConstFuckingVector = cgiParams;

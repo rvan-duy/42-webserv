@@ -108,7 +108,7 @@ runtest: fclean $(OBJ_DIR) $(OBJS)
 deletelogs:
 	@rm -rf $(LOG_DIR)
 	@mkdir $(LOG_DIR)
-	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)"
+	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)\n"
 
 # For debugging makefile
 echo: export LOG_ENABLED=0
