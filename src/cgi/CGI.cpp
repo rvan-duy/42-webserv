@@ -82,7 +82,7 @@ static int waitForChildProcess(pid_t const &pid) {
 }
 
 /* Waits for input from child process and puts it in pDest */
-static int readFromChildProcess(std::string *pDest, pid_t const &pid, int fd) {
+static int readFromChildProcess(std::string *pDest, int fd) {
   std::string output;
   std::string buffer[CGI_BUFF_SIZE + 1];
   int bytesRead;
@@ -200,12 +200,13 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
   } else if (pid == CHILD) {
     _forkCgiFile(fd, argv);
   } else {
+    // TODO: move this to function
     close(fd[WRITE]);
     int exitStatus = waitForChildProcess(pid);
     if (exitStatus != 0) {
       return intToHttpStatus(exitStatus);
     }
-    if (readFromChildProcess(&buffer, pid, fd[READ])) {
+    if (readFromChildProcess(&buffer, fd[READ])) {
       return HTTPStatusCode::INTERNAL_SERVER_ERROR;
     }
   }

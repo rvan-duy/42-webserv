@@ -66,7 +66,7 @@ HTTPStatusCode intToHttpStatus(const int &statusCode) {
     case 500:
       return HTTPStatusCode::INTERNAL_SERVER_ERROR;
     default:
-      HTTPStatusCode::INTERNAL_SERVER_ERROR;
+      return HTTPStatusCode::INTERNAL_SERVER_ERROR;
   }
 }
 
