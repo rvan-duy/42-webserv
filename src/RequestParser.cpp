@@ -131,7 +131,7 @@ static HttpRequest *createRequest(HttpHeaderData const &data) {
 /**
  * End of parsing first line
  */
-HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
+HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
   Logger &logger = Logger::getInstance();
   /* Header split into separate strings */
   std::vector<std::string> headerLines;
