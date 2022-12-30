@@ -4,7 +4,7 @@ import sys
 # so a valid header ends with a \r
 def main():
     import json
-    input = json.loads(sys.argv[1])
+    input = json.loads(sys.argv[2])
     try:
         firstname = input["first_name"].upper()
     except KeyError as error:

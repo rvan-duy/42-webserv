@@ -204,6 +204,8 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
     close(fd[WRITE]);
     int exitStatus = waitForChildProcess(pid);
     if (exitStatus != 0) {
+      Logger::getInstance().error("[CGI]: child exited with status: " +
+                                  std::to_string(exitStatus));
       return intToHttpStatus(exitStatus);
     }
     if (readFromChildProcess(&buffer, fd[READ])) {
