@@ -1,3 +1,23 @@
+TODO:
+  - errorpages need to work when you set a custom page too!
+      if i set 405 as 404 i still get 404;
+  - cgi getting internal server error;
+  - maxBodySize needs to be implemented correctly
+      I swear it was already broken i just broke it a little further
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 this file contains tests and their results
 
 
