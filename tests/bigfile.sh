@@ -1,7 +1,8 @@
 #!/bin/bash
 
-BASE_URL=http://localhost:8080
-CONF="delete.conf"
+BASE_URL="http://localhost:8080"
+CONF="bigfile.conf"
+FILE_PATH=resource/large.txt
 
 # Check the value of the pid variable to determine which process is running
 ../webserv resource/$CONF &
@@ -9,15 +10,11 @@ CONF="delete.conf"
   # give the webserver a sec to startup
   sleep 0.2;
 
-  # -X DELETE to send a delete request
-  DELETE=$(curl -X DELETE $BASE_URL/cgi/test.py)
-
+  # -L to follow redirects
+  BGFILE=$(curl -X POST --data-binary "@$FILE_PATH" $BASE_URL/cgi/upload.py)
 
   # sleep to make sure server logger is doen printing before showing results
   sleep 0.1;
-
-  echo "DELETE response:"
-  echo $DELETE
 
 # kill the webserv program so it does not linger in the background
 pkill webserv

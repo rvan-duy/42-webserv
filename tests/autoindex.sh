@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASE_URL="http://localhost:8080"
-CONF="return.conf"
+CONF="autoindex.conf"
 
 # Check the value of the pid variable to determine which process is running
 ../webserv resource/$CONF &
@@ -13,14 +13,11 @@ CONF="return.conf"
   AUTO=$(curl -L $BASE_URL/cgi)
 
   # sleep to make sure server logger is doen printing before showing results
-  sleep 0.2;
+  sleep 0.1;
 
   # compare the responses:
-  if [ "$DIRECT" == "$REDIRECT" ]; then
-    echo "Output matches expected output:"; echo $DIRECT; echo -e "\033[32m[SUCCESS]\033[0m"
-  else
-    echo "Output does not match expected output"; echo "[DIRECT]:" $DIRECT; echo "[REDIRECT]:" $REDIRECT; echo -e "\033[31m[FAILURE]\033[0m"
-  fi
+  echo "AUTOINDEX html:"
+  echo $AUTO
 
 # kill the webserv program so it does not linger in the background
 pkill webserv
