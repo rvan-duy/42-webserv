@@ -86,12 +86,8 @@ static bool isRawRequestFinished(const std::string &rawRequest) {
   return true;
 }
 
-static bool isRequestFinished(const HttpRequest &request) {
-  int contentLength = request.getIntHeader("Content-Length");
-  if (request.getBody().length() < contentLength) {
-    return false;
-  }
-  return true;
+static bool isRequestTooBig(size_t requestSize, size_t maxSize) {
+  return (requestSize > maxSize);
 }
 
 RequestStatus Socket::getRequestStatus(const int &clientFd) const {
@@ -101,7 +97,7 @@ RequestStatus Socket::getRequestStatus(const int &clientFd) const {
   return _unfinishedRequest.at(clientFd).status;
 }
 
-bool isRequestFinished(const HttpRequest &request, const int &maxSize) {
+bool isRequestFinished(const HttpRequest &request) {
   if (request.getMethod() != EHttpMethods::POST) {
     return true;
   }
@@ -112,19 +108,19 @@ bool isRequestFinished(const HttpRequest &request, const int &maxSize) {
   if (contentLength < 0) {
     return true;
   }
-  if (request.getBody().length() > maxSize) {
-    return true;
-  }
   if (request.getBody().length() < contentLength) {
     return false;
   }
   return true;
 }
 
-void Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
+int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
+  if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
+    return 1;
+  }
   if (isRawRequestFinished(fullRequest) == false) {
-    return;
+    return 0;
   }
   HttpRequest *request = RequestParser::parseHeader(fullRequest);
   // TODO: check if this is correct
@@ -133,12 +129,16 @@ void Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
     _removeUnfinishedRequest(fd);
   }
   Server *match = _matchRequestToServer(request);
-  if (isRequestFinished(*request, match->getMaxBody())) {
+  if (isRequestTooBig(match->getMaxBody(), request->getBody().size())) {
+    return 1;
+  }
+  if (isRequestFinished(*request)) {
     _addRequestToClient(fd, request, match);
     _removeUnfinishedRequest(fd);
   } else {
     _addUnfinishedRequest(fd, request, match);
   }
+  return 0;
 }
 
 int Socket::processUnfinishedRequest(const int &fd,
@@ -147,10 +147,14 @@ int Socket::processUnfinishedRequest(const int &fd,
   Server *match = _unfinishedRequest[fd].server;
 
   request->addBody(rawRequest);
+  if (request->getBody().length() > match->getMaxBody()) {
+    return 1;
+  }
   if (isRequestFinished(*request)) {
     _addRequestToClient(fd, request, match);
     _removeUnfinishedRequest(fd);
   }
+  return 0;
 }
 
 int Socket::processRequest(int const &fd) {
@@ -158,14 +162,20 @@ int Socket::processRequest(int const &fd) {
 
   Logger::getInstance().log("[SOCKET] Starting to read from client", VERBOSE);
   int bytesRead = readFromClientFd(&rawRequest, fd);
-  if (bytesRead < 0) {
+  if (bytesRead <= 0) {
     _addBadRequestToClient(fd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
     return 1;
   }
   if (getRequestStatus(fd) != RequestStatus::UNFINISHED_REQUEST) {
-    _processRawRequest(fd, rawRequest);
+    if (_processRawRequest(fd, rawRequest)) {
+      _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
+      return 1;
+    }
   } else {
-    processUnfinishedRequest(fd, rawRequest);
+    if (processUnfinishedRequest(fd, rawRequest)) {
+      _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
+      return 1;
+    };
   }
   return 0;
 }

@@ -60,7 +60,7 @@ class Socket {
   void _addBadRequestToClient(const int &fd, HTTPStatusCode statusCode);
 
   RequestStatus getRequestStatus(const int &clientFd) const;
-  void _processRawRequest(const int &fd, const std::string &rawRequest);
+  int _processRawRequest(const int &fd, const std::string &rawRequest);
   int processUnfinishedRequest(const int &fd, const std::string &rawRequest);
   std::string _addRawRequest(const int &fd, std::string const &rawRequest);
   void _addUnfinishedRequest(const int &fd, HttpRequest *request,
