@@ -160,7 +160,7 @@ void Multiplexer::_addClient(const int socket) {
   logger.log("[POLLING] Multiplexer: New connection accepted: " +
                  std::to_string(newSocket),
              VERBOSE);
-  pollfd client = {newSocket, POLLIN, 0};// | POLLOUT
+  pollfd client = {newSocket, POLLIN, 0}; // | POLLOUT
   _clients.push_back(client);
 
   for (std::vector<Socket>::iterator it = _sockets.begin();

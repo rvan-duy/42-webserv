@@ -117,11 +117,24 @@ bool isRequestFinished(const HttpRequest &request) {
 int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
   if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
+    Logger::getInstance().error("too big request L2");
     return 1;
   }
   if (isRawRequestFinished(fullRequest) == false) {
     return 0;
   }
+  // if (isChunked(fd)) {
+  //   if (_clients[fd].first->isFirstChunk())
+  //     request = RequestParser::processChunk(rawRequest);
+  //   else
+  //   {
+  //     Logger::getInstance().debug("no chunk chunk");
+  //     request = RequestParser::parseHeader(rawRequest);
+  //   }
+  //   addChunk(request, fd);
+  //   delete request;  // the body or header data has been added to og request
+  //   return 0;
+  // }
   HttpRequest *request = RequestParser::parseHeader(fullRequest);
   // TODO: check if this is correct
   if (request->getStatus() != HTTPStatusCode::NOT_SET) {
@@ -148,6 +161,7 @@ int Socket::processUnfinishedRequest(const int &fd,
 
   request->addBody(rawRequest);
   if (request->getBody().length() > match->getMaxBody()) {
+    Logger::getInstance().error("too big request L3");
     return 1;
   }
   if (isRequestFinished(*request)) {

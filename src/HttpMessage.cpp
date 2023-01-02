@@ -65,7 +65,7 @@ size_t HttpMessage::getNumHeader(const std::string &key) const {
     sstream >> result;
     return result;
   } catch (std::exception e) {
-    return -1;
+    return SIZE_MAX;
   }
 }
 

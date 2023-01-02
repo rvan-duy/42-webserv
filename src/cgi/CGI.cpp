@@ -87,7 +87,8 @@ static int waitForChildProcess(pid_t const &pid) {
 /* Waits for input from child process and puts it in pDest */
 static int readFromChildProcess(std::string *pDest, int fd) {
   std::string output;
-  std::string buffer[CGI_BUFF_SIZE + 1];
+  char buffer[CGI_BUFF_SIZE + 1];
+  memset(buffer, 0, CGI_BUFF_SIZE + 1);
   int bytesRead;
 
   do {
@@ -98,8 +99,8 @@ static int readFromChildProcess(std::string *pDest, int fd) {
       return 1;
     }
     if (bytesRead > 0) {
-      output += buffer->c_str();
-      buffer->clear();
+      output += buffer;
+      memset(buffer, 0, CGI_BUFF_SIZE + 1);
     }
   } while (bytesRead > 0);
   close(fd);
@@ -195,7 +196,6 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
     throw std::runtime_error("[PREPARING] CGI: pipe: " +
                              std::string(strerror(errno)));
   }
-
   pid = fork();
   if (pid == -1) {
     throw std::runtime_error("[PREPARING] CGI: fork: " +
