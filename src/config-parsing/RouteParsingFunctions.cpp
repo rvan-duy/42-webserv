@@ -91,6 +91,7 @@ int Parser::parseMethods(void *dest, t_dataLine line) {
       if (route->allowedMethods[DELETE] == true) {
         return 1;
       }
+      route->allowedMethods[DELETE] = true;
     }
   }
   return 0;
