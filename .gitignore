@@ -48,3 +48,6 @@ test/tester
 
 # IDE settings
 .vscode
+
+# uploads
+root/cgi/uploads/*
