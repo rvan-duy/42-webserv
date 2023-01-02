@@ -42,7 +42,8 @@ int Multiplexer::evaluateClient(pollfd *client) {
           client->events = POLLOUT;
           return 0;
         }
-        client->events = POLLOUT | POLLIN; // addition
+        if (_getSocketForClient(clientFd).getRequestForClient(clientFd) != NULL)
+          client->events = POLLOUT; // addition
         return 0;  // return 0 because we do no want to remove the clientFd
       }
       break;
@@ -61,6 +62,8 @@ int Multiplexer::evaluateClient(pollfd *client) {
         send(clientFd, (void *)clientResponse.toStr().c_str(),
              clientResponse.toStr().size(), 0);
       }
+      else
+        logger.error("no request was found!");
       delete clientRequest;
       return clientFd;  // returned clientFd will be markedForRemoval and at end
                         // of pollLoop be removed

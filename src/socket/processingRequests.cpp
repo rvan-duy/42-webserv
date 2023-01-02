@@ -117,7 +117,6 @@ bool isRequestFinished(const HttpRequest &request) {
 int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
   if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
-    Logger::getInstance().error("too big request L2");
     return 1;
   }
   if (isRawRequestFinished(fullRequest) == false) {
@@ -138,17 +137,20 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   HttpRequest *request = RequestParser::parseHeader(fullRequest);
   // TODO: check if this is correct
   if (request->getStatus() != HTTPStatusCode::NOT_SET) {
+    Logger::getInstance().error("statuscode is set");
     _addBadRequestToClient(fd, request->getStatus());
     _removeUnfinishedRequest(fd);
   }
   Server *match = _matchRequestToServer(request);
   if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
+    Logger::getInstance().error("Request is found too big");
     return 1;
   }
   if (isRequestFinished(*request)) {
     _addRequestToClient(fd, request, match);
     _removeUnfinishedRequest(fd);
   } else {
+    Logger::getInstance().debug("request is unfinished");
     _addUnfinishedRequest(fd, request, match);
   }
   return 0;
