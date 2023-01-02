@@ -42,7 +42,7 @@ HttpResponse GetRequest::executeRequest(const Server &server) {
     case FileType::DIRECTORY: {
       return _createDirectoryResponse(routeOfResponse, path);
     }
-    case FileType::REGULAR_FILE: {
+    case FileType::FILE: {
       return _createFileResponse(routeOfResponse, path);
     }
     default: {
@@ -71,7 +71,7 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
   }
   std::vector<std::string> possiblePaths = _constructPossiblePaths(path, route.indexFiles);
   for (std::vector<std::string>::const_iterator it = possiblePaths.begin(); it != possiblePaths.end(); ++it) {
-    if (_getFileType(*it) == FileType::REGULAR_FILE) {
+    if (_getFileType(*it) == FileType::FILE) {
       return _responseWithFile(*it, HTTPStatusCode::OK);
     }
   }
@@ -130,12 +130,12 @@ HttpResponse GetRequest::_errorResponseWithHtml(HTTPStatusCode statusCode, Route
 #define DEFAULT_ERROR_PAGE "root/error_pages/404/index.html"
 std::string GetRequest::_getErrorPage(const Route &route, HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
-    std::string page = route.errorPages.at(errorCode);
-    if (_getFileType(page) == FileType::REGULAR_FILE) {
-      return route.rootDirectory + page;
+    std::string page =
+        route.rootDirectory + "/" + route.errorPages.at(errorCode);
+    if (_getFileType(page) == FileType::FILE) {
+      return page;
     }
   }
-  // TODO: fix hardcode
   return std::string(DEFAULT_ERROR_PAGE);
 }
 

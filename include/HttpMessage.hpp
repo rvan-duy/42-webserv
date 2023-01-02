@@ -4,6 +4,7 @@
 #include <Webserver.hpp>
 #include <iostream>
 #include <map>
+#include <sstream>
 
 class HttpMessage {
  public:
@@ -20,7 +21,7 @@ class HttpMessage {
   std::string getVersionToStr() const;
   std::map<std::string, std::string> getHeaders() const;
   std::string getHeader(const std::string &key) const;
-  int getIntHeader(const std::string &key) const;
+  size_t getNumHeader(const std::string &key) const;
   bool hasHeader(const std::string key) const;
 
   std::string getBody() const;

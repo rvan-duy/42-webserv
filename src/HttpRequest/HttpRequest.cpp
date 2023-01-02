@@ -48,7 +48,7 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
     case FileType::DIRECTORY: {
       return HttpResponse(HTTPStatusCode::FORBIDDEN);
     }
-    case FileType::REGULAR_FILE: {
+    case FileType::FILE: {
       return HttpResponse(HTTPStatusCode::FORBIDDEN);
     }
     default: {
@@ -98,7 +98,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
       return FileType::PYTHON_SCRIPT;
     }
     Logger::getInstance().log("File is a regular file", VERBOSE);
-    return FileType::REGULAR_FILE;
+    return FileType::FILE;
   }
   Logger::getInstance().error("File is something else");
   return FileType::NOT_FOUND;

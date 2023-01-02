@@ -76,20 +76,18 @@ class Server {
   std::string getServerName() const;
   std::vector<Route> getRoutes() const;
   PageData getErrorPage() const;
-  int getMaxBody() const;
+  size_t getMaxBody() const;
   int getPort() const;
   int setPort(int const &value);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::string const &value);
-  int setMaxBody(double const &value);
+  int setMaxBody(const size_t value);
   void addRoute(Route const &route);
   const Route &getRoute(const std::string &uri) const;
-  // int                setHost(int const &statusCode, std::string const
-  // &filePath);
 
  private:
   int _port;
-  int _maxBodySize;
+  size_t _maxBodySize;
   std::string _serverName;
   std::vector<Route> _routes;
   PageData _defaultErrorPage;

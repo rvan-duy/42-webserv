@@ -104,7 +104,7 @@ bool isRequestFinished(const HttpRequest &request) {
   if (!request.hasHeader("Content-Length")) {
     return true;
   }
-  int contentLength = request.getIntHeader("Content-Length");
+  size_t contentLength = request.getNumHeader("Content-Length");
   if (contentLength < 0) {
     return true;
   }
@@ -129,7 +129,7 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
     _removeUnfinishedRequest(fd);
   }
   Server *match = _matchRequestToServer(request);
-  if (isRequestTooBig( request->getBody().size(), match->getMaxBody())) {
+  if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
     return 1;
   }
   if (isRequestFinished(*request)) {

@@ -18,7 +18,7 @@ class HttpResponse;
 struct Route;
 struct HttpHeaderData;
 
-enum class FileType { DIRECTORY, PYTHON_SCRIPT, REGULAR_FILE, NOT_FOUND };
+enum class FileType { DIRECTORY, PYTHON_SCRIPT, FILE, NOT_FOUND };
 #define MethodMap std::map<EHttpMethods, bool>
 #define HeaderMap std::map<std::string, std::string>
 
