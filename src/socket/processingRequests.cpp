@@ -1,7 +1,6 @@
 #include <Multiplexer.hpp>
 
-#define MAX_REQUEST_SIZE 1000000
-#define REQPARSER_BUFF_SIZE 2048
+#define REQPARSER_BUFF_SIZE 4096
 
 static int readFromClientFd(std::string *result, const int clientFd) {
   char buffer[REQPARSER_BUFF_SIZE + 1];
@@ -120,7 +119,7 @@ bool isRequestFinished(const HttpRequest &request) {
 
 int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
-  // do we need to test if it is to large before we have the full request read?
+  // do we need to test if it is to large before we have the full request read? (cannot use max this way)
   // if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
   //   return 1;
   // }
@@ -136,7 +135,7 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   }
   Server *match = _matchRequestToServer(request);
   Logger::getInstance().debug("size " + std::to_string(request->getBody().size()));
-  Logger::getInstance().debug("body " + request->getBody());
+  // Logger::getInstance().debug("body " + request->getBody());
   if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
     Logger::getInstance().error("Request is found too big");
     _clearRawRequest(fd);
@@ -159,7 +158,6 @@ int Socket::processUnfinishedRequest(const int &fd,
 
   request->addBody(rawRequest);
   if (request->getBody().length() > match->getMaxBody()) {
-    Logger::getInstance().error("too big request L3");
     return 1;
   }
   if (isRequestFinished(*request)) {
@@ -176,19 +174,16 @@ int Socket::processRequest(int const &fd) {
   int bytesRead = readFromClientFd(&rawRequest, fd);
   if (bytesRead <= 0) {
     _addBadRequestToClient(fd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
-    Logger::getInstance().error("one");
     return 1;
   }
   if (getRequestStatus(fd) != RequestStatus::UNFINISHED_REQUEST) {
     if (_processRawRequest(fd, rawRequest)) {
       _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
-      Logger::getInstance().error("two");
       return 1;
     }
   } else {
     if (processUnfinishedRequest(fd, rawRequest)) {
       _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
-      Logger::getInstance().error("three");
       return 1;
     };
   }

@@ -35,9 +35,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
       else {
         Socket &matchingSocket = _getSocketForClient(clientFd);
         if (matchingSocket.processRequest(clientFd)) {
-          Logger::getInstance().error(
+          logger.error(
               "[MULTIPLEXER] shutting down client with fd: " +
-              std::to_string(clientFd));
+              std::to_string(clientFd), MEDIUM);
           shutdown(clientFd, SHUT_RD);
           client->events = POLLOUT;
           return 0;
@@ -51,10 +51,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
 
     case POLLOUT: {
       logger.log("Found event of type POLLOUT on fd: " +
-                 std::to_string(client->fd));
+                 std::to_string(client->fd), MEDIUM);
       Socket &clientSocket = _getSocketForClient(clientFd);
       HttpRequest *clientRequest = clientSocket.getRequestForClient(clientFd);
-      // logger.log(clientRequest->getBody(), VERBOSE);
 
       if (clientRequest) {
         HttpResponse clientResponse = clientRequest->executeRequest(
@@ -63,14 +62,14 @@ int Multiplexer::evaluateClient(pollfd *client) {
              clientResponse.toStr().size(), 0);
       }
       else
-        logger.error("no request was found!");
+        logger.error("no request was found!", MEDIUM);
       delete clientRequest;
       return clientFd;  // returned clientFd will be markedForRemoval and at end
                         // of pollLoop be removed
     }
 
     case POLLNVAL: {
-      logger.error("POLLNVAL on descriptor : " + std::to_string(clientFd));
+      logger.error("POLLNVAL on descriptor : " + std::to_string(clientFd), MEDIUM);
       // return clientFd; // this removes the faulty fd, could make debugging
       // harder
       break;
@@ -127,7 +126,7 @@ void Multiplexer::waitForEvents(const int timeout) {
 int Multiplexer::_sendData(const int socket, const std::string &data) const {
   Logger &logger = Logger::getInstance();
 
-  logger.log("[WRITING] Multiplexer: Writing data to client: \n" + data);
+  logger.log("[WRITING] Multiplexer: Writing data to client: \n" + data, MEDIUM);
   return write(socket, data.c_str(), data.length());
 }
 
@@ -143,7 +142,7 @@ bool Multiplexer::_isSocket(const int fd) const {
     if (it->getFd() == fd) {
       logger.log("[POLLING] Multiplexer: Socket is a server [" +
                  std::to_string(it->getFd()) + ":" +
-                 std::to_string(it->getPort()) + "]");
+                 std::to_string(it->getPort()) + "]", VERBOSE);
       return true;
     }
   }
@@ -156,7 +155,7 @@ void Multiplexer::_addClient(const int socket) {
   int newSocket = accept(socket, nullptr, nullptr);
   if (newSocket == -1) {
     logger.error("[POLLING] Multiplexer: Failed to accept new connection: " +
-                 std::string(strerror(errno)));
+                 std::string(strerror(errno)), SILENT);
     _endServer = true;
     return;
   }
@@ -195,7 +194,7 @@ void Multiplexer::_removeClient(const int socket) {
       close(socket);
       _clients.erase(it);
       logger.log("[POLLING] Multiplexer: Client socket " +
-                 std::to_string(socket) + " removed from multiplexer");
+                 std::to_string(socket) + " removed from multiplexer", MEDIUM);
       break;
     }
   }

@@ -65,7 +65,7 @@ void Server::setServerName(std::string const &value) { _serverName = value; }
 
 int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
   if (statusCode < 0) {
-    Logger::getInstance().error("Incorrect statuscode set");
+    Logger::getInstance().error("Incorrect statuscode set", MEDIUM);
     return 1;
   }
   _defaultErrorPage.statusCode = statusCode;
@@ -75,10 +75,10 @@ int Server::setErrorPage(int const &statusCode, std::string const &filePath) {
 
 int Server::setPort(int const &value) {
   if (value > MAX_PORT) {
-    Logger::getInstance().error("Port higher than MAX_PORT");
+    Logger::getInstance().error("Port higher than MAX_PORT", SILENT);
     return 1;
   } else if (value <= 0) {
-    Logger::getInstance().error("Port higher than MAX_PORT");
+    Logger::getInstance().error("Port higher than MAX_PORT", SILENT);
     return 1;
   }
   _port = value;

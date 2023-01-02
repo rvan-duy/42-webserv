@@ -111,7 +111,7 @@ std::string unChunk(std::string body) {
   while (body.size()) {
     size_t sub = body.find("\r\n");
     if (sub == std::string::npos) {
-      logger.error("[CHUNK]: No \\r\\n pair found to indicate chunkSize end");
+      logger.error("[CHUNK]: No \\r\\n pair found to indicate chunkSize end", MEDIUM);
       return "";
     }
     std::string sizeStr = body.substr(sub);
@@ -119,7 +119,7 @@ std::string unChunk(std::string body) {
     char *check = NULL;
     long chunkSize = strtoul(sizeStr.c_str(), &check, 16);
     if (check != NULL) {
-      logger.error("[CHUNK]: chunkSize is not hexadecimal");
+      logger.error("[CHUNK]: chunkSize is not hexadecimal", MEDIUM);
       return "";
     }
     newBody += body.substr(sub + 2, chunkSize);

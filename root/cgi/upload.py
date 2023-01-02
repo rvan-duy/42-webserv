@@ -21,7 +21,8 @@ filename = str(uuid.uuid4())
 uri += "/"
 uri += filename
 uri += ".txt"
-file_data = sys.argv[2]
+# file_data = sys.argv[2]
+file_data = sys.stdin.read()
 
 # Save the file to the specified URI
 with open(uri, 'wb') as f:

@@ -38,7 +38,7 @@ class CGI {
 
   static HTTPStatusCode executeCgi(std::string *pBody,
                                    std::map<std::string, std::string> *pHeaders,
-                                   char *const *argv);
+                                   char *const *argv, const std::string *body);
 
  private:
   CGI();

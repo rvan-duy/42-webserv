@@ -114,16 +114,16 @@ static HttpRequest *createRequest(HttpHeaderData const &data) {
 
   switch (data.method) {
     case GET:
-      logger.log("Succesfully parsed get request!");
+      logger.log("Succesfully parsed get request!", VERBOSE);
       return new GetRequest(data);
     case POST:
-      logger.log("Succesfully parsed post request!");
+      logger.log("Succesfully parsed post request!", VERBOSE);
       return new PostRequest(data);
     case DELETE:
-      logger.log("Succesfully parsed delete request!");
+      logger.log("Succesfully parsed delete request!", VERBOSE);
       return new DeleteRequest(data);
     default:
-      Logger::getInstance().error("Incorrect type of request received");
+      Logger::getInstance().error("Incorrect type of request received", MEDIUM);
       return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
 }
@@ -139,12 +139,12 @@ HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
   HttpHeaderData headerData;
   size_t endOfHeader;
 
-  logger.log("Starting to parse request");
+  logger.log("Starting to parse request", VERBOSE);
   endOfHeader = rawRequest.find("\r\n\r\n");
   if (endOfHeader == std::string::npos) {
     logger.error(
         "[REQUESTPARSER] Incorrect end of header found -> returning new "
-        "BadRequest()");
+        "BadRequest()", MEDIUM);
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
   headerData.body =
@@ -152,13 +152,13 @@ HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
   headerLines = splitHeader(rawRequest.substr(0, endOfHeader + 2), "\r\n");
   if (parseFirstLine(&headerData, headerLines[0])) {
     logger.error(
-        "Incorrect first line of request -> returning new BadRequest()");
+        "Incorrect first line of request -> returning new BadRequest()", MEDIUM);
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
 
   if (makeHeaderMap(&headerData.headers, headerLines)) {
     logger.error(
-        "Incorrect header added to request -> returning new BadRequest()");
+        "Incorrect header added to request -> returning new BadRequest()", MEDIUM);
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
   return createRequest(headerData);
@@ -166,10 +166,10 @@ HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
 
 HttpRequest *RequestParser::processChunk(std::string &rawRequest) {
   Logger &logger = Logger::getInstance();
-  logger.debug("processing chunked request");
+  logger.debug("processing chunked request", VERBOSE);
   size_t sub = rawRequest.find("\r\n");
   if (sub == std::string::npos) {
-    logger.error("[CHUNK]: No \\r\\n pair found");
+    logger.error("[CHUNK]: No \\r\\n pair found", MEDIUM);
     return new BadRequest(HTTPStatusCode::BAD_REQUEST);
   }
   std::string sizeStr = rawRequest.substr(sub);
@@ -188,7 +188,7 @@ HttpRequest *RequestParser::processChunk(std::string &rawRequest) {
     if (endOfHeader == std::string::npos) {
       logger.error(
           "[CHUNK]: Incorrect end of header found -> returning new "
-          "BadRequest()");
+          "BadRequest()", MEDIUM);
       return new BadRequest(HTTPStatusCode::BAD_REQUEST);
     }
     std::vector<std::string> headerLines =
