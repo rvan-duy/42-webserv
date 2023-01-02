@@ -104,8 +104,8 @@ bool isRequestFinished(const HttpRequest &request) {
   if (!request.hasHeader("Content-Length")) {
     return true;
   }
-  size_t contentLength = request.getIntHeader("Content-Length");
-  if (contentLength == SIZE_MAX) {
+  size_t contentLength = request.getNumHeader("Content-Length");
+  if (contentLength < 0) {
     return true;
   }
   if (request.getBody().length() < contentLength) {
@@ -143,7 +143,6 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   }
   Server *match = _matchRequestToServer(request);
   if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
-    Logger::getInstance().error("too big request");
     return 1;
   }
   if (isRequestFinished(*request)) {

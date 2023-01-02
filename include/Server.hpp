@@ -81,11 +81,9 @@ class Server {
   int setPort(int const &value);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::string const &value);
-  int setMaxBody(double const &value);
+  int setMaxBody(const size_t value);
   void addRoute(Route const &route);
   const Route &getRoute(const std::string &uri) const;
-  // int                setHost(int const &statusCode, std::string const
-  // &filePath);
 
  private:
   int _port;

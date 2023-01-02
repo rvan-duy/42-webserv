@@ -6,7 +6,7 @@ const output = document.getElementById('output')
 button.addEventListener('click', async _ => {
 
   try {     
-    const response = await fetch('http://localhost:8090/cgi/to_upper.py', {
+    const response = await fetch('http://localhost:8090/cgi/test.py', {
       method: 'post',
       body: JSON.stringify({
         "first_name": firstNameInput.value,

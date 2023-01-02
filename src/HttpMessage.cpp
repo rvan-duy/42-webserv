@@ -57,10 +57,13 @@ std::string HttpMessage::getHeader(const std::string &key) const {
   return location->second;
 }
 
-size_t HttpMessage::getIntHeader(const std::string &key) const {
+size_t HttpMessage::getNumHeader(const std::string &key) const {
   std::string header = _headers.at(key);
+  std::stringstream sstream(header);
+  size_t result;
   try {
-    return std::stoi(header);
+    sstream >> result;
+    return result;
   } catch (std::exception e) {
     return SIZE_MAX;
   }

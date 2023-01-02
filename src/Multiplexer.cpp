@@ -39,9 +39,9 @@ int Multiplexer::evaluateClient(pollfd *client) {
               "[MULTIPLEXER] shutting down client with fd: " +
               std::to_string(clientFd));
           shutdown(clientFd, SHUT_RD);
-          client->events = POLLOUT;
+          return 0;
         }
-        return 0;  // return 0 because we do no want to remove the clientFd
+        client->events = POLLOUT | POLLIN;
       }
       break;
     }
@@ -156,7 +156,7 @@ void Multiplexer::_addClient(const int socket) {
   logger.log("[POLLING] Multiplexer: New connection accepted: " +
                  std::to_string(newSocket),
              VERBOSE);
-  pollfd client = {newSocket, POLLIN | POLLOUT, 0};
+  pollfd client = {newSocket, POLLIN, 0}; // | POLLOUT
   _clients.push_back(client);
 
   for (std::vector<Socket>::iterator it = _sockets.begin();
