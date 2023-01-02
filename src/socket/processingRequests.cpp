@@ -1,7 +1,7 @@
 #include <Multiplexer.hpp>
 
 #define MAX_REQUEST_SIZE 1000000
-#define REQPARSER_BUFF_SIZE 1024
+#define REQPARSER_BUFF_SIZE 2048
 
 static int readFromClientFd(std::string *result, const int clientFd) {
   char buffer[REQPARSER_BUFF_SIZE + 1];
@@ -116,24 +116,13 @@ bool isRequestFinished(const HttpRequest &request) {
 
 int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
-  if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
-    return 1;
-  }
+  // do we nee to test if it is to large before we have the full request read?
+  // if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
+  //   return 1;
+  // }
   if (isRawRequestFinished(fullRequest) == false) {
     return 0;
   }
-  // if (isChunked(fd)) {
-  //   if (_clients[fd].first->isFirstChunk())
-  //     request = RequestParser::processChunk(rawRequest);
-  //   else
-  //   {
-  //     Logger::getInstance().debug("no chunk chunk");
-  //     request = RequestParser::parseHeader(rawRequest);
-  //   }
-  //   addChunk(request, fd);
-  //   delete request;  // the body or header data has been added to og request
-  //   return 0;
-  // }
   HttpRequest *request = RequestParser::parseHeader(fullRequest);
   // TODO: check if this is correct
   if (request->getStatus() != HTTPStatusCode::NOT_SET) {
@@ -180,16 +169,19 @@ int Socket::processRequest(int const &fd) {
   int bytesRead = readFromClientFd(&rawRequest, fd);
   if (bytesRead <= 0) {
     _addBadRequestToClient(fd, HTTPStatusCode::INTERNAL_SERVER_ERROR);
+    Logger::getInstance().error("one");
     return 1;
   }
   if (getRequestStatus(fd) != RequestStatus::UNFINISHED_REQUEST) {
     if (_processRawRequest(fd, rawRequest)) {
       _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
+      Logger::getInstance().error("two");
       return 1;
     }
   } else {
     if (processUnfinishedRequest(fd, rawRequest)) {
       _addBadRequestToClient(fd, HTTPStatusCode::CONTENT_TOO_LARGE);
+      Logger::getInstance().error("three");
       return 1;
     };
   }
