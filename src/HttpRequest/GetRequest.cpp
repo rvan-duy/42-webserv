@@ -29,12 +29,12 @@ HttpResponse GetRequest::_handleCgiRequest(std::string const &path,
 std::string GetRequest::_getErrorPage(const Route &route,
                                       HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
-    std::string page = route.errorPages.at(errorCode);
+    std::string page =
+        route.rootDirectory + "/" + route.errorPages.at(errorCode);
     if (_getFileType(page) == FileType::FILE) {
-      return route.rootDirectory + page;
+      return page;
     }
   }
-  // TODO: fix hardcode
   return std::string(DEFAULT_ERROR_PAGE);
 }
 
