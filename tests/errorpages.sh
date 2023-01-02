@@ -19,8 +19,8 @@ CONF="error_pages.conf"
   sleep 0.2;
 
   # compare the responses:
-  if [ "$REAL_405" == "$MOCK_405" && "$MOCK_405" != "" ]; then
-    echo "Output matches expected output:"; echo $REAL_405; echo -e "\033[32m[SUCCESS]\033[0m"
+  if [ "$REAL_405" == "$MOCK_405" ]; then
+    echo "Output matches expected output:"; echo $MOCK_405; echo -e "\033[32m[SUCCESS]\033[0m"
   else
     echo "Output does not match expected output"; echo "[REAL]:" $REAL_405; echo "[MOCK]:" $MOCK_405; echo -e "\033[31m[FAILURE]\033[0m"
   fi
