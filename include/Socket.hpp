@@ -63,6 +63,7 @@ class Socket {
   int _processRawRequest(const int &fd, const std::string &rawRequest);
   int processUnfinishedRequest(const int &fd, const std::string &rawRequest);
   std::string _addRawRequest(const int &fd, std::string const &rawRequest);
+  void  _clearRawRequest(const int &fd);
   void _addUnfinishedRequest(const int &fd, HttpRequest *request,
                              Server *match);
   void _removeUnfinishedRequest(const int &fd);

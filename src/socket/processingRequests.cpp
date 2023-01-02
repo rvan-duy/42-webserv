@@ -65,6 +65,10 @@ std::string Socket::_addRawRequest(const int &fd,
   return _unfinishedRequest[fd].rawRequest;
 }
 
+void  Socket::_clearRawRequest(const int &fd) {
+  _unfinishedRequest[fd].rawRequest.clear();
+}
+
 void Socket::_addUnfinishedRequest(const int &fd, HttpRequest *request,
                                    Server *match) {
   UnfinishedRequest dest = _unfinishedRequest.at(fd);
@@ -116,7 +120,7 @@ bool isRequestFinished(const HttpRequest &request) {
 
 int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
   std::string fullRequest = _addRawRequest(fd, rawRequest);
-  // do we nee to test if it is to large before we have the full request read?
+  // do we need to test if it is to large before we have the full request read?
   // if (isRequestTooBig(fullRequest.size(), MAX_REQUEST_SIZE)) {
   //   return 1;
   // }
@@ -131,8 +135,11 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
     _removeUnfinishedRequest(fd);
   }
   Server *match = _matchRequestToServer(request);
+  Logger::getInstance().debug("size " + std::to_string(request->getBody().size()));
+  Logger::getInstance().debug("body " + request->getBody());
   if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
     Logger::getInstance().error("Request is found too big");
+    _clearRawRequest(fd);
     return 1;
   }
   if (isRequestFinished(*request)) {
