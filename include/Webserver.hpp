@@ -1,6 +1,8 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
+#define DEFAULT_CONFIG_PATH "config/config0.conf"
+
 #include <string>
 #include <vector>
 

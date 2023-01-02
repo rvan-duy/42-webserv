@@ -1,52 +1,69 @@
 #pragma once
 
-#include <vector>
 #include <arpa/inet.h>
-#include <HttpResponse.hpp>
-#include <Webserver.hpp>
 #include <sys/ioctl.h>
 
-/* backlog number of connections allowed on the incoming queue */
+#include <HttpResponse.hpp>
+#include <Webserver.hpp>
+#include <vector>
+
+/* number of connections allowed on the incoming queue */
 #define BACKLOG 10
 
-class Socket
-{
-public:
-    Socket(int const &port);
-    ~Socket();
+enum class RequestStatus { NONE, RAW, UNFINISHED_REQUEST, FINISHED };
 
-    // Methods
-    void prepare();
-    void sendResponse(const HttpResponse &response) const;
-    void addClient(const int &fd);
-    void removeClient(const int socket);
-    void addChunk(HttpRequest *request, int const &clientFd);
+struct UnfinishedRequest {
+  RequestStatus status;
+  std::string rawRequest;
+  HttpRequest *request;
+  Server *server;
+};
 
-    // Hassers
-    bool hasClient(const int &fd) const;
-    bool isChunked(const int& clientFd);
+class Socket {
+ public:
+  Socket(int const &port);
+  ~Socket();
 
-    // Getters
-    int getPort() const;
-    int getFd() const;
-    std::vector<Server> getServers() const;
-    Server &getServerForClient(const int clientFd);
-    HttpRequest *getRequestForClient(const int clientFd);
+  void prepare();
+  void sendResponse(const HttpResponse &response) const;
+  void addClient(const int &fd);
+  void removeClient(const int socket);
+  void addChunk(HttpRequest *request, int const &clientFd);
 
-    // Setters
-    void addServer(Server const &server);
-    int processRequest(int const &clientFd);
+  bool hasClient(const int &fd) const;
+  bool isChunked(const int &clientFd);
 
-private:
-    std::vector<Server> _servers;
-    // key: client FD, value: request, server pair
-    std::map<int, std::pair<HttpRequest *, Server *>> _clients;
-    int _fd;
-    int _port;
-    int _accepted;
-    struct sockaddr_in6 _servaddr;
+  // Getters
+  int getPort() const;
+  int getFd() const;
+  std::vector<Server> getServers() const;
+  Server &getServerForClient(const int clientFd);
+  HttpRequest *getRequestForClient(const int clientFd);
 
-    void _matchRequestToServer(int const &clientFd, HttpRequest *request);
-    void _addRequestToClient(int const &clientFd, HttpRequest *request, Server *server);
-    void _addBadRequestToClient(const int &fd, HTTPStatusCode statusCode);
+  // Setters
+  void addServer(Server const &server);
+  int processRequest(int const &clientFd);
+
+ private:
+  std::vector<Server> _servers;
+  // key: client FD, value: request, server pair
+  std::map<int, std::pair<HttpRequest *, Server *>> _clients;
+  std::map<int, UnfinishedRequest> _unfinishedRequest;
+  int _fd;
+  int _port;
+  int _accepted;
+  struct sockaddr_in6 _servaddr;
+
+  Server *_matchRequestToServer(HttpRequest *request);
+  void _addRequestToClient(int const &clientFd, HttpRequest *request,
+                           Server *server);
+  void _addBadRequestToClient(const int &fd, HTTPStatusCode statusCode);
+
+  RequestStatus getRequestStatus(const int &clientFd) const;
+  int _processRawRequest(const int &fd, const std::string &rawRequest);
+  int processUnfinishedRequest(const int &fd, const std::string &rawRequest);
+  std::string _addRawRequest(const int &fd, std::string const &rawRequest);
+  void _addUnfinishedRequest(const int &fd, HttpRequest *request,
+                             Server *match);
+  void _removeUnfinishedRequest(const int &fd);
 };

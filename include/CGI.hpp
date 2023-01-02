@@ -16,7 +16,7 @@
 #define CHILD 0
 #define READ 0
 #define WRITE 1
-#define BUFFER_SIZE 1024
+#define CGI_BUFF_SIZE 1024
 
 #define PATH_TO_PYTHON "/usr/bin/python3"
 #define PATH_TO_PHP "/opt/homebrew/Cellar/php/8.1.13/bin/php"

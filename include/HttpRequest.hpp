@@ -22,35 +22,53 @@ enum class FileType { DIRECTORY, PYTHON_SCRIPT, REGULAR_FILE, NOT_FOUND };
 #define MethodMap std::map<EHttpMethods, bool>
 #define HeaderMap std::map<std::string, std::string>
 
-// HTTP REQUEST BASE
 class HttpRequest : public HttpMessage {
  public:
   HttpRequest();
   HttpRequest(const HttpHeaderData &data);
   HttpRequest(const HttpRequest &ref);
   HttpRequest &operator=(const HttpRequest &ref);
+  HttpRequest *operator+(const HttpRequest &other);
   virtual ~HttpRequest();
+
+  EHttpMethods getMethod() const;
+  HTTPStatusCode getStatus() const;
+
+  void unChunkBody();
+  bool isFirstChunk();
 
   virtual HttpResponse executeRequest(const Server &server);
 
-  HttpRequest         *operator+(const HttpRequest &chunk);
-  void                 unChunkBody();
-  bool                 isFirstChunk();
+  std::string constructFullPath(const std::string &rootDirectory, const std::string &uri) const;
+  HttpResponse createCGIResponse(const Route &route, const std::string &path) const;
+  std::string getFileSize(std::ifstream &file) const;
+  std::string getContentType(const std::string &path) const;
 
  protected:
-  bool           isMethodAllowed(const MethodMap allowedMethods, const EHttpMethods &method) const;
-  FileType       getFileType(const std::string &path) const;
-  std::string    constructFullPath(const std::string &rootDirectory, const std::string &uri) const;
-  std::string    fileToStr(std::ifstream &file) const;
-  std::string    getContentType(const std::string &path) const;
-  std::string    getFileSize(std::ifstream &file) const;
-  HttpResponse   createCGIResponse(const Route &route, const std::string &path) const;
-  HttpResponse   responseWithBody(HeaderMap headers, std::string body) const;
-  HttpResponse   responseWithFile(const std::string &path, HTTPStatusCode statusCode) const;
-
-  std::string    _uri;
-  EHttpMethods   _method;
+  EHttpMethods _method;
+  std::string _uri;
+  // TODO: remove default value
   HTTPStatusCode _statusCode = HTTPStatusCode::NOT_SET;
+
+  /* Request handling */
+  // virtual HttpResponse _handleCgiRequest(std::string const 
+  HttpResponse _handleFileRequest(std::string const &path, const Route &route,
+                                  const FileType &type) const;
+
+  /* Response constructors */
+  // virtual HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
+  //                                       Route const &route) const;
+  HttpResponse _responseWithFile(std::string const &path,
+                                 HTTPStatusCode statusCode) const;
+  HttpResponse _responseWithBody(std::map<std::string, std::string> headers,
+                                 std::string body) const;
+
+  /* Helpers */
+  FileType _getFileType(const std::string &path) const;
+  bool _isTypeAccepted() const;
+  // std::vector<std::string> _getPossiblePaths(
+  //     const std::string &path,
+  //     const std::vector<std::string> &index_files) const;
 };
 
 // GET
@@ -73,6 +91,8 @@ class GetRequest : public HttpRequest {
   HttpResponse             _errorResponseWithHtml(HTTPStatusCode statusCode, Route const &route) const;
   std::vector<std::string> _constructPossiblePaths(const std::string              &path,
                                                    const std::vector<std::string> &indexFiles) const;
+  HttpResponse _errorResponse(HTTPStatusCode const &statusCode,
+                                        Route const &route) const;
 };
 
 // DELETE
@@ -100,5 +120,7 @@ class BadRequest : public HttpRequest {
 
   HttpResponse executeRequest(const Server &server);
 };
+
+bool isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods, EHttpMethods method);
 
 #endif  // HTTP_REQUEST_HPP

@@ -131,7 +131,7 @@ static HttpRequest *createRequest(HttpHeaderData const &data) {
 /**
  * End of parsing first line
  */
-HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
+HttpRequest *RequestParser::parseHeader(const std::string &rawRequest) {
   Logger &logger = Logger::getInstance();
   /* Header split into separate strings */
   std::vector<std::string> headerLines;
@@ -141,7 +141,6 @@ HttpRequest *RequestParser::parseHeader(std::string &rawRequest) {
 
   logger.log("Starting to parse request");
   endOfHeader = rawRequest.find("\r\n\r\n");
-  logger.debug(rawRequest);
   if (endOfHeader == std::string::npos) {
     logger.error(
         "[REQUESTPARSER] Incorrect end of header found -> returning new "
