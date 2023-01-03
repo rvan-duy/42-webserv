@@ -67,7 +67,7 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
     return _errorResponseWithHtml(HTTPStatusCode::NOT_ACCEPTABLE, path);
   }
   if (route.autoIndex == true) {
-    return _createAutoIndexResponse(path);
+    return _createAutoIndexResponse(path, route);
   }
   std::vector<std::string> possiblePaths = _constructPossiblePaths(path, route.indexFiles);
   for (std::vector<std::string>::const_iterator it = possiblePaths.begin(); it != possiblePaths.end(); ++it) {
@@ -75,10 +75,10 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
       return responseWithFile(*it, HTTPStatusCode::OK);
     }
   }
-  return _errorResponseWithHtml(HTTPStatusCode::NOT_FOUND, route);
+  return _errorResponseWithHtml(HTTPStatusCode::INTERNAL_SERVER_ERROR, route);
 }
 
-HttpResponse GetRequest::_createAutoIndexResponse(std::string const &path) const {
+HttpResponse GetRequest::_createAutoIndexResponse(std::string const &path, const Route& route) const {
   HttpResponse response(HTTPStatusCode::OK);
   std::string  body;
   DIR *        dir;
@@ -111,7 +111,7 @@ HttpResponse GetRequest::_createAutoIndexResponse(std::string const &path) const
     }
     closedir(dir);
   } else {
-    return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
+    return _errorResponseWithHtml(HTTPStatusCode::INTERNAL_SERVER_ERROR, route);
   }
 
   body += "</table></body></html>";
@@ -166,10 +166,12 @@ bool GetRequest::_isTypeAccepted() const {
 
 HttpResponse GetRequest::_errorResponseWithHtml(HTTPStatusCode statusCode, Route const &route) const {
   std::string pathToErrorFile = _getErrorPage(route, statusCode);
+  std::cerr << "Error page: " << pathToErrorFile << std::endl;
+  std::cerr << "Status code: " << (int)statusCode << std::endl;
   return responseWithFile(pathToErrorFile, statusCode);
 }
 
-#define DEFAULT_ERROR_PAGE "root/error_pages/404/index.html"
+#define DEFAULT_ERROR_PAGE "default_error_page/index.html"
 std::string GetRequest::_getErrorPage(const Route &route, HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
     std::string page = route.errorPages.at(errorCode);

@@ -73,7 +73,7 @@ class GetRequest : public HttpRequest {
   std::string              _getErrorPage(const Route &route, HTTPStatusCode errorCode) const;
   HttpResponse             _createRedirectionResponse(const Route &route) const;
   HttpResponse             _createDirectoryResponse(const Route &route, const std::string &path) const;
-  HttpResponse             _createAutoIndexResponse(const std::string &path) const;
+  HttpResponse             _createAutoIndexResponse(const std::string &path, const Route& route) const;
   HttpResponse             _createFileResponse(const Route &route, const std::string &path) const;
   HttpResponse             _errorResponseWithHtml(HTTPStatusCode statusCode, Route const &route) const;
   std::vector<std::string> _constructPossiblePaths(const std::string              &path,
