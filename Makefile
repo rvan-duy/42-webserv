@@ -1,7 +1,7 @@
 NAME				:=	webserv
 CC					:=	c++
 export LOG_ENABLED	:=	1
-CFLAGS				=	-Wall -Wextra -std=c++11 -pedantic -D LOG_ENABLED=$(LOG_ENABLED)
+CFLAGS				:=	-Wall -Wextra -std=c++11 -pedantic -D LOG_ENABLED=$(LOG_ENABLED) -D PATH_TO_PYTHON=\"$(shell which python3)\"
 ################################################################################
 # EXTRA FLAGS
 ifdef PROD
