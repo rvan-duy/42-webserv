@@ -48,30 +48,16 @@ static char *const *makeArgv(const std::string &filePath,
 int CGI::_forkCgiFile(int fd[2], char *const *argv) {
   Logger &logger = Logger::getInstance();
 
-  // close(fd[READ]);
-  // experimental
-  if (dup2(fd[READ], STDIN_FILENO) == -1) {
-    logger.error("[EXECUTING] CGI: dup2: " + std::string(strerror(errno)));
-    close(fd[WRITE]);
-    exit(1);
-  }
+  dup2(fd[READ], STDIN_FILENO);
+  dup2(fd[WRITE], STDOUT_FILENO);
+  dup2(fd[WRITE], STDERR_FILENO);
 
-  if (dup2(fd[WRITE], STDOUT_FILENO) == -1) {
-    logger.error("[EXECUTING] CGI: dup2: " + std::string(strerror(errno)));
-    close(fd[WRITE]);
-    exit(1);
-  }
-  if (dup2(fd[WRITE], STDERR_FILENO) == -1) {
-    logger.error("[EXECUTING] CGI: dup2: " + std::string(strerror(errno)));
-    close(fd[WRITE]);
-    exit(1);
-  }
-  if (execve(PATH_TO_PYTHON, argv, environ)) {
-    logger.error("[EXECUTING] CGI: execve: " + std::string(strerror(errno)));
-    close(fd[WRITE]);
-    exit(1);
-  }
-  return 1;
+  close(fd[WRITE]);
+  execve(PATH_TO_PYTHON, argv, environ);
+  logger.error("CGI cannot run: " + std::string(argv[0]), MEDIUM);
+
+  close(fd[READ]);
+  exit(42);
 }
 
 #include <stdlib.h>
@@ -103,6 +89,7 @@ static int readFromChildProcess(std::string *pDest, int fd) {
     if (bytesRead == -1) {
       Logger::getInstance().error("[EXECUTING] CGI: read: " +
                                   std::string(strerror(errno)));
+      close(fd);
       return 1;
     }
     if (bytesRead > 0) {
@@ -206,8 +193,6 @@ static void write_to_pipe(int pipefd, const char *message) {
         write(pipefd, message + bytes_written, message_len - bytes_written);
     Logger::getInstance().debug("write: " + std::to_string(result));
     if (result == -1) {
-      // usleep(5000);
-      sleep(1);
       // The write would have blocked, retry
       continue;
     }
@@ -294,7 +279,8 @@ HTTPStatusCode CGI::executeFileWithBody(
   }
 
   std::vector<std::string> vectorWithBody = cgiParams;
-  vectorWithBody.push_back(body);
+  if (body.size() <= 1024)
+    vectorWithBody.push_back(body);
   char *const *argv = makeArgv(filePath, vectorWithBody);
   return executeCgi(pBody, pHeaders, argv, &body);
 }

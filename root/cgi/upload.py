@@ -3,15 +3,15 @@ import sys
 import uuid
 
 # Check if the correct number of arguments were provided
-if len(sys.argv) != 3:
-    # output = "Usage: python3 upload.py <path> <file_data>"
-    # print("Content-Type: text/plain")
-    # print("Content-Length:" + str(len(output)))
-    # # Split body from headers
-    # print("")
-    # # Print body
-    # print(output)
-    sys.exit(1)
+# if len(sys.argv) != 3:
+#     # output = "Usage: python3 upload.py <path> <file_data>"
+#     # print("Content-Type: text/plain")
+#     # print("Content-Length:" + str(len(output)))
+#     # # Split body from headers
+#     # print("")
+#     # # Print body
+#     # print(output)
+#     sys.exit(len(sys.argv))
 
 
 
