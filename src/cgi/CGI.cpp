@@ -234,10 +234,10 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
     close(send_fd[READ]);
 
     if (body) {
-      fcntl(send_fd[WRITE], F_SETFL, O_NONBLOCK);
-      write(send_fd[WRITE], body->data(), body->size());
+      // fcntl(send_fd[WRITE], F_SETFL, O_NONBLOCK);
+      // write(send_fd[WRITE], body->data(), body->size());
+      write_to_pipe(send_fd[WRITE], body->c_str());
     }
-      // write_to_pipe(send_fd[WRITE], body->c_str());
     close(send_fd[WRITE]);
 
     int exitStatus = waitForChildProcess(pid);
