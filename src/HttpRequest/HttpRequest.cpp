@@ -118,9 +118,6 @@ FileType HttpRequest::getFileType(const std::string &path) const {
 
 std::string HttpRequest::constructFullPath(const std::string &rootDirectory, const std::string &uri) const {
   std::string path = rootDirectory + uri;
-  if (path[path.length() - 1] == '/') {
-    path += "index.html";
-  }
   Logger::getInstance().log("Constructed full path: " + path, VERBOSE);
   return path;
 }
