@@ -32,7 +32,7 @@ HttpRequest::~HttpRequest() {}
 HttpResponse HttpRequest::executeRequest(const Server &server) {
   const Route      &routeOfResponse = server.getRoute(_uri);
   const std::string path            = constructFullPath(routeOfResponse.rootDirectory, _uri);
-  const FileType    fileType        = _getFileType(path);
+  const FileType    fileType        = getFileType(path);
 
   if (isMethodAllowed(routeOfResponse.allowedMethods, _method) == false) {
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
@@ -48,7 +48,7 @@ HttpResponse HttpRequest::executeRequest(const Server &server) {
     case FileType::DIRECTORY: {
       return HttpResponse(HTTPStatusCode::FORBIDDEN);
     }
-    case FileType::FILE: {
+    case FileType::REGULAR_FILE: {
       return HttpResponse(HTTPStatusCode::FORBIDDEN);
     }
     default: {
@@ -73,16 +73,28 @@ void HttpRequest::unChunkBody() {
   _body = unChunk(_body);
 }
 
-/**
- * Determines whether a given HTTP request uses chunked transfer encoding.
- */
 bool HttpRequest::isFirstChunk() {
   return "chunked" == getHeader("Transfer-Encoding");
 }
 
 HTTPStatusCode HttpRequest::getStatus() const { return _statusCode; }
 
-FileType HttpRequest::_getFileType(const std::string &path) const {
+EHttpMethods HttpRequest::getMethod() const { return _method; }
+
+/* PROTECTED METHODS THAT ARE USED BY CHILD CLASSES */
+
+bool HttpRequest::isMethodAllowed(const MethodMap allowedMethods, const EHttpMethods &method) const {
+  for (MethodMap::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++) {
+    if (it->first == method) {
+      Logger::getInstance().log("Method allowed", VERBOSE);
+      return true;
+    }
+  }
+  Logger::getInstance().error("Method not allowed");
+  return false;
+}
+
+FileType HttpRequest::getFileType(const std::string &path) const {
   struct stat buf;
   if (stat(path.c_str(), &buf) == -1) {
     Logger::getInstance().log("File not found");
@@ -98,7 +110,7 @@ FileType HttpRequest::_getFileType(const std::string &path) const {
       return FileType::PYTHON_SCRIPT;
     }
     Logger::getInstance().log("File is a regular file", VERBOSE);
-    return FileType::FILE;
+    return FileType::REGULAR_FILE;
   }
   Logger::getInstance().error("File is something else");
   return FileType::NOT_FOUND;
@@ -124,18 +136,17 @@ HttpResponse HttpRequest::createCGIResponse(const Route &route, const std::strin
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
 
-  HTTPStatusCode status =
-      CGI::executeFileWithBody(&body, &headers, route.cgiParams, path, _body);
+  HTTPStatusCode status = CGI::executeFileWithBody(&body, &headers, route.cgiParams, path, _body);
   if (status != HTTPStatusCode::OK) {
     Logger::getInstance().error("Executing cgi: " + getMessageByStatusCode(status));
     return HttpResponse(status);
   }
 
   logger.log("CGI request successful", VERBOSE);
-  return _responseWithBody(headers, body);
+  return responseWithBody(headers, body);
 }
 
-HttpResponse HttpRequest::_responseWithBody(HeaderMap headers, std::string body) const {
+HttpResponse HttpRequest::responseWithBody(HeaderMap headers, std::string body) const {
   HttpResponse response(HTTPStatusCode::OK);
   response.addBody(body);
   Logger::getInstance().debug(body);
@@ -147,42 +158,25 @@ HttpResponse HttpRequest::_responseWithBody(HeaderMap headers, std::string body)
   return response;
 }
 
-
-static std::string fileToStr(std::ifstream &file) {
-  file.seekg(0, std::ios::beg);
-
-  std::string body((std::istreambuf_iterator<char>(file)),
-                   std::istreambuf_iterator<char>());
-  return body;
-}
-
-HttpResponse HttpRequest::_responseWithFile(const std::string &path, HTTPStatusCode statusCode) const {
+HttpResponse HttpRequest::responseWithFile(const std::string &path, HTTPStatusCode statusCode) const {
   std::ifstream file(path.c_str());
   if (!file.is_open()) {
     return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
   }
   HttpResponse response(statusCode);
-  // std::string test = fileToStr(file);
+  std::string  test = fileToStr(file);
   response.addBody(fileToStr(file));
   response.setHeader("Content-Length", getFileSize(file));
   response.setHeader("Content-Type", getContentType(path));
   return response;
 }
 
-EHttpMethods HttpRequest::getMethod() const { return _method; }
+std::string HttpRequest::fileToStr(std::ifstream &file) const {
+  file.seekg(0, std::ios::beg);
 
-// std::vector<std::string> HttpRequest::_getPossiblePaths(
-//     const std::string &path, const std::vector<std::string> &indexFiles) const {
-//   std::vector<std::string> possiblePaths;
-
-//   for (std::vector<std::string>::const_iterator it = indexFiles.begin();
-//        it != indexFiles.end(); ++it) {
-//     possiblePaths.push_back(path + "/" + *it);
-//   }
-
-//   std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-//   return body;
-// }
+  std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+  return body;
+}
 
 std::string HttpRequest::getFileSize(std::ifstream &file) const {
   std::stringstream ss;
@@ -206,17 +200,4 @@ std::string HttpRequest::getContentType(const std::string &path) const {
     return file_types[file_extension];
   }
   return "text/plain";
-}
-
-bool isMethodAllowed(const std::map<EHttpMethods, bool> allowedMethods,
-                            EHttpMethods method) {
-  for (std::map<EHttpMethods, bool>::const_iterator it = allowedMethods.begin();
-       it != allowedMethods.end(); it++) {
-    if (it->first == method) {
-      Logger::getInstance().log("Method allowed", VERBOSE);
-      return true;
-    }
-  }
-  Logger::getInstance().error("Method not allowed");
-  return false;
 }
