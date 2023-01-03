@@ -191,7 +191,7 @@ static void write_to_pipe(int pipefd, const char *message) {
   while (bytes_written < message_len) {
     ssize_t result =
         write(pipefd, message + bytes_written, message_len - bytes_written);
-    Logger::getInstance().debug("write: " + std::to_string(result));
+    Logger::getInstance().debug("write: " + std::to_string(result), VERBOSE);
     if (result == -1) {
       // The write would have blocked, retry
       continue;
