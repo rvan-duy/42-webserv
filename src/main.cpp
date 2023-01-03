@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   /*  Input check */
   if (argc == 2) {
     configPath = argv[1];
-  } else if (argc > 2) {
+  } else {
     std::cerr << "Usage: ./webserver [optional: path_to_config]" << std::endl;
     return 1;
   }
