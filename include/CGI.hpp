@@ -19,7 +19,7 @@
 #define CGI_BUFF_SIZE 1024
 
 #ifndef PATH_TO_PYTHON
-    #define PATH_TO_PYTHON "python3"
+    #define PATH_TO_PYTHON "/usr/local/bin/python3"
 #endif
 #define PATH_TO_PHP "/opt/homebrew/Cellar/php/8.1.13/bin/php"
 

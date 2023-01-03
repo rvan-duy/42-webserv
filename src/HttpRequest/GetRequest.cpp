@@ -29,9 +29,6 @@ HttpResponse GetRequest::executeRequest(const Server &server) {
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
 
-  // TODO autoindex
-  // dubbel check redirection
-
   switch (fileType) {
     case FileType::NOT_FOUND: {
       return _createRedirectionResponse(routeOfResponse);
@@ -69,6 +66,9 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
   if (_isTypeAccepted() == false) {
     return _errorResponseWithHtml(HTTPStatusCode::NOT_ACCEPTABLE, path);
   }
+  if (route.autoIndex == true) {
+    return _createAutoIndexResponse(path);
+  }
   std::vector<std::string> possiblePaths = _constructPossiblePaths(path, route.indexFiles);
   for (std::vector<std::string>::const_iterator it = possiblePaths.begin(); it != possiblePaths.end(); ++it) {
     if (getFileType(*it) == FileType::REGULAR_FILE) {
@@ -76,6 +76,49 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
     }
   }
   return _errorResponseWithHtml(HTTPStatusCode::NOT_FOUND, route);
+}
+
+HttpResponse GetRequest::_createAutoIndexResponse(std::string const &path) const {
+  HttpResponse response(HTTPStatusCode::OK);
+  std::string  body;
+  DIR *        dir;
+  struct dirent *ent;
+
+  body += "<!DOCTYPE html><html><head><title>Index of " + _uri + "</title></head><body><h1>Index of " + _uri + "</h1><table>";
+  body += "<tr><th>Type</th><th>Name</tr>"; // can add more columns here
+
+  if ((dir = opendir(path.c_str())) != NULL) {
+    while ((ent = readdir(dir)) != NULL) {
+
+      if (std::string(ent->d_name) == "." || std::string(ent->d_name) == "..") {
+        continue;
+      }
+
+      body += "<tr>";
+
+      if (ent->d_type == DT_DIR) {
+        body += "<td>Directory</td>";
+      } else {
+        body += "<td>File</td>";
+      }
+
+      if (_uri == "/")
+        body += "<td><a href=\"/" + std::string(ent->d_name) + "\">" + std::string(ent->d_name) + "</a></td>";
+      else
+        body += "<td><a href=\"" + _uri + "/" + std::string(ent->d_name) + "\">" + std::string(ent->d_name) + "</a></td>";
+
+      body += "</tr>";
+    }
+    closedir(dir);
+  } else {
+    return HttpResponse(HTTPStatusCode::INTERNAL_SERVER_ERROR);
+  }
+
+  body += "</table></body></html>";
+  response.addBody(body);
+  response.setHeader("Content-Type", "text/html");
+  response.setHeader("Content-Length", std::to_string(body.length()));
+  return response;
 }
 
 HttpResponse GetRequest::_createFileResponse(const Route &route, const std::string &path) const {
@@ -104,7 +147,6 @@ bool GetRequest::_isTypeAccepted() const {
   if (acceptHeader.empty() || acceptHeader.find("*/*") != std::string::npos) {
     return true;
   } else {
-    // TODO: replace with splitheader function
     std::size_t pos  = 0;
     std::size_t prev = 0;
     while ((pos = acceptHeader.find(',', prev)) != std::string::npos) {
@@ -135,6 +177,5 @@ std::string GetRequest::_getErrorPage(const Route &route, HTTPStatusCode errorCo
       return route.rootDirectory + page;
     }
   }
-  // TODO: fix hardcode
   return std::string(DEFAULT_ERROR_PAGE);
 }

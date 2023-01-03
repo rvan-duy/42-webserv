@@ -22,8 +22,7 @@ class Multiplexer {
   Multiplexer(std::vector<Socket> sockets);
   ~Multiplexer();
 
-  // TODO: remove default value -> c11
-  void waitForEvents(const int timeout = -1);
+  void waitForEvents(const int timeout);
 
  private:
   std::vector<Socket> _sockets;
