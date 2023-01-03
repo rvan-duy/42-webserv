@@ -49,7 +49,7 @@ int CGI::_forkCgiFile(int fd[2], char *const *argv) {
   Logger &logger = Logger::getInstance();
 
   // close(fd[READ]);
-    // experimental
+  // experimental
   if (dup2(fd[READ], STDIN_FILENO) == -1) {
     logger.error("[EXECUTING] CGI: dup2: " + std::string(strerror(errno)));
     close(fd[WRITE]);
@@ -79,7 +79,7 @@ int CGI::_forkCgiFile(int fd[2], char *const *argv) {
 static int waitForChildProcess(pid_t const &pid) {
   int status = 0;
 
-  if (waitpid(pid, &status, 0) < 0) {   // WNOHANG
+  if (waitpid(pid, &status, 0) < 0) {  // WNOHANG
     Logger::getInstance().error("[EXECUTING] waitpid: " +
                                 std::string(strerror(errno)));
     return 1;
@@ -190,11 +190,11 @@ static HTTPStatusCode parseCgiOutput(
   return HTTPStatusCode::OK;
 }
 
-#include <unistd.h>
-#include <string.h>
 #include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
-static void write_to_pipe(int pipefd, const char* message) {
+static void write_to_pipe(int pipefd, const char *message) {
   size_t message_len = strlen(message);
   size_t bytes_written = 0;
 
@@ -202,7 +202,8 @@ static void write_to_pipe(int pipefd, const char* message) {
   fcntl(pipefd, F_SETFL, O_NONBLOCK);
 
   while (bytes_written < message_len) {
-    ssize_t result = write(pipefd, message + bytes_written, message_len - bytes_written);
+    ssize_t result =
+        write(pipefd, message + bytes_written, message_len - bytes_written);
     Logger::getInstance().debug("write: " + std::to_string(result));
     if (result == -1) {
       // usleep(5000);
@@ -217,20 +218,17 @@ static void write_to_pipe(int pipefd, const char* message) {
   // fcntl(pipefd, F_SETFL, flags);
 }
 
-
 HTTPStatusCode CGI::executeCgi(std::string *pBody,
                                std::map<std::string, std::string> *pHeaders,
                                char *const *argv, const std::string *body) {
   Logger &logger = Logger::getInstance();
   std::string buffer;
-  int recieve_fd[2];
-  int send_fd[2];
+  int receiveFd[2];
+  int sendFd[2];
   pid_t pid;
 
-  ;
-
   logger.log("[STARTING] CGI ", VERBOSE);
-  if (pipe(recieve_fd) == -1 || pipe(send_fd) == -1) {
+  if (pipe(receiveFd) == -1 || pipe(sendFd) == -1) {
     throw std::runtime_error("[PREPARING] CGI: pipe: " +
                              std::string(strerror(errno)));
   }
@@ -239,28 +237,27 @@ HTTPStatusCode CGI::executeCgi(std::string *pBody,
     throw std::runtime_error("[PREPARING] CGI: fork: " +
                              std::string(strerror(errno)));
   } else if (pid == CHILD) {
-    close(recieve_fd[READ]);
-    close(send_fd[WRITE]);
-
-    recieve_fd[READ] = send_fd[READ];
-    _forkCgiFile(recieve_fd, argv);
+    close(receiveFd[READ]);
+    close(sendFd[WRITE]);
+    receiveFd[READ] = sendFd[READ];
+    _forkCgiFile(receiveFd, argv);
   } else {
     // TODO: move this to function
-    close(recieve_fd[WRITE]);
-    close(send_fd[READ]);
+    close(receiveFd[WRITE]);
+    close(sendFd[READ]);
 
-    if (body)
-      write_to_pipe(send_fd[WRITE], body->c_str());
-      // write(send_fd[WRITE], body->c_str(), body->size());
-    close(send_fd[WRITE]);
+    if (body) {
+      write_to_pipe(sendFd[WRITE], body->c_str());
+    }
+    close(sendFd[WRITE]);
 
     int exitStatus = waitForChildProcess(pid);
     if (exitStatus != 0) {
       Logger::getInstance().error("[CGI]: child exited with status: " +
                                   std::to_string(exitStatus));
-      return intToHttpStatus(exitStatus);
+      return HTTPStatusCode::BAD_GATEWAY;
     }
-    if (readFromChildProcess(&buffer, recieve_fd[READ])) {
+    if (readFromChildProcess(&buffer, receiveFd[READ])) {
       return HTTPStatusCode::INTERNAL_SERVER_ERROR;
     }
   }
