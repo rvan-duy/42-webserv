@@ -1,0 +1,126 @@
+TODO:
+  - errorpages need to work when you set a custom page too!
+      if i set 405 as 404 i still get 404;
+  - cgi getting internal server error;
+  - maxBodySize needs to be implemented correctly
+      I swear it was already broken i just broke it a little further
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+this file contains tests and their results
+
+
+What happens when there is no "/" loctionblock in the config, where are errorpages constructed from?
+
+Features missing acording to PFD:
+  - Limit client body size {Rutger} [dynamic limit]
+  - HTTP redirection (3XX) {Ruben} [FIXED]
+  - Clients must be able to upload files. -> see unsure
+  - You need at least GET, POST, and DELETE methods. [WIP] GET works.
+  - Stress tests your server. It must stay available at all cost. [WIP] script in the making with curl
+
+
+Unsure:
+  - Make the route able to accept uploaded files and configure where they should be saved. (CGI) [WIP] (oswin, rutger)
+      basic python cript is created
+
+
+Succesfull:
+  - Your program has to take a configuration file as argument, or use a default path. [SUCCES] as argument
+  - You can’t execve another web server [SUCCES] we do not.
+  - Your server must never block and the client can be bounced properly if necessary. [SUCCES] we do not block
+  - It must be non-blocking and use only 1 poll() (or equivalent) for all the I/O
+      operations between the client and the server (listen included). [SUCCES] Just one poll call in the entire server! (search it!)
+  - poll() (or equivalent) must check read and write at the same time. [SUCCES] we put all open sockets in one array for poll to check.
+  - You must never do a read or a write operation without going through poll() (or equivalent). [SUCCES]
+      We only evaluate a connection after it comes back from poll, then act upon it.
+  - Checking the value of errno is strictly forbidden after a read or a write operation. [SUCCES] Search errno, we do not CHECK, we do print it in logger.
+  - You don’t need to use poll() (or equivalent) before reading your configuration file. [SUCCES] We do not do that because it would be crazy
+  - You can use every macro and define like FD_SET, FD_CLR, FD_ISSET, FD_ZERO (understanding what and how they do it is very useful).
+      Too late, we already build our server without [SUCCES] (We do not HAVE to use it)
+  - A request to your server should never hang forever. [SUCCES] server is chill but has no time to hang forever...
+  - Your server must be compatible with the web browser of your choice. [SUCCES] we picked firefox (probably)
+  - We will consider that NGINX is HTTP 1.1 compliant and may be used to compare headers and answer behaviors.
+      [SUCCES] we have considered that.
+  - You server must have default error pages if none are provided. [SUCCES] I would not call them default but there are pages when none provided.
+  - You can’t use fork for something else than CGI (like PHP, or Python, and so forth). [SUCCES] all forks are in CGI.
+  - You must be able to serve a fully static website. [SUCCES]
+  - Your server must be able to listen to multiple ports (see Configuration file). [SUCCES] parser is GOAT
+  - Choose the port and host of each ’server’. [SUCCES]
+  - Setup default error pages. [SUCCES]
+
+
+Solved:
+  - alowing IP instead of servername while building requests {is this needed?} [cannot find this in pdf] [SOLVED] as not needed
+        alleen localhost of 0.0.0.0 werkend maken [SOLVED] (from unasigned)
+
+  Removed GET from methods in parseFirstLine [FIXED]
+    expected 405;
+    found    404;
+    PDF: Your HTTP response status codes must be accurate.
+  FIX:
+    405 page was missing made a simple page and it now works!
+
+  Setup the server_names or not. [FIXED] (see solution)
+    while not setting servername:
+      parser: worked;
+      found: no response send out
+      expected: response on request
+    Solution:
+      The first server for a host:port will be the default for this host:port
+        (that means it will answer to all the requests that don’t belong to an other server).
+
+
+ weird bottom part of subject PFD:
+
+ • Setup routes with one or multiple of the following rules/configuration (routes wont be using regexp):
+    ◦ Define a list of accepted HTTP methods for the route.
+    ◦ Define a HTTP redirection.
+    ◦ Define a directory or a file from where the file should be searched (for example,
+        if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is
+        /tmp/www/pouic/toto/pouet).
+    ◦ Turn on or off directory listing. [WIP or DONE] (Ruben)
+    ◦ Set a default file to answer if the request is a directory. [DONE]
+    ◦ Execute CGI based on certain file extension (for example .php). [WIP]
+    ◦ Make the route able to accept uploaded files and configure where they should
+          be saved.
+
+        ∗ Do you wonder what a CGI is?
+        ∗ Because you won’t call the CGI directly, use the full path as PATH_INFO.
+        ∗ Just remember that, for chunked request, your server needs to unchunked
+            it and the CGI will expect EOF as end of the body.
+        ∗ Same things for the output of the CGI. If no content_length is returned
+            from the CGI, EOF will mark the end of the returned data.
+        ∗ Your program should call the CGI with the file requested as first argument.
+        ∗ The CGI should be run in the correct directory for relative path file access.
+        ∗ Your server should work with one CGI (php-CGI, Python, and so forth).
+
+
+List from slack
+ ruben:
+    [LOOKED DONE] auto index -> overzicht
+    return (redirection)
+    images
+  rutger:
+    [DONE?] GET Request rector, (CGI)
+    [WIP] limit client body size
+    [WIP] cgi must handle uploaded files, cgi param?
+    [WIP] POST, DELETE
+  oswin:
+    [SOLVED] server_name die niet klopt (bad request) -> status of 71790808 [FIXED] When no servername found the first server on socket accepts.
+    [DONE] chunked (done)
+    [INDEFINITE WIP] tests (underway)
+    
+  Not asigned:
+    Zijn er nog meer gevallen?

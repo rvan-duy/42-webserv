@@ -17,28 +17,19 @@ int startWebserver(std::vector<Socket> sockets) {
   return 0;
 }
 
-void testCgi() {
-  std::string body;
-  std::map<std::string, std::string> headers;
-  std::string input =
-      "{\"first_name\":\"firstNameInput.value\",\"last_name\":\"lastNameInput."
-      "value\"}";
-  HTTPStatusCode status =
-      CGI::executeFile(&body, &headers, "root/cgi/to_upper.py", input);
-  Logger &logger = Logger::getInstance();
-
-  logger.log(getMessageByStatusCode(status));
-  logger.debug(body);
-}
-
 int main(int argc, char **argv) {
   std::vector<Socket> sockets;
+  std::string configPath = DEFAULT_CONFIG_PATH;
   /*  Input check */
-  if (argc != 2) {
-    std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
+  if (argc == 2) {
+    configPath = argv[1];
+  } else if (argc > 2) {
+    std::cerr << "Usage: ./webserver [optional: path_to_config]" << std::endl;
     return 1;
   }
   // testCgi();
-  if (initWebserver(&sockets, argv[1])) return 1;
+  if (initWebserver(&sockets, argv[1])) {
+    return 1;
+  }
   return startWebserver(sockets);
 }

@@ -42,9 +42,13 @@ webserver
 
 # logs
 logs/*.log
+*.log
 
 # Test output
 test/tester
 
 # IDE settings
 .vscode
+
+# uploads
+root/cgi/uploads/*

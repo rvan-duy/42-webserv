@@ -19,51 +19,44 @@
 
 #define MAX_PORT 65535
 
-/* Default values */
 #define DEFAULT_ERROR_STATUS 404
 #define DEFAULT_ERROR_PATH "error.html"
 
 #define DEFAULT_HOST_STATUS 420
-#define DEFAULT_HOST_PATH "index.html"
+#define DEFAULT_INDEX
 
 #define DEFAULT_MAX_BODY 1000000
 
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 80
 
-/* End of default values */
-
 struct Route {
   Route(std::string const &name)
       : route(name),
-        defaultFile("index.html"),
+        defaultFile(DEFAULT_INDEX),
         autoIndex(false),
         cgiEnabled(false) {
     allowedMethods[GET] = true;
     allowedMethods[POST] = true;
     allowedMethods[DELETE] = true;
   }
-  // Default route constructor
   Route()
       : route("/"),
-        defaultFile("index.html"),
-        // httpRedirection(""),
+        defaultFile(DEFAULT_INDEX),
+        autoIndex(false),
         cgiEnabled(false) {
     allowedMethods[GET] = true;
     allowedMethods[POST] = true;
     allowedMethods[DELETE] = true;
-    redirection.first = 0;
   }
-  // Vector for bonus
   std::string route;
   std::string rootDirectory;
   std::string defaultFile;
   std::map<HTTPStatusCode, std::string> errorPages;
   std::map<EHttpMethods, bool> allowedMethods;
   std::vector<std::string> indexFiles;
-  // std::string httpRedirection;
   std::pair<int, std::string> redirection;
-  std::string uploadStore;
+  std::vector<std::string> cgiParams;
   bool autoIndex;
   bool cgiEnabled;
 };
@@ -83,20 +76,18 @@ class Server {
   std::string getServerName() const;
   std::vector<Route> getRoutes() const;
   PageData getErrorPage() const;
-  int getMaxBody() const;
+  size_t getMaxBody() const;
   int getPort() const;
   int setPort(int const &value);
   int setErrorPage(int const &statusCode, std::string const &filePath);
   void setServerName(std::string const &value);
-  int setMaxBody(double const &value);
+  int setMaxBody(const size_t value);
   void addRoute(Route const &route);
   const Route &getRoute(const std::string &uri) const;
-  // int                setHost(int const &statusCode, std::string const
-  // &filePath);
 
  private:
   int _port;
-  int _maxBodySize;
+  size_t _maxBodySize;
   std::string _serverName;
   std::vector<Route> _routes;
   PageData _defaultErrorPage;

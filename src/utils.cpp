@@ -28,6 +28,48 @@ std::string getMessageByStatusCode(HTTPStatusCode statusCode) {
   }
 }
 
+// lol
+HTTPStatusCode intToHttpStatus(const int &statusCode) {
+  switch (statusCode) {
+    case 200:
+      return HTTPStatusCode::OK;
+    case 300:
+      return HTTPStatusCode::MULTIPLE_CHOICES;
+    case 301:
+      return HTTPStatusCode::MOVED_PERMANENTLY;
+    case 302:
+      return HTTPStatusCode::FOUND;
+    case 303:
+      return HTTPStatusCode::SEE_OTHER;
+    case 304:
+      return HTTPStatusCode::NOT_MODIFIED;
+    case 305:
+      return HTTPStatusCode::USE_PROXY;
+    case 307:
+      return HTTPStatusCode::TEMPORARY_REDIRECT;
+    case 308:
+      return HTTPStatusCode::PERMANENT_REDIRECT;
+    case 400:
+      return HTTPStatusCode::BAD_REQUEST;
+    case 403:
+      return HTTPStatusCode::FORBIDDEN;
+    case 404:
+      return HTTPStatusCode::NOT_FOUND;
+    case 405:
+      return HTTPStatusCode::METHOD_NOT_ALLOWED;
+    case 406:
+      return HTTPStatusCode::NOT_ACCEPTABLE;
+    case 413:
+      return HTTPStatusCode::CONTENT_TOO_LARGE;
+    case 418:
+      return HTTPStatusCode::I_AM_A_TEAPOT;
+    case 500:
+      return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+    default:
+      return HTTPStatusCode::INTERNAL_SERVER_ERROR;
+  }
+}
+
 std::vector<std::string> splitHeader(const std::string &headerString,
                                      const std::string &delimiter) {
   std::vector<std::string> headerLines;
@@ -69,7 +111,7 @@ std::string unChunk(std::string body) {
   while (body.size()) {
     size_t sub = body.find("\r\n");
     if (sub == std::string::npos) {
-      logger.error("[CHUNK]: No \\r\\n pair found to indicate chunkSize end");
+      logger.error("[CHUNK]: No \\r\\n pair found to indicate chunkSize end", MEDIUM);
       return "";
     }
     std::string sizeStr = body.substr(sub);
@@ -77,7 +119,7 @@ std::string unChunk(std::string body) {
     char *check = NULL;
     long chunkSize = strtoul(sizeStr.c_str(), &check, 16);
     if (check != NULL) {
-      logger.error("[CHUNK]: chunkSize is not hexadecimal");
+      logger.error("[CHUNK]: chunkSize is not hexadecimal", MEDIUM);
       return "";
     }
     newBody += body.substr(sub + 2, chunkSize);

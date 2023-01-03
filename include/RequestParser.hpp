@@ -9,18 +9,18 @@
 class HttpRequest;
 
 struct HttpHeaderData {
-  HttpHeaderData() : chunked(false) {}
+  HttpHeaderData() {}
   HttpVersion                        httpVersion;
   std::string                        url;
   EHttpMethods                       method;
   std::string                        body;
   std::map<std::string, std::string> headers;
-  bool                               chunked;
 };
 
 class RequestParser {
  public:
-  static HttpRequest *parseHeader(std::string &rawRequest);
+  static HttpRequest *parseHeader(const std::string &rawRequest);
+
   static HttpRequest *processChunk(std::string &rawRequest);
 
  private:

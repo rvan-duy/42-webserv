@@ -2,7 +2,8 @@
 
 HttpMessage::HttpMessage() : _version(HTTP_1_1) {}
 
-HttpMessage::HttpMessage(HttpVersion const &version, std::map<std::string, std::string> const &headers,
+HttpMessage::HttpMessage(HttpVersion const &version,
+                         std::map<std::string, std::string> const &headers,
                          std::string const &body)
     : _version(version), _headers(headers), _body(body) {}
 
@@ -20,9 +21,7 @@ HttpMessage::~HttpMessage() {}
 /*
  * Getter for the HTTP version of the message
  */
-HttpVersion HttpMessage::getVersion() const {
-  return _version;
-}
+HttpVersion HttpMessage::getVersion() const { return _version; }
 
 /*
  * Getter for the HTTP version of the message as a string
@@ -52,17 +51,32 @@ std::map<std::string, std::string> HttpMessage::getHeaders() const {
  * @return the value of the header
  */
 std::string HttpMessage::getHeader(const std::string &key) const {
-  std::map<std::string, std::string>::const_iterator location = _headers.find(key);
+  std::map<std::string, std::string>::const_iterator location =
+      _headers.find(key);
   if (location == _headers.end()) return "";
   return location->second;
+}
+
+size_t HttpMessage::getNumHeader(const std::string &key) const {
+  std::string header = _headers.at(key);
+  std::stringstream sstream(header);
+  size_t result;
+  try {
+    sstream >> result;
+    return result;
+  } catch (std::exception e) {
+    return SIZE_MAX;
+  }
+}
+
+bool HttpMessage::hasHeader(const std::string key) const {
+  return _headers.count(key) > 0 ? true : false;
 }
 
 /*
  * Getter for the body of the message
  */
-std::string HttpMessage::getBody() const {
-  return _body;
-}
+std::string HttpMessage::getBody() const { return _body; }
 
 /**************************************************/
 /* End of the getters                             */
@@ -72,6 +86,5 @@ void HttpMessage::setHeader(std::string const &key, std::string const &value) {
   _headers[key] = value;
 }
 
-void HttpMessage::setBody(std::string const &body) {
-  _body = body;
-}
+// TODO: check max body size
+void HttpMessage::addBody(std::string const &body) { _body += body; }

@@ -67,5 +67,8 @@ int Parser::parseMaxBodySize(void *dest, t_dataLine line) {
       return 1;
     }
   }
-  return server->setMaxBody(std::stoi(line.at(1)));
+  std::stringstream sstream(maxBodySize);
+  size_t result;
+  sstream >> result;
+  return server->setMaxBody(result);
 }

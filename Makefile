@@ -23,7 +23,6 @@ INCL_DIR			:=	include
 LOG_DIR				:=	logs
 SRC_DIR				:=	src
 OBJ_DIR				:=	obj
-TEST_DIR			:=	test
 VPATH 				:=	$(subst $(space),:,$(shell find $(SRC_DIR) -type d))
 ################################################################################
 # SOURCES / OBJECTS
@@ -76,7 +75,7 @@ prod: $(NAME)
 	@echo $(CFLAGS)
 	./$(NAME) $(ARGS)
 
-run: $(NAME)
+run: $(NAME) deletelogs
 	./$(NAME) $(ARGS)
 
 lldb: $(NAME)
@@ -84,7 +83,6 @@ lldb: $(NAME)
 
 clean:
 	@rm -rf $(OBJ_DIR)
-	@$(MAKE) -C $(TEST_DIR) clean
 
 fclean:	clean
 	@rm -f $(NAME)
@@ -97,24 +95,17 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	@mkdir -p $(LOG_DIR)
 
-compiletest: export LOG_ENABLED=0
-compiletest: fclean $(OBJ_DIR) $(OBJS)
-	@$(MAKE) -C $(TEST_DIR)
-
-runtest: export LOG_ENABLED=0
-runtest: fclean $(OBJ_DIR) $(OBJS)
-	@$(MAKE) -C $(TEST_DIR) run
-
 deletelogs:
 	@rm -rf $(LOG_DIR)
 	@mkdir $(LOG_DIR)
-	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)"
+	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)\n"
 
 # For debugging makefile
 echo: export LOG_ENABLED=0
 echo:
 	@echo $(CFLAGS)
-	@$(MAKE) -C $(TEST_DIR) echo
+
+	# @$(MAKE) -C $(TEST_DIR) echo
 
 
 .PHONY: all clean fclean re lldb
