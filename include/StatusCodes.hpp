@@ -23,7 +23,7 @@ enum class HTTPStatusCode {
   CONTENT_TOO_LARGE = 413,
   I_AM_A_TEAPOT = 418,
   INTERNAL_SERVER_ERROR = 500,
+  BAD_GATEWAY = 502,
 };
 
 std::string getMessageByStatusCode(HTTPStatusCode statusCode);
-HTTPStatusCode intToHttpStatus(const int &statusCode);
