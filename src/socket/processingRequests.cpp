@@ -134,7 +134,7 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
     _removeUnfinishedRequest(fd);
   }
   Server *match = _matchRequestToServer(request);
-  Logger::getInstance().debug("size " + std::to_string(request->getBody().size()));
+  Logger::getInstance().debug("size " + std::to_string(request->getBody().size()), VERBOSE);
   // Logger::getInstance().debug("body " + request->getBody());
   if (isRequestTooBig(request->getBody().size(), match->getMaxBody())) {
     Logger::getInstance().error("Request is found too big");
@@ -145,7 +145,7 @@ int Socket::_processRawRequest(const int &fd, const std::string &rawRequest) {
     _addRequestToClient(fd, request, match);
     _removeUnfinishedRequest(fd);
   } else {
-    Logger::getInstance().debug("request is unfinished");
+    Logger::getInstance().debug("request is unfinished", VERBOSE);
     _addUnfinishedRequest(fd, request, match);
   }
   return 0;

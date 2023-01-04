@@ -13,7 +13,7 @@ enum ELogLevel { INFO, ERROR };
 
 enum ELogVerbosity { SILENT, MEDIUM, VERBOSE };
 
-#define VERBOSITY VERBOSE
+#define VERBOSITY MEDIUM
 
 /**
  * Singleton logger

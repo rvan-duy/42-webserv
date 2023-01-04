@@ -17,7 +17,7 @@ CONF="return.conf"
   sleep 0.2;
 
   # compare the responses:
-  if [ "$DIRECT" == "$REDIRECT" ]; then
+  if [ "$DIRECT" = "$REDIRECT" ]; then
     echo "Output matches expected output:"; echo $DIRECT; echo -e "\033[32m[SUCCESS]\033[0m"
   else
     echo "Output does not match expected output"; echo "[DIRECT]:" $DIRECT; echo "[REDIRECT]:" $REDIRECT; echo -e "\033[31m[FAILURE]\033[0m"

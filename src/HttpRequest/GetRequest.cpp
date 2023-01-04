@@ -23,14 +23,11 @@ GetRequest::~GetRequest() {}
 HttpResponse GetRequest::executeRequest(const Server &server) {
   const Route      &routeOfResponse = server.getRoute(_uri);
   const std::string path            = constructFullPath(routeOfResponse.rootDirectory, _uri);
-  const FileType    fileType        = _getFileType(path);
+  const FileType    fileType        = getFileType(path);
 
   if (isMethodAllowed(routeOfResponse.allowedMethods, _method) == false) {
     return HttpResponse(HTTPStatusCode::METHOD_NOT_ALLOWED);
   }
-
-  // TODO autoindex
-  // dubbel check redirection
 
   switch (fileType) {
     case FileType::NOT_FOUND: {
@@ -42,7 +39,7 @@ HttpResponse GetRequest::executeRequest(const Server &server) {
     case FileType::DIRECTORY: {
       return _createDirectoryResponse(routeOfResponse, path);
     }
-    case FileType::FILE: {
+    case FileType::REGULAR_FILE: {
       return _createFileResponse(routeOfResponse, path);
     }
     default: {
@@ -69,20 +66,66 @@ HttpResponse GetRequest::_createDirectoryResponse(const Route &route, const std:
   if (_isTypeAccepted() == false) {
     return _errorResponseWithHtml(HTTPStatusCode::NOT_ACCEPTABLE, path);
   }
+  if (route.autoIndex == true) {
+    return _createAutoIndexResponse(path, route);
+  }
   std::vector<std::string> possiblePaths = _constructPossiblePaths(path, route.indexFiles);
   for (std::vector<std::string>::const_iterator it = possiblePaths.begin(); it != possiblePaths.end(); ++it) {
-    if (_getFileType(*it) == FileType::FILE) {
-      return _responseWithFile(*it, HTTPStatusCode::OK);
+    if (getFileType(*it) == FileType::REGULAR_FILE) {
+      return responseWithFile(*it, HTTPStatusCode::OK);
     }
   }
-  return _errorResponseWithHtml(HTTPStatusCode::NOT_FOUND, route);
+  return _errorResponseWithHtml(HTTPStatusCode::INTERNAL_SERVER_ERROR, route);
+}
+
+HttpResponse GetRequest::_createAutoIndexResponse(std::string const &path, const Route& route) const {
+  HttpResponse response(HTTPStatusCode::OK);
+  std::string  body;
+  DIR *        dir;
+  struct dirent *ent;
+
+  body += "<!DOCTYPE html><html><head><title>Index of " + _uri + "</title></head><body><h1>Index of " + _uri + "</h1><table>";
+  body += "<tr><th>Type</th><th>Name</tr>"; // can add more columns here
+
+  if ((dir = opendir(path.c_str())) != NULL) {
+    while ((ent = readdir(dir)) != NULL) {
+
+      if (std::string(ent->d_name) == "." || std::string(ent->d_name) == "..") {
+        continue;
+      }
+
+      body += "<tr>";
+
+      if (ent->d_type == DT_DIR) {
+        body += "<td>Directory</td>";
+      } else {
+        body += "<td>File</td>";
+      }
+
+      if (_uri == "/")
+        body += "<td><a href=\"/" + std::string(ent->d_name) + "\">" + std::string(ent->d_name) + "</a></td>";
+      else
+        body += "<td><a href=\"" + _uri + "/" + std::string(ent->d_name) + "\">" + std::string(ent->d_name) + "</a></td>";
+
+      body += "</tr>";
+    }
+    closedir(dir);
+  } else {
+    return _errorResponseWithHtml(HTTPStatusCode::INTERNAL_SERVER_ERROR, route);
+  }
+
+  body += "</table></body></html>";
+  response.addBody(body);
+  response.setHeader("Content-Type", "text/html");
+  response.setHeader("Content-Length", std::to_string(body.length()));
+  return response;
 }
 
 HttpResponse GetRequest::_createFileResponse(const Route &route, const std::string &path) const {
   if (_isTypeAccepted() == false) {
     return _errorResponseWithHtml(HTTPStatusCode::NOT_ACCEPTABLE, route);
   }
-  return _responseWithFile(path, HTTPStatusCode::OK);
+  return responseWithFile(path, HTTPStatusCode::OK);
 }
 
 std::vector<std::string> GetRequest::_constructPossiblePaths(const std::string              &path,
@@ -104,7 +147,6 @@ bool GetRequest::_isTypeAccepted() const {
   if (acceptHeader.empty() || acceptHeader.find("*/*") != std::string::npos) {
     return true;
   } else {
-    // TODO: replace with splitheader function
     std::size_t pos  = 0;
     std::size_t prev = 0;
     while ((pos = acceptHeader.find(',', prev)) != std::string::npos) {
@@ -124,23 +166,19 @@ bool GetRequest::_isTypeAccepted() const {
 
 HttpResponse GetRequest::_errorResponseWithHtml(HTTPStatusCode statusCode, Route const &route) const {
   std::string pathToErrorFile = _getErrorPage(route, statusCode);
-  return _responseWithFile(pathToErrorFile, statusCode);
+  std::cerr << "Error page: " << pathToErrorFile << std::endl;
+  std::cerr << "Status code: " << (int)statusCode << std::endl;
+  return responseWithFile(pathToErrorFile, statusCode);
 }
 
-#define DEFAULT_ERROR_PAGE "root/error_pages/404/index.html"
+#define DEFAULT_ERROR_PAGE "default_error_page/index.html"
 std::string GetRequest::_getErrorPage(const Route &route, HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
     std::string page =
         route.rootDirectory + "/" + route.errorPages.at(errorCode);
-    if (_getFileType(page) == FileType::FILE) {
+    if (getFileType(page) == FileType::REGULAR_FILE) {
       return page;
     }
   }
   return std::string(DEFAULT_ERROR_PAGE);
-}
-
-HttpResponse GetRequest::_errorResponse(HTTPStatusCode const &statusCode,
-                                        Route const &route) const {
-  std::string pathToErrorFile = _getErrorPage(route, statusCode);
-  return _responseWithFile(pathToErrorFile, statusCode);
 }

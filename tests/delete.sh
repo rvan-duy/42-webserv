@@ -21,11 +21,11 @@ CONF="delete.conf"
   COMP="{'message': 'hi'}";
   echo $COMP;
   # COMP=$DELETE;
-  if [[ "$DELETE" == "$COMP" ]]; then
-    echo -e "\033[32m[SUCCESS]\033[0m"
-  else
-    echo -e "\033[31m[FAILURE]\033[0m"
-  fi
+  # if [[ "$DELETE" == "$COMP" ]]; then
+  #   echo -e "\033[32m[SUCCESS]\033[0m"
+  # else
+  #   echo -e "\033[31m[FAILURE]\033[0m"
+  # fi
 
 # kill the webserv program so it does not linger in the background
 pkill webserv

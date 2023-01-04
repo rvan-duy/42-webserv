@@ -8,7 +8,7 @@ int initWebserver(std::vector<Socket> *pSockets, std::string const &filePath);
 int startWebserver(std::vector<Socket> sockets) {
   Multiplexer multiplexer(sockets);
   try {
-    multiplexer.waitForEvents();  // Start the multiplexer loop, does all the
+    multiplexer.waitForEvents(-1);  // Start the multiplexer loop, does all the
                                   // polling and handling of events etc.
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: ./webserver [optional: path_to_config]" << std::endl;
     return 1;
   }
-  // testCgi();
-  if (initWebserver(&sockets, argv[1])) {
+  if (initWebserver(&sockets, configPath)) {
     return 1;
   }
   return startWebserver(sockets);

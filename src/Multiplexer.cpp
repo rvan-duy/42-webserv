@@ -211,8 +211,6 @@ void Multiplexer::_removeClient(const int socket) {
  * Check for an return event on a socket
  * @param fd The pollfd to check
  */
-// TODO: hould this be its own function or can we just call the switch on
-// revents instead
 int Multiplexer::_getEvent(const pollfd &fd) {
   Logger &logger = Logger::getInstance();
 
