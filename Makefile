@@ -56,7 +56,7 @@ MAIN_OBJ			:=	$(addprefix $(OBJ_DIR)/, $(MAIN:.cpp=.o))
 OBJS				:=	$(TEST_OBJS) $(MAIN_OBJ)
 ################################################################################
 # ARGS FOR DEV
-ARGS				:=	config/config0.conf
+ARGS				:= 
 
 all: $(NAME)
 
@@ -99,6 +99,9 @@ deletelogs:
 	@rm -rf $(LOG_DIR)
 	@mkdir $(LOG_DIR)
 	@printf "$(LIGHT_GREEN)$(BOLD)Deleted Logs!$(RESET)\n"
+
+testPages:
+	./tests/errorpages.sh
 
 # For debugging makefile
 echo: export LOG_ENABLED=0

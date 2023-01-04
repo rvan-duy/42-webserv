@@ -23,12 +23,11 @@ int main(int argc, char **argv) {
   /*  Input check */
   if (argc == 2) {
     configPath = argv[1];
-  } else {
+  } else if (argc > 2) {
     std::cerr << "Usage: ./webserver [optional: path_to_config]" << std::endl;
     return 1;
   }
-  // testCgi();
-  if (initWebserver(&sockets, argv[1])) {
+  if (initWebserver(&sockets, configPath)) {
     return 1;
   }
   return startWebserver(sockets);

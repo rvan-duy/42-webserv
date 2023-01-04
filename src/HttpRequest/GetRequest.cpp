@@ -174,9 +174,10 @@ HttpResponse GetRequest::_errorResponseWithHtml(HTTPStatusCode statusCode, Route
 #define DEFAULT_ERROR_PAGE "default_error_page/index.html"
 std::string GetRequest::_getErrorPage(const Route &route, HTTPStatusCode errorCode) const {
   if (route.errorPages.find(errorCode) != route.errorPages.end()) {
-    std::string page = route.errorPages.at(errorCode);
+    std::string page =
+        route.rootDirectory + "/" + route.errorPages.at(errorCode);
     if (getFileType(page) == FileType::REGULAR_FILE) {
-      return route.rootDirectory + page;
+      return page;
     }
   }
   return std::string(DEFAULT_ERROR_PAGE);
